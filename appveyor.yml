@@ -73,8 +73,11 @@ build:
 build_script:
   - dotnet build
 
-test_script:
-  - dotnet test
+tests:
+  assemblies:
+    only:
+      - tests/**/*.Tests.Unit.dll
+      - tests/**/*.Tests.Integration.dll
 
 #test_script:
 ## Test & generate coverage report
