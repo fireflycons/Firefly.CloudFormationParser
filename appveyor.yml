@@ -73,7 +73,7 @@ build:
 build_script:
   - dotnet build
 
-tests:
+test:
   assemblies:
     only:
       - tests/**/*.Tests.Unit.dll
