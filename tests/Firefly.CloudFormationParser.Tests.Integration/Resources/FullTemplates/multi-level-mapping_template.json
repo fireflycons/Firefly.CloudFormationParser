@@ -1,0 +1,98 @@
+{
+    "AWSTemplateFormatVersion": "2010-09-09",
+    "Transform": "AWS::Serverless-2016-10-31",
+    "Description": "Multi level base path mapping",
+    "Parameters": {
+        "DomainName": {
+            "Type": "String",
+            "Description": "Domian name for api"
+        },
+        "ZoneId": {
+            "Type": "String",
+            "Description": "Zone ID",
+            "Default": "none"
+        },
+        "CertArn": {
+            "Type": "String",
+            "Description": "Certificate ARN",
+            "Default": "none"
+        }
+    },
+    "Resources": {
+        "CustomDomainName": {
+            "Type": "AWS::ApiGatewayV2::DomainName",
+            "Properties": {
+                "DomainName": {
+                    "Ref": "DomainName"
+                },
+                "DomainNameConfigurations": [
+                    {
+                        "EndpointType": "REGIONAL",
+                        "CertificateArn": {
+                            "Ref": "CertArn"
+                        }
+                    }
+                ]
+            }
+        },
+        "DomainRecordSet": {
+            "Type": "AWS::Route53::RecordSet",
+            "Properties": {
+                "Name": {
+                    "Ref": "DomainName"
+                },
+                "HostedZoneId": {
+                    "Ref": "ZoneId"
+                },
+                "AliasTarget": {
+                    "DNSName": {
+                        "Fn::GetAtt": [
+                            "CustomDomainName",
+                            "RegionalDomainName"
+                        ]
+                    },
+                    "HostedZoneId": {
+                        "Fn::GetAtt": [
+                            "CustomDomainName",
+                            "RegionalHostedZoneId"
+                        ]
+                    }
+                },
+                "Type": "A"
+            }
+        },
+        "ReportingV1App": {
+            "Type": "AWS::Serverless::Application",
+            "Properties": {
+                "Location": "./reportingv1.yaml",
+                "Parameters": {
+                    "DomainName": {
+                        "Ref": "CustomDomainName"
+                    }
+                }
+            }
+        },
+        "ReportingV2App": {
+            "Type": "AWS::Serverless::Application",
+            "Properties": {
+                "Location": "./reportingv2.yaml",
+                "Parameters": {
+                    "DomainName": {
+                        "Ref": "CustomDomainName"
+                    }
+                }
+            }
+        },
+        "AdminApp": {
+            "Type": "AWS::Serverless::Application",
+            "Properties": {
+                "Location": "./admin.yaml",
+                "Parameters": {
+                    "DomainName": {
+                        "Ref": "CustomDomainName"
+                    }
+                }
+            }
+        }
+    }
+}

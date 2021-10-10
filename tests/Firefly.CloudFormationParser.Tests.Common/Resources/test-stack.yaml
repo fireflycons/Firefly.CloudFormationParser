@@ -1,0 +1,32 @@
+AWSTemplateFormatVersion: 2010-09-09
+Description: test-stack
+
+Parameters:
+  P1:
+    Type: String
+
+  P2:
+    Type: Number
+    AllowedValues:
+      - 0
+      - 1
+
+Conditions:
+  DeployR2: !Equals
+    - !Ref P2
+    - 1
+
+Resources:
+
+  R1:
+    Type: AWS::SSM::Parameter
+    Properties:
+      Type: String
+      Value: !Ref P1
+
+  R2:
+    Condition: DeployR2
+    Type: AWS::SSM::Parameter
+    Properties:
+      Type: String
+      Value: blah

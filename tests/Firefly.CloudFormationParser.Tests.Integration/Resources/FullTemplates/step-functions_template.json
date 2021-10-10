@@ -1,0 +1,196 @@
+{
+    "AWSTemplateFormatVersion": "2010-09-09",
+    "Transform": "AWS::Serverless-2016-10-31",
+    "Description": "step-functions\nSample SAM Template for step-functions\n",
+    "Resources": {
+        "AnalyticsStateMachine": {
+            "Type": "AWS::Serverless::StateMachine",
+            "Properties": {
+                "DefinitionUri": "statemachine/analytics.asl.json",
+                "DefinitionSubstitutions": {
+                    "SNSTopicArn": {
+                        "Ref": "AnalyticsTopic"
+                    },
+                    "StackOverflowWorkflowArn": {
+                        "Ref": "GatherStackOverflowMetrics"
+                    },
+                    "TwitchWorkflowArn": {
+                        "Ref": "GatherTwitchMetrics"
+                    }
+                },
+                "Events": {
+                    "DailySchedule": {
+                        "Type": "Schedule",
+                        "Properties": {
+                            "Description": "Schedule to run the analytics state machine every day",
+                            "Enabled": true,
+                            "Schedule": "rate(1 day)"
+                        }
+                    }
+                },
+                "Role": {
+                    "Fn::GetAtt": [
+                        "AnalyticsWorkflowRole",
+                        "Arn"
+                    ]
+                }
+            }
+        },
+        "GatherStackOverflowMetrics": {
+            "Type": "AWS::Serverless::StateMachine",
+            "Properties": {
+                "DefinitionUri": "statemachine/stackoverflow.asl.json",
+                "DefinitionSubstitutions": {
+                    "DDBPutItem": {
+                        "Fn::Sub": "arn:${AWS::Partition}:states:::dynamodb:putItem"
+                    },
+                    "DDBTable": {
+                        "Ref": "AnalyticsTable"
+                    }
+                },
+                "Type": "EXPRESS",
+                "Policies": [
+                    {
+                        "DynamoDBWritePolicy": {
+                            "TableName": {
+                                "Ref": "AnalyticsTable"
+                            }
+                        }
+                    }
+                ]
+            }
+        },
+        "GatherTwitchMetrics": {
+            "Type": "AWS::Serverless::StateMachine",
+            "Properties": {
+                "DefinitionUri": "statemachine/twitch.asl.json",
+                "DefinitionSubstitutions": {
+                    "DDBPutItem": {
+                        "Fn::Sub": "arn:${AWS::Partition}:states:::dynamodb:putItem"
+                    },
+                    "DDBTable": {
+                        "Ref": "AnalyticsTable"
+                    }
+                },
+                "Type": "EXPRESS",
+                "Policies": [
+                    {
+                        "DynamoDBWritePolicy": {
+                            "TableName": {
+                                "Ref": "AnalyticsTable"
+                            }
+                        }
+                    }
+                ]
+            }
+        },
+        "AnalyticsTable": {
+            "Type": "AWS::Serverless::SimpleTable",
+            "Properties": {
+                "PrimaryKey": {
+                    "Name": "Id",
+                    "Type": "String"
+                },
+                "ProvisionedThroughput": {
+                    "ReadCapacityUnits": 1,
+                    "WriteCapacityUnits": 1
+                }
+            }
+        },
+        "AnalyticsTopic": {
+            "Type": "AWS::SNS::Topic"
+        },
+        "AnalyticsWorkflowRole": {
+            "Type": "AWS::IAM::Role",
+            "Properties": {
+                "AssumeRolePolicyDocument": {
+                    "Version": "2012-10-17",
+                    "Statement": [
+                        {
+                            "Effect": "Allow",
+                            "Principal": {
+                                "Service": [
+                                    {
+                                        "Fn::Sub": "states.${AWS::Region}.amazonaws.com"
+                                    }
+                                ]
+                            },
+                            "Action": "sts:AssumeRole"
+                        }
+                    ]
+                },
+                "Policies": [
+                    {
+                        "PolicyName": "ParentWorkflowExecutionPolicy",
+                        "PolicyDocument": {
+                            "Version": "2012-10-17",
+                            "Statement": [
+                                {
+                                    "Effect": "Allow",
+                                    "Action": [
+                                        "states:StartExecution"
+                                    ],
+                                    "Resource": [
+                                        {
+                                            "Ref": "GatherStackOverflowMetrics"
+                                        },
+                                        {
+                                            "Ref": "GatherTwitchMetrics"
+                                        }
+                                    ]
+                                },
+                                {
+                                    "Effect": "Allow",
+                                    "Action": [
+                                        "states:DescribeExecution",
+                                        "states:StopExecution"
+                                    ],
+                                    "Resource": [
+                                        {
+                                            "Ref": "GatherStackOverflowMetrics"
+                                        },
+                                        {
+                                            "Ref": "GatherTwitchMetrics"
+                                        }
+                                    ]
+                                },
+                                {
+                                    "Effect": "Allow",
+                                    "Action": [
+                                        "events:PutTargets",
+                                        "events:PutRule",
+                                        "events:DescribeRule"
+                                    ],
+                                    "Resource": [
+                                        {
+                                            "Fn::Sub": "arn:aws:events:${AWS::Region}:${AWS::AccountId}:rule/StepFunctionsGetEventsForStepFunctionsExecutionRule"
+                                        }
+                                    ]
+                                },
+                                {
+                                    "Effect": "Allow",
+                                    "Action": [
+                                        "sns:Publish"
+                                    ],
+                                    "Resource": [
+                                        {
+                                            "Ref": "AnalyticsTopic"
+                                        }
+                                    ]
+                                }
+                            ]
+                        }
+                    }
+                ]
+            }
+        }
+    },
+    "Outputs": {
+        "AnalyticsStateMachineArn": {
+            "Description": "Analytics state machine ARN",
+            "Value": {
+                "Ref": "AnalyticsStateMachine"
+            }
+        }
+    }
+}

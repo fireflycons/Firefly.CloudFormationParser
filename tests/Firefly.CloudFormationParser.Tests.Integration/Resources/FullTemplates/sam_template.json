@@ -1,0 +1,343 @@
+{
+    "AWSTemplateFormatVersion": "2010-09-09",
+    "Transform": "AWS::Serverless-2016-10-31",
+    "Description": "SAM Signed Url Generator",
+    "Globals": {
+        "Function": {
+            "Timeout": 3,
+            "Handler": "app.handler",
+            "Runtime": "nodejs12.x",
+            "Tracing": "Active",
+            "Environment": {
+                "Variables": {
+                    "STORAGE_BUCKET": {
+                        "Ref": "storageBucket"
+                    },
+                    "URL_TABLE": {
+                        "Ref": "urlTable"
+                    }
+                }
+            }
+        }
+    },
+    "Resources": {
+        "storageBucket": {
+            "Type": "AWS::S3::Bucket"
+        },
+        "urlTable": {
+            "Type": "AWS::DynamoDB::Table",
+            "Properties": {
+                "BillingMode": "PAY_PER_REQUEST",
+                "KeySchema": [
+                    {
+                        "AttributeName": "id",
+                        "KeyType": "HASH"
+                    }
+                ],
+                "AttributeDefinitions": [
+                    {
+                        "AttributeName": "id",
+                        "AttributeType": "S"
+                    }
+                ],
+                "TimeToLiveSpecification": {
+                    "AttributeName": "TTL",
+                    "Enabled": true
+                }
+            }
+        },
+        "uploadSignerLambda": {
+            "Type": "AWS::Serverless::Function",
+            "Properties": {
+                "CodeUri": "lambda/uploadSigner/",
+                "Policies": [
+                    {
+                        "S3WritePolicy": {
+                            "BucketName": {
+                                "Ref": "storageBucket"
+                            }
+                        }
+                    }
+                ]
+            }
+        },
+        "downloadSignerLambda": {
+            "Type": "AWS::Serverless::Function",
+            "Properties": {
+                "CodeUri": "lambda/downloadSigner/",
+                "Policies": [
+                    {
+                        "S3ReadPolicy": {
+                            "BucketName": {
+                                "Ref": "storageBucket"
+                            }
+                        }
+                    }
+                ]
+            }
+        },
+        "fetchedShortUrlLambda": {
+            "Type": "AWS::Serverless::Function",
+            "Properties": {
+                "CodeUri": "lambda/fetchShortUrl/",
+                "Policies": {
+                    "DynamoDBReadPolicy": {
+                        "TableName": {
+                            "Ref": "urlTable"
+                        }
+                    }
+                },
+                "Events": {
+                    "ApiEvent": {
+                        "Type": "HttpApi",
+                        "Properties": {
+                            "ApiId": {
+                                "Ref": "httpApi"
+                            },
+                            "Path": "/{id}",
+                            "Method": "GET"
+                        }
+                    }
+                }
+            }
+        },
+        "urlStateMachine": {
+            "Type": "AWS::Serverless::StateMachine",
+            "Properties": {
+                "Type": "EXPRESS",
+                "Tracing": {
+                    "Enabled": true
+                },
+                "Definition": {
+                    "StartAt": "Generate Signed URLs",
+                    "States": {
+                        "Generate Signed URLs": {
+                            "Type": "Parallel",
+                            "Comment": "Fetches a signed upload and download URL for the given Key",
+                            "Next": "formatResults",
+                            "Branches": [
+                                {
+                                    "StartAt": "GetUploadSignedUrl",
+                                    "States": {
+                                        "GetUploadSignedUrl": {
+                                            "End": true,
+                                            "Retry": [
+                                                {
+                                                    "ErrorEquals": [
+                                                        "Lambda.ServiceException",
+                                                        "Lambda.AWSLambdaException",
+                                                        "Lambda.SdkClientException"
+                                                    ],
+                                                    "IntervalSeconds": 2,
+                                                    "MaxAttempts": 6,
+                                                    "BackoffRate": 2
+                                                }
+                                            ],
+                                            "Type": "Task",
+                                            "ResultPath": "$.UploadSignResults",
+                                            "Resource": "arn:aws:states:::lambda:invoke",
+                                            "Parameters": {
+                                                "FunctionName": "${GetUploadSignerFunction}",
+                                                "Payload.$": "$"
+                                            }
+                                        }
+                                    }
+                                },
+                                {
+                                    "StartAt": "GetDownloadSignedUrl",
+                                    "States": {
+                                        "GetDownloadSignedUrl": {
+                                            "Next": "WriteToDynamoDB",
+                                            "Retry": [
+                                                {
+                                                    "ErrorEquals": [
+                                                        "Lambda.ServiceException",
+                                                        "Lambda.AWSLambdaException",
+                                                        "Lambda.SdkClientException"
+                                                    ],
+                                                    "IntervalSeconds": 2,
+                                                    "MaxAttempts": 6,
+                                                    "BackoffRate": 2
+                                                }
+                                            ],
+                                            "Type": "Task",
+                                            "OutputPath": "$",
+                                            "ResultPath": "$.DownloadSignResults",
+                                            "Resource": "arn:aws:states:::lambda:invoke",
+                                            "Parameters": {
+                                                "FunctionName": "${GetDownloadSignerFunction}",
+                                                "Payload.$": "$"
+                                            }
+                                        },
+                                        "WriteToDynamoDB": {
+                                            "End": true,
+                                            "Type": "Task",
+                                            "OutputPath": "$",
+                                            "ResultPath": "$.DynamoResults",
+                                            "Resource": "${DDBPutItem}",
+                                            "Parameters": {
+                                                "Item": {
+                                                    "id": {
+                                                        "S.$": "$.DownloadSignResults.Payload.id"
+                                                    },
+                                                    "signedUrl": {
+                                                        "S.$": "$.DownloadSignResults.Payload.signedUrl"
+                                                    },
+                                                    "TTL": {
+                                                        "N.$": "$.DownloadSignResults.Payload.ttl"
+                                                    }
+                                                },
+                                                "TableName": "${DDBTable}"
+                                            }
+                                        }
+                                    }
+                                }
+                            ]
+                        },
+                        "formatResults": {
+                            "Type": "Pass",
+                            "Parameters": {
+                                "UploadUrl.$": "$[0].UploadSignResults.Payload.signedUrl",
+                                "DownloadUrl.$": "$[1].DownloadSignResults.Payload.signedUrl",
+                                "DownloadShortId.$": "$[1].DownloadSignResults.Payload.id"
+                            },
+                            "End": true
+                        }
+                    },
+                    "TimeoutSeconds": 30
+                },
+                "Policies": [
+                    {
+                        "DynamoDBWritePolicy": {
+                            "TableName": {
+                                "Ref": "urlTable"
+                            }
+                        }
+                    },
+                    {
+                        "LambdaInvokePolicy": {
+                            "FunctionName": {
+                                "Ref": "uploadSignerLambda"
+                            }
+                        }
+                    },
+                    {
+                        "LambdaInvokePolicy": {
+                            "FunctionName": {
+                                "Ref": "downloadSignerLambda"
+                            }
+                        }
+                    }
+                ],
+                "DefinitionSubstitutions": {
+                    "DDBPutItem": {
+                        "Fn::Sub": "arn:${AWS::Partition}:states:::dynamodb:putItem"
+                    },
+                    "DDBTable": {
+                        "Ref": "urlTable"
+                    },
+                    "GetUploadSignerFunction": {
+                        "Fn::GetAtt": [
+                            "uploadSignerLambda",
+                            "Arn"
+                        ]
+                    },
+                    "GetDownloadSignerFunction": {
+                        "Fn::GetAtt": [
+                            "downloadSignerLambda",
+                            "Arn"
+                        ]
+                    }
+                }
+            }
+        },
+        "httpApiRole": {
+            "Type": "AWS::IAM::Role",
+            "Properties": {
+                "AssumeRolePolicyDocument": {
+                    "Version": "2012-10-17",
+                    "Statement": [
+                        {
+                            "Effect": "Allow",
+                            "Principal": {
+                                "Service": "apigateway.amazonaws.com"
+                            },
+                            "Action": [
+                                "sts:AssumeRole"
+                            ]
+                        }
+                    ]
+                },
+                "Policies": [
+                    {
+                        "PolicyName": "ApiDirectWriteToSQS",
+                        "PolicyDocument": {
+                            "Version": "2012-10-17",
+                            "Statement": {
+                                "Action": [
+                                    "states:StartSyncExecution"
+                                ],
+                                "Effect": "Allow",
+                                "Resource": [
+                                    {
+                                        "Ref": "urlStateMachine"
+                                    }
+                                ]
+                            }
+                        }
+                    }
+                ]
+            }
+        },
+        "httpApi": {
+            "Type": "AWS::Serverless::HttpApi",
+            "Properties": {
+                "DefinitionBody": {
+                    "openapi": "3.0.1",
+                    "info": {
+                        "title": "Signed URL Generator - Built with AWS SAM"
+                    },
+                    "paths": {
+                        "/": {
+                            "post": {
+                                "responses": {
+                                    "default": {
+                                        "description": "Step Function Response"
+                                    }
+                                },
+                                "x-amazon-apigateway-integration": {
+                                    "integrationSubtype": "StepFunctions-StartSyncExecution",
+                                    "credentials": {
+                                        "Fn::GetAtt": [
+                                            "httpApiRole",
+                                            "Arn"
+                                        ]
+                                    },
+                                    "requestParameters": {
+                                        "Input": "$request.body",
+                                        "StateMachineArn": {
+                                            "Fn::GetAtt": [
+                                                "urlStateMachine",
+                                                "Arn"
+                                            ]
+                                        }
+                                    },
+                                    "payloadFormatVersion": "1.0",
+                                    "type": "aws_proxy",
+                                    "connectionType": "INTERNET"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    },
+    "Outputs": {
+        "apiUrlOut": {
+            "Value": {
+                "Fn::Sub": "https://${httpApi}.execute-api.${AWS::Region}.amazonaws.com"
+            }
+        }
+    }
+}

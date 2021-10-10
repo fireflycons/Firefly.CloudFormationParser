@@ -1,0 +1,49 @@
+AWSTemplateFormatVersion: 2010-09-09
+
+Conditions:
+
+  Cond1:
+    Fn::Equals:
+      - 1
+      - 1
+
+  Cond2: !And
+    - Condition: Cond1
+    - !Equals
+      - 1
+      - 1
+
+Resources:
+
+  iamRole:
+    Type: AWS::IAM::Role
+    Properties:
+      Path: /
+      AssumeRolePolicyDocument:
+        Statement:
+          - Effect: Allow
+            Action: sts:AssumeRole
+            Principal:
+              Service:
+                - lambda.amazonaws.com
+      Policies:
+        - PolicyName: ADConnector
+          PolicyDocument:
+            Version: 2012-10-17
+            Statement:
+              - Sid: CreateAdConnectorEc2Resources
+                Effect: Allow
+                Action:
+                  - ec2:DescribeSubnets
+                Resource: '*'
+                Condition:
+                  Bool:
+                    aws:ViaAWSService: true
+              - Sid: DeleteAdConnectorEc2Resources
+                Effect: Allow
+                Action:
+                  - ec2:DeleteSecurityGroup
+                Resource: '*'
+                Condition:
+                  Bool:
+                    aws:ViaAWSService: true

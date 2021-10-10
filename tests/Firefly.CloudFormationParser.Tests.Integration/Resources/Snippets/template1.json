@@ -1,0 +1,52 @@
+{
+    "AWSTemplateFormatVersion": "2010-09-09",
+    "Description": "asasdaddf",
+    "Metadata": {
+        "D1": "sdfdsfd"
+    },
+    "Parameters": {
+        "Param1": {
+            "Description": "blah",
+            "Type": "Number",
+            "Default": 1,
+            "MinValue": 0,
+            "MaxValue": 1
+        }
+    },
+    "Mappings": {
+        "General": {
+            "Constants": {
+                "C1": "a Constants",
+                "C2": [
+                    "a1",
+                    "a2"
+                ]
+            }
+        }
+    },
+    "Resources": {
+        "R1": {
+            "Type": "AWS::SSM::Parameter",
+            "Properties": {
+                "Type": "String",
+                "Value": "sdffsd"
+            }
+        }
+    },
+    "Outputs": {
+        "R1": {
+            "Description": "this is r1.",
+            "Value": {
+                "Ref": "R1"
+            }
+        },
+        "R1Type": {
+            "Value": {
+                "Fn::GetAtt": [
+                    "R1",
+                    "Type"
+                ]
+            }
+        }
+    }
+}

@@ -1,0 +1,60 @@
+AWSTemplateFormatVersion: 2010-09-09
+Parameters:
+  Param1:
+    Type: String
+    Default: abc
+
+
+Resources:
+
+  Resource1:
+    Type: AWS::SSM::Parameter
+    Properties:
+      Type: String
+      Value:
+        Fn::Base64:
+          !Sub '${Param1}'
+
+  Resource2:
+    Type: AWS::SSM::Parameter
+    Properties:
+      Type: String
+      Value:
+        Fn::Base64: !Sub '${Param1}'
+
+  Resource3:
+    Type: AWS::SSM::Parameter
+    Properties:
+      Type: String
+      Value: !Base64
+          Fn::Sub: '${Param1}'
+
+  Resource4:
+    Type: AWS::SSM::Parameter
+    Properties:
+      Type: String
+      Value:
+        Fn::Base64:
+          !Sub
+            - '${P1}'
+            - P1: !Ref Param1
+
+  Resource5:
+    Type: AWS::SSM::Parameter
+    Properties:
+      Type: String
+      Value:
+        !Base64 literal
+
+  Resource6:
+    Type: AWS::SSM::Parameter
+    Properties:
+      Type: String
+      Value:
+        !Base64 |
+          literal
+
+Outputs:
+  Resource1:
+    Value:
+      Ref: Resource1

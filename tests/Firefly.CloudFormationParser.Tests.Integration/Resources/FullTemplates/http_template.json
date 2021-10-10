@@ -1,0 +1,115 @@
+{
+    "AWSTemplateFormatVersion": "2010-09-09",
+    "Transform": "AWS::Serverless-2016-10-31",
+    "Description": "Custom Domain",
+    "Parameters": {
+        "DomainName": {
+            "Type": "String",
+            "Description": "Domain name for api"
+        },
+        "ZoneId": {
+            "Type": "String",
+            "Description": "Zone ID if exists. If not leave as none.",
+            "Default": "none"
+        },
+        "CertArn": {
+            "Type": "String",
+            "Description": "Certificate ARN if exists. If not leave as none.",
+            "Default": "none"
+        }
+    },
+    "Conditions": {
+        "CreateZone": {
+            "Fn::Equals": [
+                {
+                    "Ref": "ZoneId"
+                },
+                "none"
+            ]
+        },
+        "CreateCert": {
+            "Fn::Equals": [
+                {
+                    "Ref": "CertArn"
+                },
+                "none"
+            ]
+        }
+    },
+    "Resources": {
+        "GeneratedZone": {
+            "Type": "AWS::Route53::HostedZone",
+            "Condition": "CreateZone",
+            "Properties": {
+                "Name": {
+                    "Ref": "DomainName"
+                }
+            }
+        },
+        "GeneratedCert": {
+            "Type": "AWS::CertificateManager::Certificate",
+            "Condition": "CreateCert",
+            "Properties": {
+                "DomainName": {
+                    "Ref": "DomainName"
+                },
+                "ValidationMethod": "DNS"
+            }
+        },
+        "HttpApiGateway": {
+            "Type": "AWS::Serverless::HttpApi",
+            "Properties": {
+                "Domain": {
+                    "DomainName": {
+                        "Ref": "DomainName"
+                    },
+                    "CertificateArn": {
+                        "Fn::If": [
+                            "CreateCert",
+                            {
+                                "Ref": "GeneratedCert"
+                            },
+                            {
+                                "Ref": "CertArn"
+                            }
+                        ]
+                    },
+                    "Route53": {
+                        "HostedZoneId": {
+                            "Fn::If": [
+                                "CreateZone",
+                                {
+                                    "Ref": "GeneratedZone"
+                                },
+                                {
+                                    "Ref": "ZoneId"
+                                }
+                            ]
+                        }
+                    }
+                }
+            }
+        },
+        "HttpApiFunction": {
+            "Type": "AWS::Serverless::Function",
+            "Properties": {
+                "InlineCode": "exports.handler = async (event) => JSON.stringify(event)",
+                "Handler": "index.handler",
+                "Runtime": "nodejs12.x",
+                "Timeout": 30,
+                "Events": {
+                    "FetchHttp": {
+                        "Type": "HttpApi",
+                        "Properties": {
+                            "ApiId": {
+                                "Ref": "HttpApiGateway"
+                            },
+                            "Method": "GET",
+                            "Path": "/"
+                        }
+                    }
+                }
+            }
+        }
+    }
+}

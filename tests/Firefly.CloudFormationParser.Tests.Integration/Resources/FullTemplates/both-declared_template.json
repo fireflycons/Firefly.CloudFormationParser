@@ -1,0 +1,197 @@
+{
+    "AWSTemplateFormatVersion": "2010-09-09",
+    "Transform": "AWS::Serverless-2016-10-31",
+    "Description": "Custom Domain",
+    "Parameters": {
+        "DomainName": {
+            "Type": "String",
+            "Description": "Domian name for api"
+        },
+        "ZoneId": {
+            "Type": "String",
+            "Description": "Zone ID if exists. If not leave as none.",
+            "Default": "none"
+        },
+        "CertArn": {
+            "Type": "String",
+            "Description": "Certificate ARN if exists. If not leave as none.",
+            "Default": "none"
+        }
+    },
+    "Conditions": {
+        "CreateZone": {
+            "Fn::Equals": [
+                {
+                    "Ref": "ZoneId"
+                },
+                "none"
+            ]
+        },
+        "CreateCert": {
+            "Fn::Equals": [
+                {
+                    "Ref": "CertArn"
+                },
+                "none"
+            ]
+        }
+    },
+    "Resources": {
+        "GeneratedZone": {
+            "Type": "AWS::Route53::HostedZone",
+            "Condition": "CreateZone",
+            "Properties": {
+                "Name": {
+                    "Ref": "DomainName"
+                }
+            }
+        },
+        "GeneratedCert": {
+            "Type": "AWS::CertificateManager::Certificate",
+            "Condition": "CreateCert",
+            "Properties": {
+                "DomainName": {
+                    "Ref": "DomainName"
+                },
+                "ValidationMethod": "DNS"
+            }
+        },
+        "CustomDomainName": {
+            "Type": "AWS::ApiGatewayV2::DomainName",
+            "Properties": {
+                "DomainName": {
+                    "Ref": "DomainName"
+                },
+                "DomainNameConfigurations": [
+                    {
+                        "EndpointType": "REGIONAL",
+                        "CertificateArn": {
+                            "Fn::If": [
+                                "CreateCert",
+                                {
+                                    "Ref": "GeneratedCert"
+                                },
+                                {
+                                    "Ref": "CertArn"
+                                }
+                            ]
+                        }
+                    }
+                ]
+            }
+        },
+        "HttpApiMapping": {
+            "Type": "AWS::ApiGatewayV2::ApiMapping",
+            "Properties": {
+                "ApiId": {
+                    "Ref": "HttpApiGateway"
+                },
+                "ApiMappingKey": "http",
+                "DomainName": {
+                    "Ref": "CustomDomainName"
+                },
+                "Stage": {
+                    "Ref": "HttpApiGatewayApiGatewayDefaultStage"
+                }
+            }
+        },
+        "RestApiMapping": {
+            "Type": "AWS::ApiGatewayV2::ApiMapping",
+            "Properties": {
+                "ApiId": {
+                    "Ref": "RestApiGateway"
+                },
+                "ApiMappingKey": "rest",
+                "DomainName": {
+                    "Ref": "CustomDomainName"
+                },
+                "Stage": {
+                    "Ref": "RestApiGatewayProdStage"
+                }
+            }
+        },
+        "HttpApiGateway": {
+            "Type": "AWS::Serverless::HttpApi"
+        },
+        "RestApiGateway": {
+            "Type": "AWS::Serverless::Api",
+            "Properties": {
+                "StageName": "Prod"
+            }
+        },
+        "HttpApiFunction": {
+            "Type": "AWS::Serverless::Function",
+            "Properties": {
+                "InlineCode": "exports.handler = async (event) => JSON.stringify(event)",
+                "Handler": "index.handler",
+                "Runtime": "nodejs12.x",
+                "Events": {
+                    "FetchHttpApi": {
+                        "Type": "HttpApi",
+                        "Properties": {
+                            "ApiId": {
+                                "Ref": "HttpApiGateway"
+                            },
+                            "Method": "GET",
+                            "Path": "/"
+                        }
+                    }
+                }
+            }
+        },
+        "RestApiFunction": {
+            "Type": "AWS::Serverless::Function",
+            "Properties": {
+                "InlineCode": "exports.handler = async (event) => {\n  const response = {\n    statusCode: 200,\n    body: JSON.stringify('Hello from Lambda!'),\n  };\n  return response;\n};\n",
+                "Handler": "index.handler",
+                "Runtime": "nodejs12.x",
+                "Events": {
+                    "FetchRest": {
+                        "Type": "Api",
+                        "Properties": {
+                            "RestApiId": {
+                                "Ref": "RestApiGateway"
+                            },
+                            "Method": "GET",
+                            "Path": "/"
+                        }
+                    }
+                }
+            }
+        },
+        "RecordSet": {
+            "Type": "AWS::Route53::RecordSet",
+            "Properties": {
+                "Name": {
+                    "Ref": "DomainName"
+                },
+                "HostedZoneId": {
+                    "Fn::If": [
+                        "CreateZone",
+                        {
+                            "Ref": "GeneratedZone"
+                        },
+                        {
+                            "Ref": "ZoneId"
+                        }
+                    ]
+                },
+                "AliasTarget": {
+                    "DNSName": {
+                        "Fn::GetAtt": [
+                            "CustomDomainName",
+                            "RegionalDomainName"
+                        ]
+                    },
+                    "HostedZoneId": {
+                        "Fn::GetAtt": [
+                            "CustomDomainName",
+                            "RegionalHostedZoneId"
+                        ]
+                    }
+                },
+                "Type": "A"
+            }
+        }
+    }
+}

@@ -1,0 +1,117 @@
+AWSTemplateFormatVersion: 2010-09-09
+Description: asasdaddf
+Metadata:
+  D1: sdfdsfd
+
+Parameters:
+  Param1:
+    Description: blah
+    Type: Number
+    Default: 1
+    MinValue: 0
+    MaxValue: 1
+
+  Param2:
+    Description: param2
+    Type: Number
+    Default: 1
+    MinValue: 0
+    MaxValue: 1
+
+
+Mappings:
+  General:
+    Constants:
+      C1: a Constants
+      C2:
+        - a1
+        - a2
+
+Conditions:
+  Cond1: !Or
+    - !Equals
+      - 1 # !Ref Param1
+      - 0
+    - !Equals
+      - 0
+      - !Ref Param2
+
+
+  Cond2: !Not
+    - !And
+      - !Condition Cond1
+      - !Equals
+        - !Ref Param2
+        - 0
+
+#  Cond3:
+#    Fn::Not:
+#      - Fn::And:
+#          - Condition: Cond1
+#          - Fn::Equals:
+#              - Ref: Param2
+#              - 0
+
+Resources:
+  SSMParameter1:
+    Condition: Cond2
+    Type: AWS::SSM::Parameter
+    Properties:
+      Type: String
+      Value: #!Sub
+        Fn::Sub:
+        - 'sad-${Param1}-${p2}-${p3}-${p4}-${p5}-${p6}'
+        - p2: dsfds
+          p3: !FindInMap
+            - General
+            - Constants
+            - C1
+          p4: !Select
+            - 0
+            - !FindInMap
+              - General
+              - Constants
+              - C2
+          p5: !Join
+            - ''
+            - - 'arn:'
+              - !Ref AWS::Partition
+              - ':s3:::elasticbeanstalk-*-'
+              - !Ref AWS::AccountId
+          p6: !Select
+            - 1
+            - !Split
+              - '|'
+              - 'a|b|c'
+
+  SSMParameter2:
+    Condition: Cond2
+    Type: AWS::SSM::Parameter
+    Properties:
+      Type: String
+      Value: 'sadfdsfsdf'
+
+  Subnet:
+    Type: AWS::EC2::Subnet
+    Properties:
+      AvailabilityZone: !GetAZs 
+#        Ref: AWS::Region
+      VpcId: vpc-00000000
+      CidrBlock: !Cidr
+        - 192.168.0.0/24
+        - 6
+        - 5
+      Tags:
+        - Key: keyname
+          Value: !If
+            - Cond1
+            - !Ref AWS::StackName
+            - !Ref AWS::AccountId
+        - Key: dfds
+          Value: !ImportValue xx
+Outputs:
+  SSMParameter1:
+    Description: this is r1.
+    Value: !Ref SSMParameter1
+  R1Type:
+    Value: !GetAtt SSMParameter1.Type

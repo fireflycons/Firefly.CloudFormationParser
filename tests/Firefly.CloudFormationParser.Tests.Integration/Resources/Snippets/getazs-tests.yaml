@@ -1,0 +1,62 @@
+AWSTemplateFormatVersion: 2010-09-09
+
+Parameters:
+
+  EC2ImageId:
+    Description:    EC2 AMI Id
+    Type:           AWS::EC2::Image::Id
+    Default:        "ami-xxx"
+
+  EC2InstanceType:
+    Description:    Amazon EC2 instance type.
+    Type:           String
+    Default:        "t2.small"
+
+Resources:
+
+  # First 4 resources should evaluate to AWS::Region
+  Resource1:
+    Type: AWS::SSM::Parameter
+    Properties:
+      Type: String
+      Value: !GetAZs
+
+  Resource2:
+    Type: AWS::SSM::Parameter
+    Properties:
+      Type: String
+      Value: !GetAZs ''
+
+  Resource3:
+    Type: AWS::SSM::Parameter
+    Properties:
+      Type: String
+      Value:
+        Fn::GetAZs: !Ref AWS::Region
+
+  Resource4:
+    Type: AWS::SSM::Parameter
+    Properties:
+      Type: String
+      Value: !GetAZs
+        Ref: AWS::Region
+
+  Resource5:
+    Type: AWS::SSM::Parameter
+    Properties:
+      Type: String
+      Value: !GetAZs us-east-1
+
+  EC2Instance:
+    Type: AWS::EC2::Instance
+    Properties:
+      ImageId: !Ref EC2ImageId
+      AvailabilityZone: !Select
+      - '0'
+      - Fn::GetAZs: !Ref AWS::Region
+      InstanceType: !Ref EC2InstanceType
+
+Outputs:
+  Resource1:
+    Value:
+      Ref: Resource1

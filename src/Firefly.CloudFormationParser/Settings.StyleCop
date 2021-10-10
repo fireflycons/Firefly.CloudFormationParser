@@ -1,0 +1,19 @@
+<StyleCopSettings Version="105">
+  <GlobalSettings>
+    <CollectionProperty Name="RecognizedWords">
+      <Value>changeset</Value>
+      <Value>cmdlet</Value>
+      <Value>cmdlets</Value>
+      <Value>deserializer</Value>
+      <Value>Deserializer</Value>
+      <Value>Deserializes</Value>
+      <Value>deserialize</Value>
+      <Value>git</Value>
+      <Value>stderr</Value>
+      <Value>stderr</Value>
+      <Value>stdout</Value>
+      <Value>terraform</Value>
+      <Value>intrinsics</Value>
+    </CollectionProperty>
+  </GlobalSettings>
+</StyleCopSettings>

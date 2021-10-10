@@ -1,0 +1,196 @@
+{
+    "AWSTemplateFormatVersion": "2010-09-09",
+    "Transform": "AWS::Serverless-2016-10-31",
+    "Description": "HTTP API",
+    "Parameters": {
+        "UserPoolId": {
+            "Type": "String",
+            "Description": "User poolID for Cognito provider"
+        },
+        "Audience": {
+            "Type": "String",
+            "Description": "Client id for user pool"
+        }
+    },
+    "Globals": {
+        "Function": {
+            "Timeout": 5,
+            "Handler": "app.lambdaHandler",
+            "Runtime": "nodejs12.x"
+        }
+    },
+    "Resources": {
+        "HttpApi": {
+            "Type": "AWS::Serverless::HttpApi",
+            "Properties": {
+                "Auth": {
+                    "Authorizers": {
+                        "GeneralAuth": {
+                            "AuthorizationScopes": [
+                                "email"
+                            ],
+                            "IdentitySource": "$request.header.Authorization",
+                            "JwtConfiguration": {
+                                "issuer": {
+                                    "Fn::Sub": "https://cognito-idp.${AWS::Region}.amazonaws.com/${UserPoolId}"
+                                },
+                                "audience": [
+                                    {
+                                        "Ref": "Audience"
+                                    }
+                                ]
+                            }
+                        }
+                    }
+                },
+                "CorsConfiguration": {
+                    "AllowMethods": [
+                        "GET"
+                    ],
+                    "AllowOrigins": [
+                        "http://localhost:8080"
+                    ]
+                }
+            }
+        },
+        "LambdaFunction": {
+            "Type": "AWS::Serverless::Function",
+            "Properties": {
+                "CodeUri": "src/",
+                "Events": {
+                    "RootGet": {
+                        "Type": "HttpApi",
+                        "Properties": {
+                            "Path": "/",
+                            "Method": "get",
+                            "ApiId": {
+                                "Ref": "HttpApi"
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "SimpleAuthLambdaFunction": {
+            "Type": "AWS::Serverless::Function",
+            "Properties": {
+                "CodeUri": "src/",
+                "Events": {
+                    "RootGet": {
+                        "Type": "HttpApi",
+                        "Properties": {
+                            "Auth": {
+                                "Authorizer": "GeneralAuth"
+                            },
+                            "Path": "/simple",
+                            "Method": "get",
+                            "ApiId": {
+                                "Ref": "HttpApi"
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "AdminLambdaFunction": {
+            "Type": "AWS::Serverless::Function",
+            "Properties": {
+                "CodeUri": "src/",
+                "Events": {
+                    "DosGet": {
+                        "Type": "HttpApi",
+                        "Properties": {
+                            "Auth": {
+                                "Authorizer": "GeneralAuth",
+                                "AuthorizationScopes": [
+                                    {
+                                        "Fn::Sub": "Admins-${Audience}"
+                                    }
+                                ]
+                            },
+                            "Path": "/admin",
+                            "Method": "get",
+                            "ApiId": {
+                                "Ref": "HttpApi"
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "SULambdaFunction": {
+            "Type": "AWS::Serverless::Function",
+            "Properties": {
+                "CodeUri": "src/",
+                "Events": {
+                    "DosGet": {
+                        "Type": "HttpApi",
+                        "Properties": {
+                            "Auth": {
+                                "Authorizer": "GeneralAuth",
+                                "AuthorizationScopes": [
+                                    {
+                                        "Fn::Sub": "SU-${Audience}"
+                                    }
+                                ]
+                            },
+                            "Path": "/su",
+                            "Method": "get",
+                            "ApiId": {
+                                "Ref": "HttpApi"
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "BothLambdaFunction": {
+            "Type": "AWS::Serverless::Function",
+            "Properties": {
+                "CodeUri": "src/",
+                "Events": {
+                    "DosGet": {
+                        "Type": "HttpApi",
+                        "Properties": {
+                            "Auth": {
+                                "Authorizer": "GeneralAuth",
+                                "AuthorizationScopes": [
+                                    {
+                                        "Fn::Sub": "Admins-${Audience}"
+                                    },
+                                    {
+                                        "Fn::Sub": "SU-${Audience}"
+                                    }
+                                ]
+                            },
+                            "Path": "/both",
+                            "Method": "get",
+                            "ApiId": {
+                                "Ref": "HttpApi"
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "CatchAllLambdaFunction": {
+            "Type": "AWS::Serverless::Function",
+            "Properties": {
+                "CodeUri": "src/",
+                "Events": {
+                    "RootGet": {
+                        "Type": "HttpApi"
+                    }
+                }
+            }
+        }
+    },
+    "Outputs": {
+        "ApiEndpoint": {
+            "Description": "HTTP API endpoint URL",
+            "Value": {
+                "Fn::Sub": "https://${HttpApi}.execute-api.${AWS::Region}.amazonaws.com"
+            }
+        }
+    }
+}

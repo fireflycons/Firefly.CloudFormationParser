@@ -1,0 +1,4 @@
+apiRules:
+  - exclude:
+    uidRegex: ^Firefly\.CloudFormationParser\.Serialization\.Deserializers\.DeserializationContext$
+    type: Enum

@@ -1,0 +1,188 @@
+{
+    "AWSTemplateFormatVersion": "2010-09-09",
+    "Transform": "AWS::Serverless-2016-10-31",
+    "Description": "Gevernance for Serverless initial setup",
+    "Parameters": {
+        "MainRegion": {
+            "Type": "String",
+            "Default": "us-west-2",
+            "Description": "Main region for the account"
+        },
+        "AggregateAccount": {
+            "Type": "String",
+            "Description": "Aggregate account ID",
+            "NoEcho": true
+        },
+        "SubAccountList": {
+            "Type": "CommaDelimitedList",
+            "Description": "List of sub accounts to be monitored",
+            "NoEcho": true
+        }
+    },
+    "Conditions": {
+        "IsMainRegion": {
+            "Fn::Equals": [
+                {
+                    "Ref": "MainRegion"
+                },
+                {
+                    "Ref": "AWS::Region"
+                }
+            ]
+        },
+        "IsAggregateAccount": {
+            "Fn::Equals": [
+                {
+                    "Ref": "AggregateAccount"
+                },
+                {
+                    "Ref": "AWS::AccountId"
+                }
+            ]
+        }
+    },
+    "Resources": {
+        "AggregateCollection": {
+            "Type": "AWS::Config::ConfigurationAggregator",
+            "Condition": "IsAggregateAccount",
+            "Properties": {
+                "AccountAggregationSources": [
+                    {
+                        "AccountIds": {
+                            "Ref": "SubAccountList"
+                        },
+                        "AllAwsRegions": true
+                    }
+                ],
+                "ConfigurationAggregatorName": "ConfigAggregateCollector"
+            }
+        },
+        "AggragateAccountAuth": {
+            "Type": "AWS::Config::AggregationAuthorization",
+            "Properties": {
+                "AuthorizedAccountId": {
+                    "Ref": "AggregateAccount"
+                },
+                "AuthorizedAwsRegion": {
+                    "Ref": "MainRegion"
+                }
+            }
+        },
+        "DataBucket": {
+            "Type": "AWS::S3::Bucket"
+        },
+        "NotificationTopic": {
+            "Type": "AWS::SNS::Topic"
+        },
+        "DeliveryChannel": {
+            "Type": "AWS::Config::DeliveryChannel",
+            "Properties": {
+                "S3BucketName": {
+                    "Ref": "DataBucket"
+                },
+                "SnsTopicARN": {
+                    "Ref": "NotificationTopic"
+                }
+            }
+        },
+        "ConfigRecorder": {
+            "Type": "AWS::Config::ConfigurationRecorder",
+            "Properties": {
+                "Name": {
+                    "Fn::Sub": "${AWS::Region}-Config-Recorder"
+                },
+                "RecordingGroup": {
+                    "IncludeGlobalResourceTypes": {
+                        "Fn::If": [
+                            "IsMainRegion",
+                            true,
+                            false
+                        ]
+                    },
+                    "AllSupported": true
+                },
+                "RoleARN": {
+                    "Fn::GetAtt": [
+                        "ConfigRole",
+                        "Arn"
+                    ]
+                }
+            }
+        },
+        "ConfigRole": {
+            "Type": "AWS::IAM::Role",
+            "Properties": {
+                "AssumeRolePolicyDocument": {
+                    "Version": "2012-10-17",
+                    "Statement": [
+                        {
+                            "Effect": "Allow",
+                            "Principal": {
+                                "Service": "config.amazonaws.com"
+                            },
+                            "Action": [
+                                "sts:AssumeRole"
+                            ]
+                        }
+                    ]
+                },
+                "ManagedPolicyArns": [
+                    "arn:aws:iam::aws:policy/service-role/AWSConfigRole"
+                ],
+                "Policies": [
+                    {
+                        "PolicyName": "S3ConfigPolicy",
+                        "PolicyDocument": {
+                            "Version": "2012-10-17",
+                            "Statement": {
+                                "Action": [
+                                    "s3:PutObject",
+                                    "s3:GetBucketAcl"
+                                ],
+                                "Effect": "Allow",
+                                "Resource": [
+                                    {
+                                        "Fn::GetAtt": [
+                                            "DataBucket",
+                                            "Arn"
+                                        ]
+                                    },
+                                    {
+                                        "Fn::Sub": [
+                                            "${BucketArn}/*",
+                                            {
+                                                "BucketArn": {
+                                                    "Fn::GetAtt": [
+                                                        "DataBucket",
+                                                        "Arn"
+                                                    ]
+                                                }
+                                            }
+                                        ]
+                                    }
+                                ]
+                            }
+                        }
+                    },
+                    {
+                        "PolicyName": "SNSConfigPolicy",
+                        "PolicyDocument": {
+                            "Version": "2012-10-17",
+                            "Statement": {
+                                "Action": [
+                                    "sns:Publish"
+                                ],
+                                "Effect": "Allow",
+                                "Resource": [
+                                    {
+                                        "Ref": "NotificationTopic"
+                                    }
+                                ]
+                            }
+                        }
+                    }
+                ]
+            }
+        }
+    }
+}

@@ -1,0 +1,76 @@
+{
+    "AWSTemplateFormatVersion": "2010-09-09",
+    "Parameters": {
+        "VPCStack": {
+            "Type": "String",
+            "Default": "abc"
+        }
+    },
+    "Conditions": {
+        "Cond2": {
+            "Fn::And": [
+                {
+                    "Fn::Or": [
+                        {
+                            "Fn::Equals": [
+                                1,
+                                0
+                            ]
+                        },
+                        {
+                            "Condition": "Cond1"
+                        },
+                        {
+                            "Condition": "Cond3"
+                        }
+                    ]
+                },
+                {
+                    "Fn::Equals": [
+                        1,
+                        1
+                    ]
+                }
+            ]
+        },
+        "Cond1": {
+            "Fn::Not": [
+                {
+                    "Fn::Equals": [
+                        true,
+                        false
+                    ]
+                }
+            ]
+        },
+        "Cond3": {
+            "Fn::Equals": [
+                1,
+                1
+            ]
+        }
+    },
+    "Resources": {
+        "R1": {
+            "Type": "AWS::SSM::Parameter",
+            "Properties": {
+                "Type": "String",
+                "Value": {
+                    "Fn::Sub": [
+                        "${VPCStack}-${P1}VPCID",
+                        {
+                            "P1": "asdasdas"
+                        }
+                    ]
+                }
+            }
+        }
+    },
+    "Outputs": {
+        "R1": {
+            "Value": {
+                "Ref": "R1"
+            }
+        }
+    }
+}

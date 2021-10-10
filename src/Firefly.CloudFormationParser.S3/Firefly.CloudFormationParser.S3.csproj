@@ -1,0 +1,37 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <TargetFramework>netstandard2.0</TargetFramework>
+        <IsPackable>true</IsPackable>
+        <PackageId>Firefly.CloudFormationParser.S3</PackageId>
+        <GeneratePackageOnBuild>$(Generate_CloudFormationParserS3)</GeneratePackageOnBuild>
+        <Title>Firefly.CloudFormationParser.S3</Title>
+
+        <!-- Overridden by CI -->
+        <Version>0.0.0</Version>
+        <AssemblyVersion>0.0.0</AssemblyVersion>
+        <FileVersion>0.0.0</FileVersion>
+
+        <Copyright>Copyright © 2021 Firefly IT Consulting Ltd.</Copyright>
+        <Description>
+            Add-in library for Firefly.CloudFormationParser that provides the  mechanism to read CloudFormation templates from S3 buckets.
+
+            Supported platforms:
+            - .NET Standard 2.0+
+
+            Supports Source Link
+        </Description>
+    </PropertyGroup>
+
+    <!-- Dependencies -->
+    <ItemGroup Condition="$(UseCloudformationParserNuget)">
+        <PackageReference Include="Firefly.CloudFormationParser" Version="0.1.0" />
+    </ItemGroup>
+    <ItemGroup Condition="!$(UseCloudformationParserNuget)">
+        <ProjectReference Include="..\Firefly.CloudFormationParser\Firefly.CloudFormationParser.csproj" />
+    </ItemGroup>
+    <ItemGroup>
+        <PackageReference Include="AWSSDK.S3" Version="3.7.*" />
+    </ItemGroup>
+
+</Project>

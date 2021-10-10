@@ -1,0 +1,13 @@
+AWSTemplateFormatVersion: 2010-09-09
+
+Mappings:
+  Accounts:
+    '0123456789012':
+      k: v
+
+Resources:
+  R1:
+    Type: AWS::SSM::Parameter
+    Properties:
+      Type: String
+      Value: sdfsdf

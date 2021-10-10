@@ -1,0 +1,39 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <TargetFramework>netstandard2.0</TargetFramework>
+        <IsPackable>true</IsPackable>
+        <PackageId>Firefly.CloudFormationParser</PackageId>
+        <GeneratePackageOnBuild>$(Generate_CloudFormationParser)</GeneratePackageOnBuild>
+        <Title>Firefly.CloudFormationParser</Title>
+
+        <!-- Overridden by CI -->
+        <Version>0.0.0</Version>
+        <AssemblyVersion>0.0.0</AssemblyVersion>
+        <FileVersion>0.0.0</FileVersion>
+
+        <Copyright>Copyright © 2021 Firefly IT Consulting Ltd.</Copyright>
+        <Description>
+            .NET Library that parses CloudFormation Templates and produces a directed edge graph of dependencies between the objects in the template.
+
+            Supported platforms:
+            - .NET Standard 2.0+
+
+            Supports Source Link
+        </Description>
+    </PropertyGroup>
+
+    <ItemGroup>
+        <PackageReference Include="QuikGraph" Version="2.3.0" />
+        <PackageReference Include="QuikGraph.Graphviz" Version="2.3.1" />
+    </ItemGroup>
+
+    <ItemGroup Condition="'$(SolutionName)' == 'Firefly.CloudFormationParser.debug'">
+        <ProjectReference Include="..\..\third-party\YamlDotNet\YamlDotNet.csproj" />
+    </ItemGroup>
+
+    <ItemGroup Condition="'$(SolutionName)' != 'Firefly.CloudFormationParser.debug'">
+        <PackageReference Include="YamlDotNet" Version="11.2.1" />
+    </ItemGroup>
+
+</Project>

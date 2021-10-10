@@ -1,0 +1,33 @@
+AWSTemplateFormatVersion: 2010-09-09
+
+Resources:
+
+  R1:
+    Type: AWS::SSM::Parameter
+    Properties:
+      Type: String
+      Value: !GetAZs
+
+  R2:
+    Type: AWS::SSM::Parameter
+    Properties:
+      Type: String
+      Value: !GetAZs ''
+
+  R3:
+    Type: AWS::SSM::Parameter
+    Properties:
+      Type: String
+      Value: !GetAZs us-east-1
+
+  R4:
+    Type: AWS::SSM::Parameter
+    Properties:
+      Type: String
+      Value: !GetAZs
+        Ref: AWS::Region
+
+Outputs:
+  R1:
+    Value:
+      Ref: R1

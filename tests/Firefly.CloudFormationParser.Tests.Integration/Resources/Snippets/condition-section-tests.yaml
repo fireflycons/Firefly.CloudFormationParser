@@ -1,0 +1,22 @@
+AWSTemplateFormatVersion: 2010-09-09
+
+Conditions:
+
+  Cond1:
+    Fn::Equals:
+      - 1
+      - 1
+
+  Cond2: !And
+    - Condition: Cond1
+    - !Equals
+      - 1
+      - 1
+
+Resources:
+
+  R1:
+    Type: AWS::SSM::Parameter
+    Properties:
+      Type: String
+      Value: !GetAZs
