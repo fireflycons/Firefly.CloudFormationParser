@@ -33,7 +33,7 @@ environment:
 
 # Setup build version
 install:
-  - ps: ./build/setupBuild.ps1
+  - ps: ./build/setup-build.ps1
 
 # Assembly infos & csproj patching
 assembly_info:
