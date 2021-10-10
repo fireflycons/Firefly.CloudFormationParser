@@ -65,13 +65,13 @@ matrix:
 # Build
 before_build:
 # NuGet restore
-  - nuget restore -verbosity detailed
+  - dotnet restore
 
 build:
   verbosity: minimal
 
 build_script:
-  - msbuild
+  - dotnet build
 
 #test_script:
 ## Test & generate coverage report
