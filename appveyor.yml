@@ -81,8 +81,9 @@ test_script:
       ) |
       Foreach-Object {
 
-          Write-Host $_.BaseName
-          & xunit.console $_.Fullname /appveyor
+          Write-Host
+          Write-Host "##" $_.BaseName
+          & %xunit20%\xunit.console.x86 $_.FullName -appveyor
       }
 
 # Artifacts
