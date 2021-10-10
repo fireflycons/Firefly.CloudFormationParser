@@ -4,34 +4,42 @@ $testsPassed = $true
 
 try
 {
-    $wc = [System.Net.WebClient]::new()
+    try
+    {
+        $wc = [System.Net.WebClient]::new()
 
-    $(
-        Get-ChildItem -Path (Join-Path $env:APPVEYOR_BUILD_FOLDER tests) -Filter *.Tests.Unit.csproj -Recurse
-        Get-ChildItem -Path (Join-Path $env:APPVEYOR_BUILD_FOLDER tests) -Filter *.Tests.Integration.csproj -Recurse
-    ) |
-    Foreach-Object {
+        $(
+            Get-ChildItem -Path (Join-Path $env:APPVEYOR_BUILD_FOLDER tests) -Filter *.Tests.Unit.csproj -Recurse
+            Get-ChildItem -Path (Join-Path $env:APPVEYOR_BUILD_FOLDER tests) -Filter *.Tests.Integration.csproj -Recurse
+        ) |
+        Foreach-Object {
 
-        Write-Host
-        Write-Host "##" $_.BaseName
-        $logFileName = "$($_.BaseName).trx"
+            Write-Host
+            Write-Host "##" $_.BaseName
+            $logFileName = "$($_.BaseName).trx"
 
-        & $dotnet test $_.FullName --results-directory $resultsDir --logger "trx;LogFileName=$logFileName"
+            & $dotnet test $_.FullName --results-directory $resultsDir --logger "trx;LogFileName=$logFileName"
 
-        if ($LASTEXITCODE -ne 0)
-        {
-            $testsPassed = $false
+            if ($LASTEXITCODE -ne 0)
+            {
+                $testsPassed = $false
+            }
+
+            $wc.UploadFile("https://ci.appveyor.com/api/testresults/mstest/$env:APPVEYOR_JOB_ID", (Join-Path $resultsDir $logFileName))
         }
+    }
+    finally
+    {
+        $wc.Dispose()
+    }
 
-        $wc.UploadFile("https://ci.appveyor.com/api/testresults/mstest/$env:APPVEYOR_JOB_ID", (Join-Path $env:APPVEYOR_BUILD_FOLDER $logFileName))
+    if (-not $testsPassed)
+    {
+        throw "Some tests failed"
     }
 }
-finally
+catch
 {
-    $wc.Dispose()
-}
-
-if (-not $testsPassed)
-{
-    throw "Some tests failed"
+    Write-Host -ForegroundColor Red $_.Exception.Message
+    exit 1
 }
