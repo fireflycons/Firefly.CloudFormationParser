@@ -76,8 +76,8 @@ build_script:
 test:
   assemblies:
     only:
-      - tests/**/*.Tests.Unit.dll
-      - tests/**/*.Tests.Integration.dll
+      - tests\**\*.Tests.Unit.dll
+      - tests\**\*.Tests.Integration.dll
 
 #test_script:
 ## Test & generate coverage report
