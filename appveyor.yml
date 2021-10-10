@@ -73,55 +73,17 @@ build:
 build_script:
   - dotnet build
 
-test:
-  assemblies:
-    only:
-      - tests\**\*.Tests.Unit.dll
-      - tests\**\*.Tests.Integration.dll
+test_script:
+  - ps: >-
+      $(
+          Get-ChildItem -Path (Join-Path $env:APPVEYOR_BUILD_FOLDER tests) -Filter *.Tests.Unit.dll -Recurse
+          Get-ChildItem -Path (Join-Path $env:APPVEYOR_BUILD_FOLDER tests) -Filter *.Tests.Integration.dll -Recurse
+      ) |
+      Foreach-Object {
 
-#test_script:
-## Test & generate coverage report
-#  - ps: >-
-#      $nunitFolder = (Resolve-Path "tools\NUnit.ConsoleRunner.*\tools").ToString();
-#      $nunitConsole = (Resolve-Path "$nunitFolder\nunit3-console.exe").ToString();
-#
-#      # Only take test assemblies matching their folder name
-#      # Example:
-#      # Directory = tests\TestProject.Tests\bin\CONFIGURATION\TARGET
-#      # Directory.Parent = tests\TestProject.Tests\bin\CONFIGURATION
-#      # Directory.Parent.Parent = tests\TestProject.Tests\bin
-#      # Directory.Parent.Parent.Parent = tests\TestProject.Tests
-#
-#      $testAssemblies = (ls tests\*.Tests\bin\$env:Configuration\net461\*Tests.dll | Where-Object { $_ -Match "net*" -and $_ -NotMatch "netcoreapp*" -and [System.IO.Path]::GetFileNameWithoutExtension($_.FullName) -Match $_.Directory.Parent.Parent.Parent.Name } | % FullName | sort-object -Unique);
-#
-#      $testsPassed = $false;
-#      if ($env:IsFullIntegrationBuild -eq $true)
-#      {
-#          $opencover = (Resolve-Path "tools\OpenCover.*\tools\OpenCover.Console.exe").ToString();
-#          $coveralls = (Resolve-Path "tools\csmacnz.Coveralls.exe").ToString();
-#
-#          & $opencover -register:Path64 -filter:"+[*]* -[*.Test*]* -[*]JetBrains.Annotations*" -excludebyfile:"*\Dgml.cs;*\SortedSet.cs;*\BitHelper.cs" -hideskipped:File -target:"$nunitConsole" -targetargs:"$testAssemblies --result=\`"TestResult.xml\`" --where \`"cat != VerboseTest and cat != CISkip\`"" -returntargetcode -log:Warn -output:coverage.xml;
-#          $testsPassed = $?;
-#
-#          & $sonarScanner end /d:"sonar.login=$env:SONARQUBE_TOKEN"
-#
-#          & $coveralls --opencover -i coverage.xml --repoToken $env:COVERALLS_REPO_TOKEN --useRelativePaths --commitId $env:APPVEYOR_REPO_COMMIT --commitBranch $env:APPVEYOR_REPO_BRANCH --commitAuthor $env:APPVEYOR_REPO_COMMIT_AUTHOR --commitEmail $env:APPVEYOR_REPO_COMMIT_AUTHOR_EMAIL --commitMessage $env:APPVEYOR_REPO_COMMIT_MESSAGE --jobId $env:APPVEYOR_BUILD_NUMBER --serviceName appveyor
-#      }
-#      else
-#      {
-#          & $nunitConsole $testAssemblies --where "cat != VerboseTest and cat != CISkip";
-#          $testsPassed = $?;
-#      }
-#
-#      # Upload results to AppVeyor
-#
-#      $wc = New-Object 'System.Net.WebClient';
-#      $wc.UploadFile("https://ci.appveyor.com/api/testresults/nunit3/$($env:APPVEYOR_JOB_ID)", (Resolve-Path .\TestResult.xml));
-#
-#      if (!$testsPassed)
-#      {
-#          throw "Unit tests failed";
-#      }
+          Write-Host $_.BaseName
+          & xunit.console $_.Fullname /appveyor
+      }
 
 # Artifacts
 artifacts:
