@@ -73,6 +73,9 @@ build:
 build_script:
   - dotnet build
 
+test_script:
+  - dotnet test
+
 #test_script:
 ## Test & generate coverage report
 #  - ps: >-
