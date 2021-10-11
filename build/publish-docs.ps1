@@ -107,8 +107,18 @@ else
 git config core.autocrlf true
 git config core.eol lf
 
-git config user.email $env:GITHUB_EMAIL
-git config user.name "fireflycons"
+if (([string]::IsNullOrEmpty($env:GITHUB_EMAIL)))
+{
+    throw "GITHUB_EMAIL not set"
+}
+
+if (-not $env:GITHUB_EMAIL.Contains('@'))
+{
+    throw "GITHUB_EMAIL not an email address"
+}
+
+git config --global user.email $env:GITHUB_EMAIL
+git config --global user.name "fireflycons"
 
 Write-Host "Copying documentation into the local documentation directory..."
 Copy-Item -recurse $SOURCE_DIR/docfx/_site/* .
