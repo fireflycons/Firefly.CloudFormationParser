@@ -42,7 +42,7 @@
         /// </para>
         /// <para>
         /// Implementations should prepare the template data as a reader from the information passed to the implementation's constructor.
-        /// It is the job of the implementation to dispose of nay resources involved in this operation after the template has been read.
+        /// It is the job of the implementation to dispose of any resources involved in this operation after the template has been read.
         /// </para>
         /// </summary>
         /// <returns>A reader positioned at the start of the template to parse.</returns>

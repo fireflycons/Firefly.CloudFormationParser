@@ -26,10 +26,10 @@ skip_commits:
 
 environment:
   DocFXVersion: 2.58
-#  GITHUB_ACCESS_TOKEN:
-#    secure: fLTTmcGOM55kigJC4vErpObFmybCtzQtwb4QN55BTNq3GDGaOCoHDoIPxexzO59d
-#  GITHUB_EMAIL:
-#    secure: wcfqCHOmeRLZf/BX6u6qQSV89Q4jFs9fHNDgMpKAcqE=
+  GITHUB_ACCESS_TOKEN:
+    secure: 53MNc4RNkaB8Cj54MNxuyLf9syy+i54ITECxm7HhmbJZfIJvzIss6WbiHZ4mCXAW
+  GITHUB_EMAIL:
+    secure: CxOftS/5wmEkPCDl0O/KIiKlF4KhUnGD9436K/1iQwY3RkDMZRCkCEny+dG5zCS+
 
 # Setup build version
 install:
@@ -64,7 +64,7 @@ matrix:
 
 # Build
 before_build:
-# NuGet restore
+  # NuGet restore
   - dotnet restore
 
 build:
@@ -77,26 +77,30 @@ test_script:
   - ps: ./build/run-tests.ps1
 
 ## Documentation
-#before_deploy:
-## Release documentation
-#  - ps: ./build/releaseDoc.ps1
-#
+before_deploy:
+  # Release documentation
+  - ps: ./build/publish-docs.ps1
+
 ## Deploy
-#deploy:
-## MyGet
-#  - provider: NuGet
-#    server: https://www.myget.org/F/kernelith-ci/api/v2/package
-#    symbol_server: https://www.myget.org/F/kernelith-ci/symbols/api/v2/package
-#    api_key:
-#      secure: ANF+joC2B+NahxCFbLPOjNvEAo36F2F4QJu6zLwoIf2I9KwkxKyCSuNxDpLmJmtU
-#    on:
-#      configuration: Release
+deploy:
+  ## GitHub
+  - provider: GitHub
+    auth_token:
+      secure: 53MNc4RNkaB8Cj54MNxuyLf9syy+i54ITECxm7HhmbJZfIJvzIss6WbiHZ4mCXAW
+    release: '${APPVEYOR_REPO_TAG_NAME}'
+    description: 'Version ${Release_Name}'
+    draft: false
+    prerelease: false
+    force_update: true
+    on:
+      configuration: Release
+      APPVEYOR_REPO_TAG: true
 ## GitHub packages
 #  - provider: NuGet
-#    server: https://nuget.pkg.github.com/KeRNeLith/index.json
-#    username: KeRNeLith
+#    server: TODO
+#    username: TODO
 #    api_key:
-#      secure: 6N37NtnuKSzKQXlPOCtPSFJGOvJUdJjPK8LcuWx2PjHs2WVdngenZvYixk6br72b
+#      secure: TODO
 #    skip_symbols: true
 #    artifact: NuGet
 #    on:
@@ -105,19 +109,7 @@ test_script:
 ## NuGet
 #  - provider: NuGet
 #    api_key:
-#      secure: zP8NG9npOCKDveAxWgK3a2Nb95gE5tk08i5ksxQKJpzqg0WsbOsK6vfxUjsjmlM+
-#    on:
-#      configuration: Release
-#      APPVEYOR_REPO_TAG: true
-## GitHub
-#  - provider: GitHub
-#    auth_token:
-#      secure: fLTTmcGOM55kigJC4vErpObFmybCtzQtwb4QN55BTNq3GDGaOCoHDoIPxexzO59d
-#    release: '${APPVEYOR_REPO_TAG_NAME}'
-#    description: 'Version ${Release_Name}'
-#    draft: false
-#    prerelease: false
-#    force_update: true
+#      secure: TODO
 #    on:
 #      configuration: Release
 #      APPVEYOR_REPO_TAG: true
