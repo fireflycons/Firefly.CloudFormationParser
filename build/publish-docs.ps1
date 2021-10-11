@@ -51,8 +51,6 @@ function Invoke-Git
     }
 }
 
-throw "DEBUG STOP"
-
 # Only master Release
 if ($env:Configuration -ne "Release")
 {

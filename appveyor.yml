@@ -77,7 +77,7 @@ test_script:
   - ps: ./build/run-tests.ps1
 
 ## Documentation
-before_deploy:
+after_test:
   # Release documentation
   - ps: ./build/publish-docs.ps1
 
