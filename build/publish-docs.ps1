@@ -65,7 +65,13 @@ if ($env:APPVEYOR_REPO_BRANCH -ne "master")
 }
 
 # Chocolatey DocFX
-cinst docfx --version $env:DocFXVersion -y
+cinst docfx --version $env:DocFXVersion -y  --limit-output |
+Foreach-Object {
+    if ($_ -inotlike 'Progress*Saving*')
+    {
+        Write-Host $_
+    }
+}
 
 Write-Host "Generating documentation site..."
 docfx ./docfx/docfx.json
