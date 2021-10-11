@@ -67,12 +67,6 @@ if ($env:APPVEYOR_REPO_BRANCH -ne "master")
 # Chocolatey DocFX
 cinst docfx --version $env:DocFXVersion -y
 
-git config --global core.autocrlf true
-git config --global core.eol lf
-
-git config --global user.email $env:GITHUB_EMAIL
-git config --global user.name "fireflycons"
-
 Write-Host "Generating documentation site..."
 docfx ./docfx/docfx.json
 
@@ -104,6 +98,12 @@ else
     Set-Location $DOC_SITE_DIR
 }
 
+git config core.autocrlf true
+git config core.eol lf
+
+git config user.email $env:GITHUB_EMAIL
+git config user.name "fireflycons"
+
 Write-Host "Copying documentation into the local documentation directory..."
 Copy-Item -recurse $SOURCE_DIR/docfx/_site/* .
 
@@ -112,7 +112,7 @@ Invoke-Git "add -A ."
 Write-Host "Checking if there are changes in the documentation..."
 if (-not [string]::IsNullOrEmpty($(git status --porcelain)))
 {
-    Write-Host "Pushing the new documentation to the remote gh-pages branch..."
+    Write-Host "Pushing the new documentation to github.io..."
     git commit -m "Update generated documentation."
     git remote set-url origin https://$($env:GITHUB_ACCESS_TOKEN)@github.com/fireflycons/fireflycons.github.io.git
     git push -q origin
