@@ -35,14 +35,6 @@ environment:
 install:
   - ps: ./build/setup-build.ps1
 
-# Assembly infos & csproj patching
-assembly_info:
-  patch: true
-  file: '**\\AssemblyInfo.*'
-  assembly_version: '$(Build_Assembly_Version)'
-  assembly_file_version: '$(Build_Assembly_Version)'
-  assembly_informational_version: '$(Build_Version)'
-
 dotnet_csproj:
   patch: true
   file: '**\*.csproj'
