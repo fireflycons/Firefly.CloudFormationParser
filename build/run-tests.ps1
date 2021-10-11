@@ -18,14 +18,14 @@ try
             Write-Host "##" $_.BaseName
             $logFileName = "$($_.BaseName).trx"
 
-            & $dotnet test $_.FullName --results-directory $resultsDir --logger "trx;LogFileName=$logFileName"
+            & $dotnet test $_.FullName --test-adapter-path:. --logger:Appveyor
 
             if ($LASTEXITCODE -ne 0)
             {
                 $testsPassed = $false
             }
 
-            $wc.UploadFile("https://ci.appveyor.com/api/testresults/mstest/$env:APPVEYOR_JOB_ID", (Join-Path $resultsDir $logFileName))
+            # $wc.UploadFile("https://ci.appveyor.com/api/testresults/mstest/$env:APPVEYOR_JOB_ID", (Join-Path $resultsDir $logFileName))
         }
     }
     finally
