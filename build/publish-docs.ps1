@@ -85,12 +85,12 @@ Foreach-Object {
 Write-Host "Generating documentation site..."
 docfx ./docfx/docfx.json
 
-$SOURCE_DIR = $env:APPVEYOR_BUILD_FOLDER
-$TEMP_REPO_DIR = Join-Path ([IO.Path]::GetTempPath()) 'fireflycons.github.io'
-$DOC_SITE_DIR = Join-Path $TEMP_REPO_DIR 'Firefly.CloudFormationParser'
-
-$githubAccount = $env:APPVEYOR_REPO_NAME -split '/' | Select-Object -First 1
+$githubAccount, $repoName = $env:APPVEYOR_REPO_NAME -split '/'
 $docUriPath = "$($githubAccount)/$($githubAccount).github.io.git"
+
+$SOURCE_DIR = $env:APPVEYOR_BUILD_FOLDER
+$TEMP_REPO_DIR = Join-Path ([IO.Path]::GetTempPath()) "$githubAccount.github.io"
+$DOC_SITE_DIR = Join-Path $TEMP_REPO_DIR $repoName
 
 if (Test-Path $TEMP_REPO_DIR)
 {
@@ -132,7 +132,7 @@ Write-Host "Checking if there are changes in the documentation..."
 if (-not [string]::IsNullOrEmpty($(git status --porcelain)))
 {
     Write-Host "Pushing the new documentation to github.io..."
-    git commit -m "Update generated documentation."
+    git commit -m "AppVeyor Build ${env:APPVEYOR_BUILD_NUMBER}"
     git remote set-url origin "https://$($env:GITHUB_ACCESS_TOKEN)@github.com/$docUriPath"
     git push -q origin
     Write-Host "Documentation updated!"

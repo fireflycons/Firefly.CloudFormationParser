@@ -4,7 +4,7 @@
 
 There are so many questions on Stack Overflow and other sites related to the parsing of CloudFormation Templates in .NET. This is a problem I really wanted to solve once and for all, as I have several other repos here that have half-cocked CloudFormation support, and this package will be gradually integrated into them.
 
-I set out to solve the five main issues I see with parsing CloudFormation effectively, plus I wanted to be able to understand the dependency relationship between objects declared in a template. Should you for instance want to create a CloudFormation Linter, most of what you would need is here.
+I set out to solve the [five main issues](https://fireflycons.github.io/Firefly.CloudFormationParser/documentation/gory-details.html) I see with parsing CloudFormation effectively, plus I wanted to be able to understand the dependency relationship between objects declared in a template. Should you for instance want to create a CloudFormation Linter, most of what you would need is here.
 
 Using this library, templates may be parsed from a number of sources, currently:
 
@@ -35,3 +35,7 @@ There will shortly be three NuGet pacakges.
 * `Firefly.CloudFormationParser` - Core functionality with support for reading templates from stream, string or file.
 * `Firefly.CloudFormationParser.Cfn` - Adds support for reading from a deployed CloudFormation Stack
 * `Firefly.CloudFormationParser.S3` - Adds support for reading from an S3 bucket.
+
+## Next Steps
+
+* View the [documentation](https://fireflycons.github.io/Firefly.CloudFormationParser/)
