@@ -89,6 +89,9 @@ $SOURCE_DIR = $env:APPVEYOR_BUILD_FOLDER
 $TEMP_REPO_DIR = Join-Path ([IO.Path]::GetTempPath()) 'fireflycons.github.io'
 $DOC_SITE_DIR = Join-Path $TEMP_REPO_DIR 'Firefly.CloudFormationParser'
 
+$githubAccount = $env:APPVEYOR_REPO_NAME -split '/' | Select-Object -First 1
+$docUriPath = "$($githubAccount)/$($githubAccount).github.io.git"
+
 if (Test-Path $TEMP_REPO_DIR)
 {
     Write-Host "Removing temporary documentation directory $TEMP_REPO_DIR..."
@@ -98,7 +101,7 @@ if (Test-Path $TEMP_REPO_DIR)
 New-Item -Path $TEMP_REPO_DIR -ItemType Directory | Out-Null
 
 Write-Host "Cloning the documentation site."
-git clone -q https://github.com/fireflycons/fireflycons.github.io.git $TEMP_REPO_DIR
+git clone -q "https://github.com/$docUriPath" $TEMP_REPO_DIR
 
 if (Test-Path -Path $DOC_SITE_DIR -PathType Container)
 {
@@ -113,12 +116,11 @@ else
     Set-Location $DOC_SITE_DIR
 }
 
-$at = (Get-Content -Raw (Join-Path $env:APPVEYOR_BUILD_FOLDER at.txt)).Trim()
 
 git config core.autocrlf true
 git config core.eol lf
 
-git config --global user.email $env:APPVEYOR_REPO_COMMIT_AUTHOR_EMAIL
+git config --global user.email $env:GITHUB_EMAIL
 git config --global user.name  $env:APPVEYOR_REPO_COMMIT_AUTHOR
 
 Write-Host "Copying documentation into the local documentation directory..."
@@ -131,7 +133,7 @@ if (-not [string]::IsNullOrEmpty($(git status --porcelain)))
 {
     Write-Host "Pushing the new documentation to github.io..."
     git commit -m "Update generated documentation."
-    git remote set-url origin https://$($env:GITHUB_ACCESS_TOKEN)@github.com/fireflycons/fireflycons.github.io.git
+    git remote set-url origin "https://$($env:GITHUB_ACCESS_TOKEN)@github.com/$docUriPath"
     git push -q origin
     Write-Host "Documentation updated!"
 }
