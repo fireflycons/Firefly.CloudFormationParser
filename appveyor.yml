@@ -55,9 +55,9 @@ matrix:
   fast_finish: true
 
 # Build
-before_build:
-  # NuGet restore
-  - dotnet restore
+#before_build:
+#  # NuGet restore
+#  - dotnet restore
 
 build:
   verbosity: minimal
@@ -66,7 +66,7 @@ build_script:
   - dotnet build
 
 test_script:
-  - ps: $blockRdp = $true ; iex ((new-object net.webclient).DownloadString('https://raw.githubusercontent.com/appveyor/ci/master/scripts/enable-rdp.ps1'))
+  # - ps: $blockRdp = $true ; iex ((new-object net.webclient).DownloadString('https://raw.githubusercontent.com/appveyor/ci/master/scripts/enable-rdp.ps1'))
   - ps: ./build/run-tests.ps1
 
 ## Documentation
