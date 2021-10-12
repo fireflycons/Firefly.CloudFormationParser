@@ -7,10 +7,10 @@ function Invoke-Git
             Run git, handling quirky messages on stderr that aren't errors
 
         .PARAMETER OutputToPipeline
-            If set, write git utput to the pipeline (for further processing), else to console
+            If set, write git output to the pipeline (for further processing), else to console
 
         .PARAMETER SuppressWarnings
-            If set, hide any output that contains the text 'warning'
+            If set, hide any warning output that went to stderr
 
         .PARAMETER Quiet
             If set, do not emit any messages from git
@@ -53,22 +53,25 @@ function Invoke-Git
                     }
                 ).Trim()
 
-                if (-not ($SuppressWarnings -and $msg -ilike 'warning*'))
+                if (-not $SuppressWarnings)
                 {
                     Write-Host $msg
                 }
             }
             else
             {
-                if (-not ($Quiet -or ([string]::IsNullOrWhitespace($_))))
+                if (-not $Quiet)
                 {
-                    if ($OutputToPipeline)
+                    if (-not ([string]::IsNullOrWhitespace($_)))
                     {
-                        $_
-                    }
-                    else
-                    {
-                        Write-Host "* $_"
+                        if ($OutputToPipeline)
+                        {
+                            $_
+                        }
+                        else
+                        {
+                            Write-Host "* $_"
+                        }
                     }
                 }
             }
