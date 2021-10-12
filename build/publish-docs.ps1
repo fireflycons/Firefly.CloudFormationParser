@@ -8,6 +8,8 @@ function Invoke-Git
 
         [switch]$SuppressWarnings,
 
+        [switch]$Quiet,
+
         [Parameter(ValueFromRemainingArguments)]
         [string[]]$GitArgs
     )
@@ -42,7 +44,7 @@ function Invoke-Git
             }
             else
             {
-                if (-not ([string]::IsNullOrWhitespace($_)))
+                if (-not ($Quiet -or ([string]::IsNullOrWhitespace($_))))
                 {
                     if ($OutputToPipeline)
                     {
@@ -125,7 +127,7 @@ if (Test-Path -Path $DOC_SITE_DIR -PathType Container)
 {
     Write-Host "Clearing local documentation directory..."
     Set-Location $DOC_SITE_DIR
-    Invoke-Git rm -r *
+    Invoke-Git -Quiet rm -r *
 }
 else
 {
@@ -144,7 +146,7 @@ Invoke-Git config --global user.name  $env:APPVEYOR_REPO_COMMIT_AUTHOR
 Write-Host "Copying documentation into the local documentation directory..."
 Copy-Item -recurse $SOURCE_DIR/docfx/_site/* .
 
-Invoke-Git "add -A ."
+Invoke-Git -SuppressWarnings add --all
 
 Write-Host "Checking if there are changes in the documentation..."
 if (-not [string]::IsNullOrEmpty($(Invoke-Git -OutputToPipeline status --porcelain)))
