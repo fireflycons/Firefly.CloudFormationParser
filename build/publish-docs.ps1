@@ -1,55 +1,73 @@
+$script:git = Get-Command -Name Git
+
 function Invoke-Git
 {
-    <#
-    .SYNOPSIS
-        Invoke git, handling its quirky stderr that isn't error
-
-    .OUTPUTS
-        Git messages, and lastly the exit code
-
-    .EXAMPLE
-        Invoke-Git push
-
-    .EXAMPLE
-        Invoke-Git "add ."
-    #>
     param
     (
-        [Parameter(Mandatory)]
-        [string] $Command
+        [switch]$OutputToPipeline,
+
+        [switch]$SuppressWarnings,
+
+        [Parameter(ValueFromRemainingArguments)]
+        [string[]]$GitArgs
     )
+
+    $backupErrorActionPreference = $script:ErrorActionPreference
+    $script:ErrorActionPreference = "Continue"
 
     try
     {
-        $exitCode = 0
-        $path = [System.IO.Path]::GetTempFileName()
+        Write-Host -ForegroundColor Cyan ("git " + ($GitArgs -join ' ').Replace($env:GITHUB_ACCESS_TOKEN, "*****")).Replace($env:GITHUB_EMAIL, "*****")
 
-        Invoke-Expression "git $Command 2> $path"
-        $exitCode = $LASTEXITCODE
+        & $git $GitArgs 2>&1 |
+        ForEach-Object {
+            if ($_ -is [System.Management.Automation.ErrorRecord])
+            {
+                # Some git warnings still make it out as error records.
+                $msg = $(
+                    if (-not ([string]::IsNullOrEmpty($_.ErrorDetails.Message)))
+                    {
+                        $_.ErrorDetails.Message
+                    }
+                    else
+                    {
+                        $_.Exception.Message
+                    }
+                ).Trim()
 
-        if ( $exitCode -gt 0 )
-        {
-            Write-Error (Get-Content $path).ToString()
+                if (-not ($SuppressWarnings -and $msg -ilike 'warning*'))
+                {
+                    Write-Host $msg
+                }
+            }
+            else
+            {
+                if (-not ([string]::IsNullOrWhitespace($_)))
+                {
+                    if ($OutputToPipeline)
+                    {
+                        $_
+                    }
+                    else
+                    {
+                        Write-Host "* $_"
+                    }
+                }
+            }
         }
-        else
-        {
-            Get-Content $path | Select-Object -First 1
-        }
 
-        $exitCode
-    }
-    catch
-    {
-        Write-Host "Error: $_`n$($_.ScriptStackTrace)"
+        $exitcode = $LASTEXITCODE
     }
     finally
     {
-        if ( Test-Path $path )
-        {
-            Remove-Item $path
-        }
+        $script:ErrorActionPreference = $backupErrorActionPreference
+    }
+    if ($exitcode -ne 0)
+    {
+        throw "GIT finished with exit code $exitcode"
     }
 }
+
 
 $ErrorActionPreference = "Stop"
 
@@ -101,13 +119,13 @@ if (Test-Path $TEMP_REPO_DIR)
 New-Item -Path $TEMP_REPO_DIR -ItemType Directory | Out-Null
 
 Write-Host "Cloning the documentation site."
-git clone -q "https://github.com/$docUriPath" $TEMP_REPO_DIR
+Invoke-Git clone -q "https://github.com/$docUriPath" $TEMP_REPO_DIR
 
 if (Test-Path -Path $DOC_SITE_DIR -PathType Container)
 {
     Write-Host "Clearing local documentation directory..."
     Set-Location $DOC_SITE_DIR
-    git rm -r *
+    Invoke-Git rm -r *
 }
 else
 {
@@ -117,11 +135,11 @@ else
 }
 
 
-git config core.autocrlf true
-git config core.eol lf
+Invoke-Git config core.autocrlf true
+Invoke-Git config core.eol lf
 
-git config --global user.email $env:GITHUB_EMAIL
-git config --global user.name  $env:APPVEYOR_REPO_COMMIT_AUTHOR
+Invoke-Git config --global user.email $env:GITHUB_EMAIL
+Invoke-Git config --global user.name  $env:APPVEYOR_REPO_COMMIT_AUTHOR
 
 Write-Host "Copying documentation into the local documentation directory..."
 Copy-Item -recurse $SOURCE_DIR/docfx/_site/* .
@@ -129,12 +147,12 @@ Copy-Item -recurse $SOURCE_DIR/docfx/_site/* .
 Invoke-Git "add -A ."
 
 Write-Host "Checking if there are changes in the documentation..."
-if (-not [string]::IsNullOrEmpty($(git status --porcelain)))
+if (-not [string]::IsNullOrEmpty($(Invoke-Git -OutputToPipeline status --porcelain)))
 {
     Write-Host "Pushing the new documentation to github.io..."
-    git commit -m "AppVeyor Build ${env:APPVEYOR_BUILD_NUMBER}"
-    git remote set-url origin "https://$($env:GITHUB_ACCESS_TOKEN)@github.com/$docUriPath"
-    git push -q origin
+    Invoke-Git -OutputToPipeline commit -m "AppVeyor Build ${env:APPVEYOR_BUILD_NUMBER}"
+    Invoke-Git remote set-url origin "https://$($env:GITHUB_ACCESS_TOKEN)@github.com/$docUriPath"
+    Invoke-Git -OutputToPipeline push -q origin
     Write-Host "Documentation updated!"
 }
 else
