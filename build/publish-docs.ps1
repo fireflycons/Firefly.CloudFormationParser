@@ -131,7 +131,7 @@ if (-not [string]::IsNullOrEmpty($(git status --porcelain)))
 {
     Write-Host "Pushing the new documentation to github.io..."
     git commit -m "Update generated documentation."
-    git remote set-url origin https://$($at)@github.com/fireflycons/fireflycons.github.io.git
+    git remote set-url origin https://$($env:GITHUB_ACCESS_TOKEN)@github.com/fireflycons/fireflycons.github.io.git
     git push -q origin
     Write-Host "Documentation updated!"
 }
