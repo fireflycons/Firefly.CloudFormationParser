@@ -2,6 +2,22 @@ $script:git = Get-Command -Name Git
 
 function Invoke-Git
 {
+    <#
+        .SYNOPSIS
+            Run git, handling quirky messages on stderr that aren't errors
+
+        .PARAMETER OutputToPipeline
+            If set, write git utput to the pipeline (for further processing), else to console
+
+        .PARAMETER SuppressWarnings
+            If set, hide any output that contains the text 'warning'
+
+        .PARAMETER Quiet
+            If set, do not emit any messages from git
+
+        .PARAMETER GitArgs
+            All remaining arguments become command tail to get executable.
+    #>
     param
     (
         [switch]$OutputToPipeline,
@@ -146,15 +162,15 @@ Invoke-Git config --global user.name  $env:APPVEYOR_REPO_COMMIT_AUTHOR
 Write-Host "Copying documentation into the local documentation directory..."
 Copy-Item -recurse $SOURCE_DIR/docfx/_site/* .
 
-Invoke-Git -SuppressWarnings add --all
+Invoke-Git -Quiet -SuppressWarnings add --all
 
 Write-Host "Checking if there are changes in the documentation..."
 if (-not [string]::IsNullOrEmpty($(Invoke-Git -OutputToPipeline status --porcelain)))
 {
     Write-Host "Pushing the new documentation to github.io..."
-    Invoke-Git -OutputToPipeline commit -m "AppVeyor Build ${env:APPVEYOR_BUILD_NUMBER}"
+    Invoke-Git commit -m "AppVeyor Build ${env:APPVEYOR_BUILD_NUMBER}"
     Invoke-Git remote set-url origin "https://$($env:GITHUB_ACCESS_TOKEN)@github.com/$docUriPath"
-    Invoke-Git -OutputToPipeline push -q origin
+    Invoke-Git push -q origin
     Write-Host "Documentation updated!"
 }
 else
