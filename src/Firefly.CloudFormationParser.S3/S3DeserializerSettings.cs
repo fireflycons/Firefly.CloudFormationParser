@@ -99,9 +99,6 @@
         }
 
         /// <inheritdoc />
-        public TextReader Content { get; private set; } = TextReader.Null;
-
-        /// <inheritdoc />
         public bool ExcludeConditionalResources { get; set; }
 
         /// <inheritdoc />

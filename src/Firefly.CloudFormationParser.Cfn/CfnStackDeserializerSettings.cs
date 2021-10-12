@@ -85,19 +85,34 @@
         /// <inheritdoc />
         public bool ExcludeConditionalResources { get; set; }
 
-        /// <inheritdoc />
-        public IDictionary<string, object>? ParameterValues { get; private set; }
+        /// <summary>
+        /// <para>
+        /// Gets or sets an optional dictionary of values to assign to parameters.
+        /// </para>
+        /// <para>
+        /// If this is unset at the time <see cref="GetContentAsync"/> is called, it will be populated
+        /// with the current values of the parameters as defined by the deployed stack. Note that for
+        /// parameters that were declared <c>NoEcho</c>, the values of these parameters will be undefined.
+        /// </para>
+        /// </summary>
+        /// <value>
+        /// The parameter values.
+        /// </value>
+        public IDictionary<string, object>? ParameterValues { get; set; }
 
         /// <inheritdoc />
         public async Task<TextReader> GetContentAsync()
         {
-            var stackRespose =
-                (await this.client.DescribeStacksAsync(new DescribeStacksRequest { StackName = this.stackId })).Stacks
-                .First();
+            if (this.ParameterValues == null)
+            {
+                var stackRespose =
+                    (await this.client.DescribeStacksAsync(new DescribeStacksRequest { StackName = this.stackId }))
+                    .Stacks.First();
 
-            this.ParameterValues = stackRespose.Parameters.ToDictionary(
-                p => p.ParameterKey,
-                p => (object)p.ParameterValue);
+                this.ParameterValues = stackRespose.Parameters.ToDictionary(
+                    p => p.ParameterKey,
+                    p => (object)p.ParameterValue);
+            }
 
             var templateResponse = await this.client.GetTemplateAsync(
                                        new GetTemplateRequest

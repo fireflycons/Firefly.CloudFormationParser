@@ -15,7 +15,7 @@
     {
         /// <summary>
         /// <para>
-        /// Gets a value indicating whether to exclude resources and outputs nullified by the evaluation of conditions.
+        /// Gets or sets a value indicating whether to exclude resources and outputs nullified by the evaluation of conditions.
         /// </para>
         /// <para>
         /// When this is <c>true</c>, the results of the evaluation of conditions in the <c>Conditions</c> block of the template using the values of
@@ -26,19 +26,25 @@
         /// <value>
         ///   <c>true</c> if conditional objects should be excluded; otherwise, <c>false</c>.
         /// </value>
-        bool ExcludeConditionalResources { get; }
+        bool ExcludeConditionalResources { get; set; }
 
         /// <summary>
-        /// Gets an optional dictionary of values to assign to parameters.
+        /// <para>
+        /// Gets or sets an optional dictionary of values to assign to parameters.
+        /// </para>
+        /// <para>
+        /// If left unset, then parameter defaults where present will be used in evaluations, or where there is no
+        /// declared default value, the default for the type - empty string, zero for number etc.
+        /// </para>
         /// </summary>
         /// <value>
         /// The parameter values.
         /// </value>
-        IDictionary<string, object>? ParameterValues { get; }
+        IDictionary<string, object>? ParameterValues { get; set; }
 
         /// <summary>
         /// <para>
-        /// Gets the template content.
+        /// Gets the template content. This should be implemented as an <c>async</c> method.
         /// </para>
         /// <para>
         /// Implementations should prepare the template data as a reader from the information passed to the implementation's constructor.
