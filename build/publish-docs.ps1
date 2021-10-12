@@ -51,17 +51,26 @@ function Invoke-Git
     }
 }
 
+$ErrorActionPreference = "Stop"
+
 # Only master Release
 if ($env:Configuration -ne "Release")
 {
-    Write-Host "Documentation update ignored: Not Release build.";
-    return;
+    Write-Host "Documentation update ignored: Not Release build."
+    return
 }
 
 if ($env:APPVEYOR_REPO_BRANCH -ne "master")
 {
-    Write-Host "Documentation update ignored: Not master branch.";
-    return;
+    Write-Host "Documentation update ignored: Not master branch."
+    return
+}
+
+if (-not [string]::IsNullOrEmpty($env:APPVEYOR_PULL_REQUEST_NUMBER))
+{
+    # Secure variables not set during PR, so we couldn't do this even if we wanted to.
+    Write-Host "Documentation update ignored: Pull request."
+    return
 }
 
 # Chocolatey DocFX

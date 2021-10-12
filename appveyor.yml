@@ -33,13 +33,6 @@ environment:
 
 # Setup build version
 install:
-  - ps: |
-      if (-not $env:GITHUB_ACCESS_TOKEN)
-      {
-        throw "GITHUB_ACCESS_TOKEN not set"
-      }
-
-      $env:GITHUB_ACCESS_TOKEN | Out-File (Join-Path $env:APPVEYOR_BUILD_FOLDER at.txt)
   - ps: ./build/setup-build.ps1
 
 dotnet_csproj:
