@@ -5,12 +5,14 @@
     using System;
     using System.Collections;
     using System.Collections.Generic;
+    using System.ComponentModel;
     using System.Diagnostics;
     using System.Linq;
     using System.Text.RegularExpressions;
 
     using Firefly.CloudFormationParser.Utils;
 
+    using YamlDotNet.Core;
     using YamlDotNet.Serialization;
 
     /// <summary>
@@ -19,16 +21,40 @@
     [DebuggerDisplay("Param {Name}")]
     public class Parameter : ITemplateObject, IParameter
     {
+        /// <summary>
+        /// The allowed pattern regex.
+        /// </summary>
+        private Regex? allowedPattern;
+
         /// <inheritdoc cref="IParameter.AllowedPattern"/>>
-        [YamlMember(Order = 5)]
-        public string? AllowedPattern { get; set; }
+        [YamlIgnore]
+        public Regex? AllowedPattern => this.allowedPattern;
+
+        /// <summary>
+        /// <para>
+        /// Gets or sets a regular expression that represents the patterns to allow for String types. The pattern must match the entire parameter value provided.
+        /// </para>
+        /// <para>
+        /// Use the convenience property <see cref="AllowedPattern"/> to access the pattern as a regular expression.
+        /// </para>
+        /// </summary>
+        /// <value>
+        /// The allowed pattern, which will be <c>null</c> if not defined in the template.
+        /// </value>
+        [YamlMember(Order = 5, Alias = "AllowedPattern", ScalarStyle = ScalarStyle.SingleQuoted, DefaultValuesHandling = DefaultValuesHandling.OmitNull)]
+        public string? AllowedPatternString
+        {
+            get => this.allowedPattern?.ToString();
+
+            set => this.allowedPattern = value == null ? null : new Regex(value);
+        }
 
         /// <inheritdoc cref="IParameter.AllowedValues"/>>
-        [YamlMember(Order = 6)]
+        [YamlMember(Order = 6, DefaultValuesHandling = DefaultValuesHandling.OmitEmptyCollections | DefaultValuesHandling.OmitEmptyCollections)]
         public List<string>? AllowedValues { get; set; }
 
         /// <inheritdoc cref="IParameter.ConstraintDescription"/>>
-        [YamlMember(Order = 3)]
+        [YamlMember(Order = 3, DefaultValuesHandling = DefaultValuesHandling.OmitNull)]
         public string? ConstraintDescription { get; set; }
 
         /// <inheritdoc cref="IParameter.CurrentValue"/>>
@@ -36,27 +62,27 @@
         public object? CurrentValue { get; private set; }
 
         /// <inheritdoc cref="IParameter.Default"/>>
-        [YamlMember(Order = 2)]
+        [YamlMember(Order = 2, DefaultValuesHandling = DefaultValuesHandling.OmitNull)]
         public string? Default { get; set; }
 
         /// <inheritdoc cref="IParameter.Description"/>>
-        [YamlMember(Order = 0)]
+        [YamlMember(Order = 0, DefaultValuesHandling = DefaultValuesHandling.OmitNull)]
         public string? Description { get; set; }
 
         /// <inheritdoc cref="IParameter.MaxLength"/>>
-        [YamlMember(Order = 8)]
+        [YamlMember(Order = 8, DefaultValuesHandling = DefaultValuesHandling.OmitNull)]
         public int? MaxLength { get; set; }
 
         /// <inheritdoc cref="IParameter.MaxValue"/>>
-        [YamlMember(Order = 10)]
+        [YamlMember(Order = 10, DefaultValuesHandling = DefaultValuesHandling.OmitNull)]
         public double? MaxValue { get; set; }
 
         /// <inheritdoc cref="IParameter.MinLength"/>>
-        [YamlMember(Order = 7)]
+        [YamlMember(Order = 7, DefaultValuesHandling = DefaultValuesHandling.OmitNull)]
         public int? MinLength { get; set; }
 
         /// <inheritdoc cref="IParameter.MinValue"/>>
-        [YamlMember(Order = 9)]
+        [YamlMember(Order = 9, DefaultValuesHandling = DefaultValuesHandling.OmitNull)]
         public double? MinValue { get; set; }
 
         /// <inheritdoc cref="IParameter.Name"/>>
@@ -64,12 +90,28 @@
         public string Name { get; set; } = string.Empty;
 
         /// <inheritdoc cref="IParameter.NoEcho"/>>
-        [YamlMember(Order = 4)]
+        [YamlMember(Order = 4, DefaultValuesHandling = DefaultValuesHandling.OmitDefaults)]
         public bool NoEcho { get; set; }
 
         /// <inheritdoc cref="IParameter.Type"/>>
         [YamlMember(Order = 1)]
         public string Type { get; set; } = string.Empty;
+
+        /// <inheritdoc cref="IParameter.HasMinLength"/>
+        [YamlIgnore]
+        public bool HasMinLength => this.MinLength != null;
+
+        /// <inheritdoc cref="IParameter.HasMinValue"/>
+        [YamlIgnore]
+        public bool HasMinValue => this.MinValue != null;
+
+        /// <inheritdoc cref="IParameter.HasMaxLength"/>
+        [YamlIgnore]
+        public bool HasMaxLength => this.MaxLength != null;
+
+        /// <inheritdoc cref="IParameter.HasMaxValue"/>
+        [YamlIgnore]
+        public bool HasMaxValue => this.MaxValue != null;
 
         /// <inheritdoc cref="IParameter.GetClrType"/>>
         public Type GetClrType()
@@ -234,10 +276,10 @@
                     var stringVal = value.ToString();
 
                     // ReSharper disable once AssignNullToNotNullAttribute - checked by IsNullOrEmpty
-                    if (!string.IsNullOrEmpty(this.AllowedPattern) && !Regex.IsMatch(stringVal, this.AllowedPattern))
+                    if (this.AllowedPattern != null && !this.AllowedPattern.IsMatch(stringVal))
                     {
                         throw new ArgumentException(
-                            $"Parameter {name} - Value '{stringVal}' does not match pattern: {this.AllowedPattern}");
+                            $"Parameter {name} - Value '{stringVal}' does not match pattern: {this.AllowedPatternString}");
                     }
 
                     if (this.AllowedValues != null && !this.AllowedValues.Contains(stringVal))

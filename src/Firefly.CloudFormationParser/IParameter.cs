@@ -2,6 +2,7 @@
 {
     using System;
     using System.Collections.Generic;
+    using System.Text.RegularExpressions;
 
     using Firefly.CloudFormationParser.Serialization.Settings;
     using Firefly.CloudFormationParser.TemplateObjects;
@@ -12,12 +13,12 @@
     public interface IParameter : ITemplateObject
     {
         /// <summary>
-        /// Gets or sets a regular expression that represents the patterns to allow for String types. The pattern must match the entire parameter value provided.
+        /// Gets the allowed pattern as a regular expression.
         /// </summary>
         /// <value>
-        /// The allowed pattern, which will be <c>null</c> if not defined in the template.
+        /// The allowed pattern, or <c>null</c> if the parameter has no allowed pattern.
         /// </value>
-        string? AllowedPattern { get; set; }
+        Regex? AllowedPattern { get; }
 
         /// <summary>
         /// Gets or sets an array containing the list of values allowed for the parameter.
@@ -34,6 +35,19 @@
         /// The constraint description, which will be <c>null</c> if not defined in the template.
         /// </value>
         string? ConstraintDescription { get; set; }
+
+        /// <summary>
+        /// <para>
+        /// Gets the current value of this parameter
+        /// </para>
+        /// <para>
+        /// This value may be set by passing a <see cref="Dictionary{TKey,TValue}"/> of string,object to <see cref="IDeserializerSettings.ParameterValues"/> method.
+        /// </para>
+        /// </summary>
+        /// <value>
+        /// The current value, which will be <c>null</c> if not set by passing a values dictionary to the deserializer.
+        /// </value>
+        object? CurrentValue { get; }
 
         /// <summary>
         /// Gets or sets a value of the appropriate type for the template to use if no value is specified when a stack is created.
@@ -53,28 +67,44 @@
         string? Description { get; set; }
 
         /// <summary>
-        /// Gets or sets a value indicating whether to mask the parameter value to prevent it from being displayed in the console, command line tools, or API.
+        /// Gets a value indicating whether this parameter has a maximum length.
         /// </summary>
         /// <value>
-        /// If <c>true</c>, user interfaces should redact the parameter value when displaying.
+        ///   <c>true</c> if this parameter has a maximum length; otherwise, <c>false</c>.
         /// </value>
-        bool NoEcho { get; set; }
+        bool HasMaxLength { get; }
 
         /// <summary>
-        /// Gets or sets the data type for the parameter.
+        /// Gets a value indicating whether this parameter has a maximum value.
         /// </summary>
         /// <value>
-        /// The AWS Parameter type.
+        ///   <c>true</c> if this parameter has a maximum value; otherwise, <c>false</c>.
         /// </value>
-        string Type { get; set; }
+        bool HasMaxValue { get; }
 
         /// <summary>
-        /// Gets or sets a numeric value that determines the smallest numeric value you want to allow for Number types.
+        /// Gets a value indicating whether this parameter has a minimum length.
         /// </summary>
         /// <value>
-        /// The minimum value, which will be <c>null</c> if not defined in the template.
+        ///   <c>true</c> if this parameter has a minimum length; otherwise, <c>false</c>.
         /// </value>
-        double? MinValue { get; set; }
+        bool HasMinLength { get; }
+
+        /// <summary>
+        /// Gets a value indicating whether this parameter has a minimum value.
+        /// </summary>
+        /// <value>
+        ///   <c>true</c> if this parameter has a minimum value; otherwise, <c>false</c>.
+        /// </value>
+        bool HasMinValue { get; }
+
+        /// <summary>
+        /// Gets or sets an integer value that determines the largest number of characters you want to allow for String types.
+        /// </summary>
+        /// <value>
+        /// The maximum length, which will be <c>null</c> if not defined in the template.
+        /// </value>
+        int? MaxLength { get; set; }
 
         /// <summary>
         /// Gets or sets a numeric value that determines the largest numeric value you want to allow for Number types.
@@ -93,25 +123,28 @@
         int? MinLength { get; set; }
 
         /// <summary>
-        /// Gets or sets an integer value that determines the largest number of characters you want to allow for String types.
+        /// Gets or sets a numeric value that determines the smallest numeric value you want to allow for Number types.
         /// </summary>
         /// <value>
-        /// The maximum length, which will be <c>null</c> if not defined in the template.
+        /// The minimum value, which will be <c>null</c> if not defined in the template.
         /// </value>
-        int? MaxLength { get; set; }
+        double? MinValue { get; set; }
 
         /// <summary>
-        /// <para>
-        /// Gets the current value of this parameter
-        /// </para>
-        /// <para>
-        /// This value may be set by passing a <see cref="Dictionary{TKey,TValue}"/> of string,object to <see cref="IDeserializerSettings.ParameterValues"/> method.
-        /// </para>
+        /// Gets or sets a value indicating whether to mask the parameter value to prevent it from being displayed in the console, command line tools, or API.
         /// </summary>
         /// <value>
-        /// The current value, which will be <c>null</c> if not set by passing a values dictionary to the deserializer.
+        /// If <c>true</c>, user interfaces should redact the parameter value when displaying.
         /// </value>
-        object? CurrentValue { get; }
+        bool NoEcho { get; set; }
+
+        /// <summary>
+        /// Gets or sets the data type for the parameter.
+        /// </summary>
+        /// <value>
+        /// The AWS Parameter type.
+        /// </value>
+        string Type { get; set; }
 
         /// <summary>
         /// Gets the CLR type for the parameter given the AWS type specified for it in the template.
