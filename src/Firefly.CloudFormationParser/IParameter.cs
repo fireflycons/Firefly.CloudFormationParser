@@ -21,20 +21,20 @@
         Regex? AllowedPattern { get; }
 
         /// <summary>
-        /// Gets or sets an array containing the list of values allowed for the parameter.
+        /// Gets an array containing the list of values allowed for the parameter.
         /// </summary>
         /// <value>
         /// The allowed values, which will be <c>null</c> if not defined in the template.
         /// </value>
-        List<string>? AllowedValues { get; set; }
+        List<string>? AllowedValues { get; }
 
         /// <summary>
-        /// Gets or sets a string that explains a constraint when the constraint is violated..
+        /// Gets a string that explains a constraint when the constraint is violated..
         /// </summary>
         /// <value>
         /// The constraint description, which will be <c>null</c> if not defined in the template.
         /// </value>
-        string? ConstraintDescription { get; set; }
+        string? ConstraintDescription { get; }
 
         /// <summary>
         /// <para>
@@ -50,21 +50,21 @@
         object? CurrentValue { get; }
 
         /// <summary>
-        /// Gets or sets a value of the appropriate type for the template to use if no value is specified when a stack is created.
+        /// Gets a value of the appropriate type for the template to use if no value is specified when a stack is created.
         /// If you define constraints for the parameter, you must specify a value that adheres to those constraints.
         /// </summary>
         /// <value>
         /// The default value, which will be <c>null</c> if not defined in the template.
         /// </value>
-        string? Default { get; set; }
+        string? Default { get; }
 
         /// <summary>
-        /// Gets or sets a string of up to 4000 characters that describes the parameter.
+        /// Gets a string of up to 4000 characters that describes the parameter.
         /// </summary>
         /// <value>
         /// Description of the parameter, which will be <c>null</c> if not defined in the template.
         /// </value>
-        string? Description { get; set; }
+        string? Description { get; }
 
         /// <summary>
         /// Gets a value indicating whether this parameter has a maximum length.
@@ -99,52 +99,61 @@
         bool HasMinValue { get; }
 
         /// <summary>
-        /// Gets or sets an integer value that determines the largest number of characters you want to allow for String types.
+        /// Gets an integer value that determines the largest number of characters you want to allow for String types.
         /// </summary>
         /// <value>
         /// The maximum length, which will be <c>null</c> if not defined in the template.
         /// </value>
-        int? MaxLength { get; set; }
+        int? MaxLength { get; }
 
         /// <summary>
-        /// Gets or sets a numeric value that determines the largest numeric value you want to allow for Number types.
+        /// Gets a numeric value that determines the largest numeric value you want to allow for Number types.
         /// </summary>
         /// <value>
         /// The maximum value, which will be <c>null</c> if not defined in the template.
         /// </value>
-        double? MaxValue { get; set; }
+        double? MaxValue { get; }
 
         /// <summary>
-        /// Gets or sets an integer value that determines the smallest number of characters you want to allow for String types.
+        /// Gets an integer value that determines the smallest number of characters you want to allow for String types.
         /// </summary>
         /// <value>
         /// The minimum length.
         /// </value>
-        int? MinLength { get; set; }
+        int? MinLength { get; }
 
         /// <summary>
-        /// Gets or sets a numeric value that determines the smallest numeric value you want to allow for Number types.
+        /// Gets a numeric value that determines the smallest numeric value you want to allow for Number types.
         /// </summary>
         /// <value>
         /// The minimum value, which will be <c>null</c> if not defined in the template.
         /// </value>
-        double? MinValue { get; set; }
+        double? MinValue { get; }
 
         /// <summary>
-        /// Gets or sets a value indicating whether to mask the parameter value to prevent it from being displayed in the console, command line tools, or API.
+        /// Gets a value indicating whether to mask the parameter value to prevent it from being displayed in the console, command line tools, or API.
         /// </summary>
         /// <value>
         /// If <c>true</c>, user interfaces should redact the parameter value when displaying.
         /// </value>
-        bool NoEcho { get; set; }
+        bool NoEcho { get; }
 
         /// <summary>
-        /// Gets or sets the data type for the parameter.
+        /// Gets the data type for the parameter.
         /// </summary>
         /// <value>
         /// The AWS Parameter type.
         /// </value>
-        string Type { get; set; }
+        string Type { get; }
+
+        /// <summary>
+        /// Gets a value indicating whether this parameter is populated from SSM Parameter Store
+        /// </summary>
+        /// <value>
+        /// <c>true</c> if this is an SSM-populated parameter; else <c>false</c>.
+        /// </value>
+        bool IsSsmParameter { get; }
+
 
         /// <summary>
         /// Gets the CLR type for the parameter given the AWS type specified for it in the template.

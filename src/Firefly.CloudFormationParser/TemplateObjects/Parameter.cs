@@ -113,6 +113,10 @@
         [YamlIgnore]
         public bool HasMaxValue => this.MaxValue != null;
 
+        /// <inheritdoc cref="IParameter.IsSsmParameter"/>
+        [YamlIgnore]
+        public bool IsSsmParameter => this.Type.StartsWith("AWS::SSM::Parameter");
+
         /// <inheritdoc cref="IParameter.GetClrType"/>>
         public Type GetClrType()
         {
