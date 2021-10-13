@@ -12,6 +12,8 @@
     /// </summary>
     public class Resource : IConditionalTemplateObject, IResource
     {
+        private object? transform;
+
         /// <inheritdoc cref="IResource.Condition"/>
         [YamlMember(Order = 0)]
         public string? Condition { get; set; }
@@ -71,6 +73,36 @@
         /// <inheritdoc cref="IResource.Version"/>
         [YamlMember(Order = 8)]
         public string? Version { get; set; }
+
+        /// <summary>
+        /// Gets or sets the function transform.
+        /// </summary>
+        /// <value>
+        /// The function transform.
+        /// </value>
+        [YamlMember(Order = 11, Alias = "Fn::Transform", DefaultValuesHandling = DefaultValuesHandling.OmitNull)]
+        public object? FnTransform
+        {
+            get => this.transform;
+
+            set => this.transform = value;
+        }
+
+        /// <summary>
+        /// Gets or sets the transform.
+        /// </summary>
+        /// <value>
+        /// The transform.
+        /// </value>
+        [YamlMember(Order = 12)]
+        public object? Transform
+        {
+            get => null;
+
+            set => this.transform = value;
+        }
+
+
 
         /// <summary>
         /// Converts to string.
