@@ -21,8 +21,6 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Firefly.CloudFormationParse
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Firefly.CloudFormationParser.Cfn", "src\Firefly.CloudFormationParser.Cfn\Firefly.CloudFormationParser.Cfn.csproj", "{8281809F-6C97-4B72-B6F2-8A4E90DC97FD}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Firefly.CloudFormationParser.Cfn.Tests.Unit", "tests\Firefly.CloudFormationParser.Cfn.Tests.Unit\Firefly.CloudFormationParser.Cfn.Tests.Unit.csproj", "{4A2BD8A8-0795-4FCC-A2E0-3A91633448B4}"
-EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Firefly.CloudFormationParser.Tests.Common", "tests\Firefly.CloudFormationParser.Tests.Common\Firefly.CloudFormationParser.Tests.Common.csproj", "{73F66BF2-8047-4E36-8D66-CC68DAA860DF}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Firefly.CloudFormationParser.S3", "src\Firefly.CloudFormationParser.S3\Firefly.CloudFormationParser.S3.csproj", "{C0B1D6BD-C207-4F22-8D8A-7F69E04C393D}"
@@ -33,8 +31,6 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = ".build", ".build", "{E094FF
 		build\DeployBuild.props = build\DeployBuild.props
 		build\PackagesGeneration.props = build\PackagesGeneration.props
 	EndProjectSection
-EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Firefly.CloudFormationParser.S3.Tests.Unit", "tests\Firefly.CloudFormationParser.S3.Tests.Unit\Firefly.CloudFormationParser.S3.Tests.Unit.csproj", "{9AA4C770-80A1-48E9-92D1-9A885F176354}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -58,10 +54,6 @@ Global
 		{8281809F-6C97-4B72-B6F2-8A4E90DC97FD}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{8281809F-6C97-4B72-B6F2-8A4E90DC97FD}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{8281809F-6C97-4B72-B6F2-8A4E90DC97FD}.Release|Any CPU.Build.0 = Release|Any CPU
-		{4A2BD8A8-0795-4FCC-A2E0-3A91633448B4}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{4A2BD8A8-0795-4FCC-A2E0-3A91633448B4}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{4A2BD8A8-0795-4FCC-A2E0-3A91633448B4}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{4A2BD8A8-0795-4FCC-A2E0-3A91633448B4}.Release|Any CPU.Build.0 = Release|Any CPU
 		{73F66BF2-8047-4E36-8D66-CC68DAA860DF}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{73F66BF2-8047-4E36-8D66-CC68DAA860DF}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{73F66BF2-8047-4E36-8D66-CC68DAA860DF}.Release|Any CPU.ActiveCfg = Release|Any CPU
@@ -70,10 +62,6 @@ Global
 		{C0B1D6BD-C207-4F22-8D8A-7F69E04C393D}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{C0B1D6BD-C207-4F22-8D8A-7F69E04C393D}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{C0B1D6BD-C207-4F22-8D8A-7F69E04C393D}.Release|Any CPU.Build.0 = Release|Any CPU
-		{9AA4C770-80A1-48E9-92D1-9A885F176354}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{9AA4C770-80A1-48E9-92D1-9A885F176354}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{9AA4C770-80A1-48E9-92D1-9A885F176354}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{9AA4C770-80A1-48E9-92D1-9A885F176354}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -83,10 +71,8 @@ Global
 		{ACD46257-BB5E-4E88-8591-0E3FF829F41F} = {BAE3733B-C5BE-420A-AD35-346171693391}
 		{3E9770FB-CD31-4B1C-BFB6-9294EC822525} = {BAE3733B-C5BE-420A-AD35-346171693391}
 		{8281809F-6C97-4B72-B6F2-8A4E90DC97FD} = {C9E81580-FB0B-49F9-9F4D-5BA5C8CFC304}
-		{4A2BD8A8-0795-4FCC-A2E0-3A91633448B4} = {BAE3733B-C5BE-420A-AD35-346171693391}
 		{73F66BF2-8047-4E36-8D66-CC68DAA860DF} = {BAE3733B-C5BE-420A-AD35-346171693391}
 		{C0B1D6BD-C207-4F22-8D8A-7F69E04C393D} = {C9E81580-FB0B-49F9-9F4D-5BA5C8CFC304}
-		{9AA4C770-80A1-48E9-92D1-9A885F176354} = {BAE3733B-C5BE-420A-AD35-346171693391}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {40D23F0C-1F4C-472A-BE45-33E34FE0F112}

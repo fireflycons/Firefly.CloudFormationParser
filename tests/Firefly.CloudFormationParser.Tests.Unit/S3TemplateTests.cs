@@ -1,4 +1,4 @@
-namespace Firefly.CloudFormationParser.S3.Tests.Unit
+namespace Firefly.CloudFormationParser.Tests.Unit
 {
     using System;
     using System.IO;
@@ -10,6 +10,7 @@ namespace Firefly.CloudFormationParser.S3.Tests.Unit
     using Amazon.S3;
     using Amazon.S3.Model;
 
+    using Firefly.CloudFormationParser.Serialization.Settings;
     using Firefly.CloudFormationParser.TemplateObjects;
     using Firefly.EmbeddedResourceLoader;
 

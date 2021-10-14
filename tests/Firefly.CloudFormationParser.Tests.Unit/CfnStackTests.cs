@@ -1,4 +1,4 @@
-namespace Firefly.CloudFormationParser.Cfn.Tests.Unit
+namespace Firefly.CloudFormationParser.Tests.Unit
 {
     using System.Collections.Generic;
     using System.Linq;
@@ -6,6 +6,7 @@ namespace Firefly.CloudFormationParser.Cfn.Tests.Unit
     using Amazon.CloudFormation;
     using Amazon.CloudFormation.Model;
 
+    using Firefly.CloudFormationParser.Serialization.Settings;
     using Firefly.CloudFormationParser.TemplateObjects;
     using Firefly.EmbeddedResourceLoader;
 

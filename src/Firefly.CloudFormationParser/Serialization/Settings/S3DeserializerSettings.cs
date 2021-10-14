@@ -1,4 +1,4 @@
-﻿namespace Firefly.CloudFormationParser.S3
+﻿namespace Firefly.CloudFormationParser.Serialization.Settings
 {
     using System;
     using System.Collections.Generic;
@@ -9,16 +9,11 @@
     using Amazon.S3.Model;
     using Amazon.S3.Util;
 
-    using Firefly.CloudFormationParser.Serialization.Settings;
-
     /// <summary>
     /// <para>
     /// Deserializer settings for reading a stack template directly from a location in an S3 bucket.
     /// </para>
     /// </summary>
-    /// <remarks>
-    /// To use this type, include package <c>Firefly.CloudFormationParser.S3</c> in your project.
-    /// </remarks>
     /// <example>
     /// How to deserialize a template given a bucket name and key
     /// <code>
