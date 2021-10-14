@@ -3,7 +3,5 @@
   <PropertyGroup>
     <!-- Package generation control -->
     <Generate_CloudFormationParser>false</Generate_CloudFormationParser>
-    <Generate_CloudFormationParserCfn>false</Generate_CloudFormationParserCfn>
-    <Generate_CloudFormationParserS3>false</Generate_CloudFormationParserS3>
   </PropertyGroup>
 </Project>
