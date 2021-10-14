@@ -4,4 +4,6 @@
   href: gory-details.md
 - name: Dependency Graph
   href: dependencies.md
+- name: Accessing Resource Properties
+  href: resource-props.md
 
