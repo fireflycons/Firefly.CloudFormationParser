@@ -26,6 +26,8 @@ skip_commits:
 
 environment:
   DocFXVersion: 2.58
+  NUGET_API_KEY:
+    secure: zq0+IBIITvBHIsVd7MmRQl09X2q4erMzK7LBi2UTpjNFgJeY/R+Krm4dZWAcb4E1
   GITHUB_ACCESS_TOKEN:
     secure: 53MNc4RNkaB8Cj54MNxuyLf9syy+i54ITECxm7HhmbJZfIJvzIss6WbiHZ4mCXAW
   GITHUB_EMAIL:
@@ -55,10 +57,6 @@ matrix:
   fast_finish: true
 
 # Build
-#before_build:
-#  # NuGet restore
-#  - dotnet restore
-
 build:
   verbosity: minimal
 
@@ -66,7 +64,6 @@ build_script:
   - dotnet build
 
 test_script:
-  # - ps: $blockRdp = $true ; iex ((new-object net.webclient).DownloadString('https://raw.githubusercontent.com/appveyor/ci/master/scripts/enable-rdp.ps1'))
   - ps: ./build/run-tests.ps1
 
 ## Documentation
@@ -88,6 +85,13 @@ deploy:
     on:
       configuration: Release
       APPVEYOR_REPO_TAG: true
+  # NuGet
+  - provider: NuGet
+    api_key:
+      secure: zq0+IBIITvBHIsVd7MmRQl09X2q4erMzK7LBi2UTpjNFgJeY/R+Krm4dZWAcb4E1
+    on:
+      configuration: Release
+      APPVEYOR_REPO_TAG: true
 ## GitHub packages
 #  - provider: NuGet
 #    server: TODO
@@ -96,13 +100,6 @@ deploy:
 #      secure: TODO
 #    skip_symbols: true
 #    artifact: NuGet
-#    on:
-#      configuration: Release
-#      APPVEYOR_REPO_TAG: true
-## NuGet
-#  - provider: NuGet
-#    api_key:
-#      secure: TODO
 #    on:
 #      configuration: Release
 #      APPVEYOR_REPO_TAG: true

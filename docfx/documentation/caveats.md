@@ -10,6 +10,12 @@ When [ITemplate.IsSAMTemplate](xref:Firefly.CloudFormationParser.ITemplate.IsSAM
 
 ## Other Macro Types
 
+### Fn::Transform - AWS::Include
+
+Currently not supported, but will be soon.
+
+### Third Party (Custom) Macros
+
 The library will likely never support custom macro expansions as these rely on third party code that won't be directly accessible to this library, and will always throw exceptions on templates where additional attributes for the macro are present at the resource level (i.e. sibling attribute to Type, Properties). Again, better to retrieve a processed template from CloudFormation.
 
 

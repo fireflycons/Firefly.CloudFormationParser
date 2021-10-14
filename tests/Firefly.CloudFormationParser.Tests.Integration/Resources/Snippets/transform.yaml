@@ -1,0 +1,6 @@
+Resources:
+  Bucket:
+    Fn::Transform:
+      Name: AWS::Include
+      Parameters:
+        Location: s3://MyAmazonS3BucketName/MyFileName.yaml

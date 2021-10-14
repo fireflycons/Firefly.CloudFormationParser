@@ -1,6 +1,5 @@
-﻿namespace Firefly.CloudFormationParser.Cfn
+﻿namespace Firefly.CloudFormationParser.Serialization.Settings
 {
-    using System;
     using System.Collections.Generic;
     using System.IO;
     using System.Linq;
@@ -8,8 +7,6 @@
 
     using Amazon.CloudFormation;
     using Amazon.CloudFormation.Model;
-
-    using Firefly.CloudFormationParser.Serialization.Settings;
 
     /// <summary>
     /// <para>
@@ -21,9 +18,6 @@
     /// will receive undefined values.
     /// </para>
     /// </summary>
-    /// <remarks>
-    /// To use this type, include package <c>Firefly.CloudFormationParser.Cfn</c> in your project.
-    /// </remarks>
     /// <example>
     /// How to deserialize a template given a stack name or ARN
     /// <code>

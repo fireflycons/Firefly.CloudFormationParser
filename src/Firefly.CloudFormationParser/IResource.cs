@@ -1,5 +1,6 @@
 ﻿namespace Firefly.CloudFormationParser
 {
+    using System;
     using System.Collections.Generic;
 
     using Firefly.CloudFormationParser.TemplateObjects;
@@ -139,5 +140,29 @@
         /// A list of explicit dependencies.
         /// </value>
         IEnumerable<string> ExplicitDependencies { get; }
+
+        /// <summary>
+        /// Gets a resource property value.
+        /// </summary>
+        /// <param name="propertyPath">The property path.</param>
+        /// <returns>The value of the property; else <c>null</c> if the property path was not found.</returns>
+        object? GetResourcePropertyValue(string propertyPath);
+
+
+        /// <summary>
+        /// <para>
+        /// Updates a property of this resource.
+        /// </para>
+        /// <para>
+        /// You would want to do this if you were implementing the functionality of <c>aws cloudformation package</c>
+        /// to rewrite local file paths to S3 object locations.
+        /// </para>
+        /// </summary>
+        /// <param name="propertyPath">Path to the property you want to set within this resource's <c>Properties</c> section,
+        /// e.g. for a <c>AWS::Glue::Job</c> the path would be <c>Command.ScriptLocation</c>.
+        /// </param>
+        /// <param name="newValue">The new value.</param>
+        /// <exception cref="FormatException">Resource format is unknown (not JSON or YAML)</exception>
+        void UpdateResourceProperty(string propertyPath, object newValue);
     }
 }

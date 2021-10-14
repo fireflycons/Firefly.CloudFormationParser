@@ -15,6 +15,7 @@
     <None Remove="Resources\Snippets\template1.json" />
     <None Remove="Resources\Snippets\template1.yaml" />
     <None Remove="Resources\Snippets\sam-dependencies.yaml" />
+    <None Remove="Resources\Snippets\transform.yaml" />
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="Resources\Snippets\base64-tests.yaml" />
@@ -440,6 +441,7 @@
     <EmbeddedResource Include="Resources\FullTemplates\VPC_With_Managed_NAT_And_Private_Subnet.json" />
     <EmbeddedResource Include="Resources\FullTemplates\web-app_template.json" />
     <EmbeddedResource Include="Resources\FullTemplates\WordPress_Single_Instance.json" />
+    <EmbeddedResource Include="Resources\Snippets\transform.yaml" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Firefly.CloudFormationParser.Tests.Common\Firefly.CloudFormationParser.Tests.Common.csproj" />
