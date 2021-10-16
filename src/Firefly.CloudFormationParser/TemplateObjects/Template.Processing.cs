@@ -3,6 +3,7 @@
     using System;
     using System.Collections;
     using System.Collections.Generic;
+    using System.Dynamic;
     using System.Linq;
     using System.Text;
     using System.Threading.Tasks;
@@ -178,9 +179,16 @@
         /// <returns>Reference to the template, for method chaining.</returns>
         internal Template PostProcess(bool excludeConditionalResources, IDictionary<string, object>? parameterValues)
         {
+            // Name these objects from their parent keys in the template schema.
             FixNames(this.ParsedParameters);
             FixNames(this.ParsedResources);
             FixNames(this.ParsedOutputs);
+
+            // Point resources to the template, as resources need this for intrinsic evaluations
+            foreach (var resource in this.ParsedResources.Select(kvp => kvp.Value))
+            {
+                resource.Template = this;
+            }
 
             this.ProcessConditions();
 

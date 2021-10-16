@@ -3,82 +3,89 @@
     using System.Collections;
     using System.Collections.Generic;
 
+    using Firefly.CloudFormationParser.Intrinsics;
+    using Firefly.CloudFormationParser.Intrinsics.Functions;
     using Firefly.CloudFormationParser.TemplateObjects;
 
     using FluentAssertions;
+
+    using Moq;
 
     using Xunit;
 
     public class ResourcePropertyManuipulationTests
     {
+        private const string Param1Name = "Param1";
+
+        private const string Param1Value = "param-value-1";
+
         [Fact]
         public void ShouldReturnDictResourcePropertyValue()
         {
-            IResource resource = new Resource
-            {
-                Properties = new Dictionary<string, object>
-                                                          {
-                                                              {
-                                                                  "Prop1",
-                                                                  new Dictionary<object, object>
-                                                                      {
-                                                                          { "Prop2", "a-value" }
-                                                                      }
-                                                              }
-                                                          }
-            };
-
+            var resource = SetupDictionaryResource();
             resource.GetResourcePropertyValue("Prop1.Prop2").Should().Be("a-value");
-        }
-
-        [Fact]
-        public void ShouldSetDictResourcePropertyValue()
-        {
-            IResource resource = new Resource
-            {
-                Properties = new Dictionary<string, object>
-                                                          {
-                                                              {
-                                                                  "Prop1",
-                                                                  new Dictionary<object, object>
-                                                                      {
-                                                                          { "Prop2", "a-value" }
-                                                                      }
-                                                              }
-                                                          }
-            };
-
-            resource.UpdateResourceProperty("Prop1.Prop2", new ObjectValue());
-
-            resource.GetResourcePropertyValue("Prop1.Prop2").Should().BeAssignableTo<IDictionary>("the object should be converted to a dictionary within the resource");
         }
 
         [Fact]
         public void ShouldReturnListResourcePropertyValue()
         {
-            IResource resource = new Resource
-                                     {
-                                         Properties = new Dictionary<string, object>
-                                                          {
-                                                              {
-                                                                  "Prop1",
-                                                                  new Dictionary<object, object>
-                                                                      {
-                                                                          {
-                                                                              "Prop2",
-                                                                              new List<object> { "a-value", "b-value" }
-                                                                          }
-                                                                      }
-                                                              }
-                                                          }
-                                     };
-
+            var resource = SetupListResource();
             resource.GetResourcePropertyValue("Prop1.Prop2.1").Should().Be("b-value");
+        }
+
+        [Fact]
+        public void ShouldSetDictResourcePropertyValue()
+        {
+            var resource = SetupDictionaryResource();
+            resource.UpdateResourceProperty("Prop1.Prop2", new { MyProp = "MyValue " });
+            resource.GetResourcePropertyValue("Prop1.Prop2").Should().BeAssignableTo<IDictionary>(
+                "the object should be converted to a dictionary within the resource");
         }
 
         [Fact]
         public void ShouldSetListResourcePropertyValue()
         {
+            var resource = SetupListResource();
+            resource.UpdateResourceProperty("Prop1.Prop2.1", new { MyProp = "MyValue " });
+            resource.GetResourcePropertyValue("Prop1.Prop2.1").Should().BeAssignableTo<IDictionary>(
+                "the object should be converted to a dictionary within the resource");
+        }
+
+        [Fact]
+        public void ShouldReturnIntrinsicResourceValue()
+        {
+            var @ref = new RefIntrinsic();
+            @ref.SetValue(new object[] { Param1Name });
+            
+            var template = SetupMockTemplate();
+            var resource = SetupIntrinsicResource(template, @ref);
+
+            resource.GetResourcePropertyValue("Prop1").Should().Be(
+                Param1Value,
+                "the ref intrinsic should have been evaluated");
+        }
+
+
+        private static IResource SetupDictionaryResource()
+        {
+            IResource resource = new Resource
+                                     {
+                                         Properties = new Dictionary<string, object>
+                                                          {
+                                                              {
+                                                                  "Prop1",
+                                                                  new Dictionary<object, object>
+                                                                      {
+                                                                          { "Prop2", "a-value" }
+                                                                      }
+                                                              }
+                                                          }
+                                     };
+            return resource;
+        }
+
+        private static IResource SetupListResource()
+        {
             IResource resource = new Resource
                                      {
                                          Properties = new Dictionary<string, object>
@@ -95,15 +102,36 @@
                                                               }
                                                           }
                                      };
-
-            resource.UpdateResourceProperty("Prop1.Prop2.1", new ObjectValue());
-
-            resource.GetResourcePropertyValue("Prop1.Prop2.1").Should().BeAssignableTo<IDictionary>("the object should be converted to a dictionary within the resource");
+            return resource;
         }
 
-        private class ObjectValue
+        private static IResource SetupIntrinsicResource(ITemplate template, IIntrinsic intrinsic)
         {
-            public string MyValue { get; set; } = "MyValue";
+            IResource resource = new Resource
+                                     {
+                                         Properties = new Dictionary<string, object>
+                                                          {
+                                                              {
+                                                                  "Prop1",
+                                                                  intrinsic
+                                                              }
+                                                          },
+                                         Template = template
+                                     };
+            return resource;
+        }
+
+        private static ITemplate SetupMockTemplate()
+        {
+            var template = new Mock<ITemplate>();
+
+            template.Setup(
+                t => t.Parameters).Returns(new List<Parameter>
+                                        {
+                                            new Parameter { Name = Param1Name, Type = "String", Default = Param1Value }
+                                        });
+
+            return template.Object;
         }
     }
 }

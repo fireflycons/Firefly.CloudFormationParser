@@ -6,6 +6,7 @@
     using System.Collections.Generic;
     using System.Linq;
 
+    using Firefly.CloudFormationParser.Intrinsics;
     using Firefly.CloudFormationParser.Utils;
 
     using YamlDotNet.Serialization;
@@ -105,11 +106,31 @@
         [YamlMember(Order = 8)]
         public string? Version { get; set; }
 
+        [YamlIgnore]
+        internal ITemplate? Template { get; set; }
+
         /// <inheritdoc cref="IResource.GetResourcePropertyValue"/>
         public object? GetResourcePropertyValue(string propertyPath)
         {
             var prop = this.GetPropertyAtPath(propertyPath);
-            return prop?.GetValue();
+            var propValue = prop?.GetValue();
+
+            if (!(propValue is IIntrinsic intrinsic))
+            {
+                // Value is scalar, list or dictionary
+                return propValue;
+            }
+
+            if (this.Template == null)
+            {
+                // Should only get this for incorrectly set up tests.
+                throw new InvalidOperationException(
+                    $"Resource {this.Name}: Cannot evaluate intrinsic when template property is null");
+            }
+
+            // Evaluate the intrinsic and return its result
+            return intrinsic.Evaluate(this.Template);
+
         }
 
         /// <summary>
