@@ -32,11 +32,9 @@ To get it working you need to:
 
 ### Packages
 
-There will shortly be three NuGet pacakges.
+There will soon be...
 
 * `Firefly.CloudFormationParser` - Core functionality with support for reading templates from stream, string or file.
-* `Firefly.CloudFormationParser.Cfn` - Adds support for reading from a deployed CloudFormation Stack
-* `Firefly.CloudFormationParser.S3` - Adds support for reading from an S3 bucket.
 
 ## Next Steps
 

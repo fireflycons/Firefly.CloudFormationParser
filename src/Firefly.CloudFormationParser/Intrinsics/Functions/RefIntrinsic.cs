@@ -50,7 +50,9 @@
             {
                 // Pseudo parameter reference
                 var t = (Template)template;
-                t.AddPseudoParameter(PseudoParameter.Create(this.Reference));
+                var pp = PseudoParameter.Create(this.Reference);
+                pp.SetCurrentValue(template.UserParameterValues);
+                t.AddPseudoParameter(pp);
             }
 
             return new List<string> { this.Reference };

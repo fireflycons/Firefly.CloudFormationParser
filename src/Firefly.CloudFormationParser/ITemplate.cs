@@ -3,6 +3,7 @@
     using System.Collections.Generic;
 
     using Firefly.CloudFormationParser.GraphObjects;
+    using Firefly.CloudFormationParser.Serialization.Settings;
     using Firefly.CloudFormationParser.TemplateObjects;
 
     using QuikGraph;
@@ -186,5 +187,13 @@
         ///   <c>true</c> if this instance is a SAM template; otherwise, <c>false</c>.
         /// </value>
         bool IsSAMTemplate { get; }
+
+        /// <summary>
+        /// Gets any values for parameters set up from <see cref="IDeserializerSettings"/>
+        /// </summary>
+        /// <value>
+        /// The parameter values.
+        /// </value>
+        IDictionary<string, object> UserParameterValues { get; }
     }
 }

@@ -16,7 +16,10 @@
     {
         private bool configuredExclusions;
 
-        private Dictionary<string, object> configuredParameterValues = new Dictionary<string, object>();
+        private Dictionary<string, object> configuredParameterValues = new Dictionary<string, object>
+                                                                           {
+                                                                               { "AWS::Region", "eu-west-1" }
+                                                                           };
 
         private IAmazonS3? configuredS3Client = null;
 

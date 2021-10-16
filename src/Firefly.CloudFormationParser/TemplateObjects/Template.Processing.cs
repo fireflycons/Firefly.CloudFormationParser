@@ -60,6 +60,10 @@
 
         /// <inheritdoc />
         [YamlIgnore]
+        public IDictionary<string, object> UserParameterValues { get; private set; } = new Dictionary<string, object>();
+
+        /// <inheritdoc />
+        [YamlIgnore]
         public bool IsSAMTemplate
         {
             get
@@ -177,8 +181,10 @@
         /// <param name="excludeConditionalResources">If <c>true</c>, omit resources excluded by evaluated conditions.</param>
         /// <param name="parameterValues">Optional dictionary of values to assign to parameters</param>
         /// <returns>Reference to the template, for method chaining.</returns>
-        internal Template PostProcess(bool excludeConditionalResources, IDictionary<string, object>? parameterValues)
+        internal Template PostProcess(bool excludeConditionalResources, IDictionary<string, object> parameterValues)
         {
+            this.UserParameterValues = parameterValues;
+
             // Name these objects from their parent keys in the template schema.
             FixNames(this.ParsedParameters);
             FixNames(this.ParsedResources);
@@ -240,13 +246,10 @@
                 throw new FormatException(sb.ToString());
             }
 
-            if (parameterValues != null)
+            // Assign parameters
+            foreach (var param in this.Parameters)
             {
-                // Assign parameters
-                foreach (var param in this.Parameters)
-                {
-                    param.SetCurrentValue(parameterValues);
-                }
+                param.SetCurrentValue(parameterValues);
             }
 
             this.ProcessResources();

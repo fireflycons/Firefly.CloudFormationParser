@@ -94,7 +94,9 @@
                             {
                                 // Pseudo parameter reference
                                 var t = (Template)template;
-                                t.AddPseudoParameter(PseudoParameter.Create(s));
+                                var pp = PseudoParameter.Create(s);
+                                pp.SetCurrentValue(template.UserParameterValues);
+                                t.AddPseudoParameter(pp);
                             }
 
                             break;
@@ -112,7 +114,9 @@
                     {
                         // Pseudo parameter reference
                         var t = (Template)template;
-                        t.AddPseudoParameter(PseudoParameter.Create(param));
+                        var pp = PseudoParameter.Create(param);
+                        pp.SetCurrentValue(template.UserParameterValues);
+                        t.AddPseudoParameter(pp);
                     }
                     else
                     {

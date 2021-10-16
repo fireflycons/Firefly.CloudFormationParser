@@ -53,13 +53,11 @@
                               $"{ExpectedRegion}f",
                           };
 
-            GetAZsIntrinsic.GetAZsFunction = s => azs;
-
             var template = await Template.Deserialize(new DeserializerSettingsBuilder().WithTemplateString(this.templateContent).Build());
             var intrinsic = (GetAZsIntrinsic)template.Resources.First(r => r.Name == ResourceName).Properties
                 .First(p => p.Key == "Value").Value;
 
-            intrinsic.Evaluate(template).Should().BeSameAs(azs);
+            intrinsic.Evaluate(template).Should().BeEquivalentTo(azs);
         }
     }
 }
