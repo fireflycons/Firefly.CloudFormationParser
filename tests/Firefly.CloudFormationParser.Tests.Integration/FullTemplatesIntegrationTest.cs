@@ -452,11 +452,11 @@ namespace Firefly.CloudFormationParser.Tests.Integration
             // If a template is deserialized, re-serialized then deserialized again
             // the dependency graph for each deserialization should match.
             var template = await Template.Deserialize(
-                new FileDeserializerSettings(
-                    Path.Combine(this.fixture.TempDirectory, $"{templateFile}.{format}"))
-                    {
-                        ExcludeConditionalResources = excludeConditionalResources
-                    });
+                               new DeserializerSettingsBuilder()
+                                   .WithTemplateFile(
+                                       Path.Combine(this.fixture.TempDirectory, $"{templateFile}.{format}"))
+                                   .WithExcludeConditionalResources(excludeConditionalResources)
+                                   .Build());
 
             var initialDotGraph = TestHelpers.GenerateDotGraph(template);
             var yaml = Template.Serialize(template);
@@ -465,7 +465,7 @@ namespace Firefly.CloudFormationParser.Tests.Integration
 
             try
             {
-                finalTemplate = await Template.Deserialize(new StringDeserializerSettings(yaml));
+                finalTemplate = await Template.Deserialize(new DeserializerSettingsBuilder().WithTemplateString(yaml).Build());
             }
             catch (YamlException e)
             {
@@ -691,8 +691,8 @@ namespace Firefly.CloudFormationParser.Tests.Integration
         {
             // Test for an issue when deserializing resources, in that a key of "Condition" within the resource
             // properties is incorrectly converted to a Condition intrinsic
-            var template = await Template.Deserialize(new FileDeserializerSettings(
-                Path.Combine(this.fixture.TempDirectory, $"{templateFile}.{format}")));
+            var template = await Template.Deserialize(new DeserializerSettingsBuilder().WithTemplateFile(
+                Path.Combine(this.fixture.TempDirectory, $"{templateFile}.{format}")).Build());
 
             // Assert that conditions on policy statements were not deserialized as intrinsic
             foreach (var resource in template.Resources)
@@ -917,8 +917,8 @@ namespace Firefly.CloudFormationParser.Tests.Integration
             // as one of the branches of !If are correctly serialized.
             // When they aren't, then we see type names like System.Collections.Generic.Dictionary since the dict
             // was serialized as a scalar and ToString was implicitly called.
-            var template = await Template.Deserialize(new FileDeserializerSettings(
-                               Path.Combine(this.fixture.TempDirectory, $"{templateFile}.{format}")));
+            var template = await Template.Deserialize(new DeserializerSettingsBuilder().WithTemplateFile(
+                               Path.Combine(this.fixture.TempDirectory, $"{templateFile}.{format}")).Build());
 
             var yaml = Template.Serialize(template);
 

@@ -1,6 +1,5 @@
 ﻿namespace Firefly.CloudFormationParser.Serialization.Settings
 {
-    using System.Collections.Generic;
     using System.IO;
     using System.Linq;
     using System.Threading.Tasks;
@@ -13,7 +12,7 @@
     /// Deserializer settings for reading a stack template directly from the CloudFormation API, i.e. the template of a deployed CloudFormation Stack.
     /// </para>
     /// <para>
-    /// This class reads a template from an existing CloudFormation stack, and populates <see cref="CfnStackDeserializerSettings.ParameterValues"/>
+    /// This class reads a template from an existing CloudFormation stack, and populates <see cref="IDeserializerSettings.ParameterValues"/>
     /// with the current values of the stack's parameters as set by the most recent update. Parameters that were declared with <c>NoEcho</c>
     /// will receive undefined values.
     /// </para>
@@ -48,7 +47,7 @@
     /// </code>
     /// </example>
     /// <seealso cref="IDeserializerSettings" />
-    public class CfnStackDeserializerSettings : IDeserializerSettings
+    internal class CfnStackDeserializerSettings : AbstractDeserializerSettings
     {
         /// <summary>
         /// The client
@@ -77,42 +76,42 @@
         }
 
         /// <inheritdoc />
-        public bool ExcludeConditionalResources { get; set; }
-
-        /// <summary>
-        /// <para>
-        /// Gets or sets an optional dictionary of values to assign to parameters.
-        /// </para>
-        /// <para>
-        /// If this is unset at the time <see cref="GetContentAsync"/> is called, it will be populated
-        /// with the current values of the parameters as defined by the deployed stack. Note that for
-        /// parameters that were declared <c>NoEcho</c>, the values of these parameters will be undefined.
-        /// </para>
-        /// </summary>
-        /// <value>
-        /// The parameter values.
-        /// </value>
-        public IDictionary<string, object>? ParameterValues { get; set; }
-
-        /// <inheritdoc />
-        public async Task<TextReader> GetContentAsync()
+        public override async Task<TextReader> GetContentAsync()
         {
-            if (this.ParameterValues == null)
-            {
-                var stackRespose =
-                    (await this.client.DescribeStacksAsync(new DescribeStacksRequest { StackName = this.stackId }))
-                    .Stacks.First();
+            var templateSummaryResponse =
+                await this.client.GetTemplateSummaryAsync(new GetTemplateSummaryRequest { StackName = this.stackId });
 
-                this.ParameterValues = stackRespose.Parameters.ToDictionary(
-                    p => p.ParameterKey,
-                    p => (object)p.ParameterValue);
+            var noEchoParameters = templateSummaryResponse.Parameters.Where(p => p.NoEcho).Select(p => p.ParameterKey)
+                .ToList();
+
+            var stackResponse =
+                (await this.client.DescribeStacksAsync(new DescribeStacksRequest { StackName = this.stackId })).Stacks
+                .First();
+
+            // Merge stack parameters with user ones.
+            // Overwrite user ones from stack, but omit any NoEcho ones from 
+            // stack as these will be undefined.
+            var mergeParameters = stackResponse.Parameters.Where(p => !noEchoParameters.Contains(p.ParameterKey))
+                .ToDictionary(p => p.ParameterKey, p => (object)p.ParameterValue);
+
+            foreach (var pk in noEchoParameters)
+            {
+                if (this.ParameterValues.All(kv => kv.Key != pk))
+                {
+                    // Add fixed value for unreferenced NoEco params
+                    mergeParameters.Add(pk, "UNRESOLVED-NOECHO");
+                }
+            }
+
+            foreach (var kv in mergeParameters)
+            {
+                this.ParameterValues[kv.Key] = kv.Value;
             }
 
             var templateResponse = await this.client.GetTemplateAsync(
                                        new GetTemplateRequest
                                            {
-                                               StackName = this.stackId,
-                                               TemplateStage = TemplateStage.Processed
+                                               StackName = this.stackId, TemplateStage = TemplateStage.Processed
                                            });
 
             this.reader = new StringReader(templateResponse.TemplateBody);
@@ -123,7 +122,7 @@
         /// <summary>
         /// Performs application-defined tasks associated with freeing, releasing, or resetting unmanaged resources.
         /// </summary>
-        public void Dispose()
+        public override void Dispose()
         {
             this.reader?.Dispose();
         }

@@ -24,7 +24,7 @@
             const string numericKey = "0123456789012";
             string yaml;
 
-            var template = await Template.Deserialize(new FileDeserializerSettings(this.templateContent));
+            var template = await Template.Deserialize(new DeserializerSettingsBuilder().WithTemplateString(this.templateContent).Build());
 
             try
             {

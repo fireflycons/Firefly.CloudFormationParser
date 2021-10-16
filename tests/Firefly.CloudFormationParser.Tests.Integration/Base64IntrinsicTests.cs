@@ -25,7 +25,7 @@
         [InlineData("Param1", "Resource4")]
         public async void ParameterShouldBeReferencedByResource(string parameterName, string resourceName)
         {
-            var template = await Template.Deserialize(new StringDeserializerSettings(this.templateContent));
+            var template = await Template.Deserialize(new DeserializerSettingsBuilder().WithTemplateString(this.templateContent).Build());
             var dotGraph = TestHelpers.GenerateDotGraph(template);
             var parameterVertex = template.DependencyGraph.Vertices.First(v => v.Name == parameterName);
             var resourceVertex = template.DependencyGraph.Vertices.First(v => v.Name == resourceName);

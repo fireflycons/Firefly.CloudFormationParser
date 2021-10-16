@@ -29,7 +29,7 @@
         {
             const string PseudoParameterName = "AWS::Region";
 
-            var template = await Template.Deserialize(new StringDeserializerSettings(this.templateContent));
+            var template = await Template.Deserialize(new DeserializerSettingsBuilder().WithTemplateString(this.templateContent).Build());
             var initialDotGraph = TestHelpers.GenerateDotGraph(template);
             var parameterVertex = template.DependencyGraph.Vertices.First(v => v.Name == PseudoParameterName);
             var resourceVertex = template.DependencyGraph.Vertices.First(v => v.Name == resourceName);
@@ -55,7 +55,7 @@
 
             GetAZsIntrinsic.GetAZsFunction = s => azs;
 
-            var template = await Template.Deserialize(new StringDeserializerSettings(this.templateContent));
+            var template = await Template.Deserialize(new DeserializerSettingsBuilder().WithTemplateString(this.templateContent).Build());
             var intrinsic = (GetAZsIntrinsic)template.Resources.First(r => r.Name == ResourceName).Properties
                 .First(p => p.Key == "Value").Value;
 

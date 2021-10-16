@@ -18,7 +18,7 @@
     /// </code>
     /// </example>
     /// <seealso cref="Firefly.CloudFormationParser.Serialization.Settings.IDeserializerSettings" />
-    public class FileDeserializerSettings : StreamDeserializerSettings
+    internal class FileDeserializerSettings : StreamDeserializerSettings
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="FileDeserializerSettings"/> class.

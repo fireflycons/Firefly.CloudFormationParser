@@ -20,7 +20,7 @@
     /// </code>
     /// </example>
     /// <seealso cref="Firefly.CloudFormationParser.Serialization.Settings.IDeserializerSettings" />
-    public class StreamDeserializerSettings : IDeserializerSettings
+    internal class StreamDeserializerSettings : AbstractDeserializerSettings
     {
         /// <summary>
         /// The stream to read
@@ -41,23 +41,17 @@
             this.stream = stream;
         }
 
-        /// <inheritdoc />
-        public bool ExcludeConditionalResources { get; set; }
-
-        /// <inheritdoc />
-        public IDictionary<string, object>? ParameterValues { get; set; }
-
         /// <summary>
         /// Performs application-defined tasks associated with freeing, releasing, or resetting unmanaged resources.
         /// </summary>
-        public void Dispose()
+        public override void Dispose()
         {
             this.reader?.Dispose();
             this.stream.Dispose();
         }
 
         /// <inheritdoc />
-        public async Task<TextReader> GetContentAsync()
+        public override async Task<TextReader> GetContentAsync()
         {
             this.reader = new StreamReader(this.stream);
 

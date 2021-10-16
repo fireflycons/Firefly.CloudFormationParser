@@ -16,7 +16,7 @@
         [Fact]
         public async void DependencyOnImpliedSAMResourceShoudBeIgnored()
         {
-            var template = await Template.Deserialize(new StringDeserializerSettings(this.templateContent));
+            var template = await Template.Deserialize(new DeserializerSettingsBuilder().WithTemplateString(this.templateContent).Build());
         }
     }
 }

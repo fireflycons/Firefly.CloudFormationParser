@@ -19,7 +19,7 @@
     /// </code>
     /// </example>
     /// <seealso cref="Firefly.CloudFormationParser.Serialization.Settings.IDeserializerSettings" />
-    public class StringDeserializerSettings : StreamDeserializerSettings
+    internal class StringDeserializerSettings : StreamDeserializerSettings
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="StringDeserializerSettings"/> class.

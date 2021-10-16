@@ -1,7 +1,6 @@
 ﻿namespace Firefly.CloudFormationParser.Serialization.Settings
 {
     using System;
-    using System.Collections.Generic;
     using System.IO;
     using System.Threading.Tasks;
 
@@ -25,7 +24,7 @@
     /// </code>
     /// </example>
     /// <seealso cref="IDeserializerSettings" />
-    public class S3DeserializerSettings : IDeserializerSettings
+    internal class S3DeserializerSettings : AbstractDeserializerSettings
     {
         /// <summary>
         /// The bucket name
@@ -94,27 +93,32 @@
         }
 
         /// <inheritdoc />
-        public bool ExcludeConditionalResources { get; set; }
+        public override IAmazonS3? S3Client
+        {
+            get => this.client;
+
+            set
+            {
+                // ignore
+            }
+        }
+
+        /// <summary>
+        /// Performs application-defined tasks associated with freeing, releasing, or resetting unmanaged resources.
+        /// </summary>
+        public override void Dispose()
+        {
+            this.reader?.Dispose();
+        }
 
         /// <inheritdoc />
-        public IDictionary<string, object>? ParameterValues { get; set; }
-
-        /// <inheritdoc />
-        public async Task<TextReader> GetContentAsync()
+        public override async Task<TextReader> GetContentAsync()
         {
             var response =
                 await this.client.GetObjectAsync(new GetObjectRequest { BucketName = this.bucketName, Key = this.key });
 
             this.reader = new StreamReader(response.ResponseStream);
             return this.reader;
-        }
-
-        /// <summary>
-        /// Performs application-defined tasks associated with freeing, releasing, or resetting unmanaged resources.
-        /// </summary>
-        public void Dispose()
-        {
-            this.reader?.Dispose();
         }
     }
 }

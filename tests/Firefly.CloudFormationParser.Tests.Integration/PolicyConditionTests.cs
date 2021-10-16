@@ -27,7 +27,7 @@
         [Fact]
         public async void PolicyConditionShouldNotBeDeserializedAsIntrinsicWhenConditionsDeclaredFirst()
         {
-            var template = await Template.Deserialize(new StringDeserializerSettings(this.policyConditionPre));
+            var template = await Template.Deserialize(new DeserializerSettingsBuilder().WithTemplateString(this.policyConditionPre).Build());
             TestHelpers.ContainsObjectOfType(template.Resources.First().Properties, typeof(IIntrinsic)).Should()
                 .BeFalse(
                     "'Condition' within resource properties (e.g. policies) should not be deserialized as intrinsic");
@@ -40,7 +40,7 @@
         [Fact]
         public async void PolicyConditionShouldNotBeDeserializedAsIntrinsicWhenConditionsDeclaredLast()
         {
-            var template = await Template.Deserialize(new StringDeserializerSettings(this.policyConditionPost));
+            var template = await Template.Deserialize(new DeserializerSettingsBuilder().WithTemplateString(this.policyConditionPost).Build());
             TestHelpers.ContainsObjectOfType(template.Resources.First().Properties, typeof(IIntrinsic)).Should()
                 .BeFalse(
                     "'Condition' within resource properties (e.g. policies) should not be deserialized as intrinsic");

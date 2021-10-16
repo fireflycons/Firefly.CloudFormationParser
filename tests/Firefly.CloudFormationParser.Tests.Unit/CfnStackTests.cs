@@ -30,7 +30,8 @@ namespace Firefly.CloudFormationParser.Tests.Unit
         {
             var mockClient = this.CreateMockCloudFormationClient();
 
-            using var settings = new CfnStackDeserializerSettings(mockClient.Object, "my-stack");
+            using var settings = new DeserializerSettingsBuilder()
+                .WithCloudFormationStack(mockClient.Object, "my-stack").Build();
 
             var template = await Template.Deserialize(settings);
 
@@ -42,13 +43,33 @@ namespace Firefly.CloudFormationParser.Tests.Unit
         {
             var mockClient = this.CreateMockCloudFormationClient();
 
-            using var settings =
-                new CfnStackDeserializerSettings(mockClient.Object, "my-stack") { ExcludeConditionalResources = true };
+            using var settings = new DeserializerSettingsBuilder()
+                .WithCloudFormationStack(mockClient.Object, "my-stack")
+                .WithExcludeConditionalResources(true)
+                .Build();
 
             var template = await Template.Deserialize(settings);
 
             template.Resources.FirstOrDefault(r => r.Name == "R2").Should()
                 .BeNull("R2 should be excluded by condition");
+        }
+
+        [Fact]
+        public async void ShouldProvideUserValueForNoEchoParameter()
+        {
+            var mockClient = this.CreateMockCloudFormationClient();
+
+            using var settings = new DeserializerSettingsBuilder()
+                .WithCloudFormationStack(mockClient.Object, "my-stack")
+                .WithParameterValues(new Dictionary<string, object>
+                                         {
+                                             {"P3", "user-value"}
+                                         })
+                .Build();
+
+            await Template.Deserialize(settings);
+
+            settings.ParameterValues["P3"].Should().Be("user-value");
         }
 
         private Mock<IAmazonCloudFormation> CreateMockCloudFormationClient()
@@ -75,11 +96,42 @@ namespace Firefly.CloudFormationParser.Tests.Unit
                                                                       new Parameter
                                                                           {
                                                                               ParameterKey = "P2", ParameterValue = "0"
+                                                                          },
+                                                                      new Parameter
+                                                                          {
+                                                                              ParameterKey = "P3",
+                                                                              ParameterValue = string.Empty
                                                                           }
                                                                   }
                                              }
                                      }
                     });
+
+            mockClient.Setup(c => c.GetTemplateSummaryAsync(It.IsAny<GetTemplateSummaryRequest>(), default))
+                .ReturnsAsync(new GetTemplateSummaryResponse
+                                  {
+                                      Parameters = new List<ParameterDeclaration>
+                                                       {
+                                                           new ParameterDeclaration
+                                                               {
+                                                                   ParameterKey = "P1",
+                                                                   ParameterType = "String",
+                                                                   NoEcho = false
+                                                               },
+                                                           new ParameterDeclaration
+                                                               {
+                                                                   ParameterKey = "P2",
+                                                                   ParameterType = "Number",
+                                                                   NoEcho = false
+                                                               },
+                                                           new ParameterDeclaration
+                                                               {
+                                                                   ParameterKey = "P3",
+                                                                   ParameterType = "String",
+                                                                   NoEcho = true
+                                                               }
+                                                       }
+                                  });
 
             return mockClient;
         }
