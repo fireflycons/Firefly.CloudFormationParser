@@ -5,7 +5,6 @@
     using System.Linq;
 
     using Firefly.CloudFormationParser.Intrinsics.Abstractions;
-    using Firefly.CloudFormationParser.TemplateObjects;
 
     /// <summary>
     /// Represents the <see href="https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/intrinsic-function-reference-ref.html">Ref</see> intrinsic.
@@ -46,15 +45,6 @@
         /// <inheritdoc />
         public override IEnumerable<string> GetReferencedObjects(ITemplate template)
         {
-            if (this.Reference.StartsWith("AWS::"))
-            {
-                // Pseudo parameter reference
-                var t = (Template)template;
-                var pp = PseudoParameter.Create(this.Reference);
-                pp.SetCurrentValue(template.UserParameterValues);
-                t.AddPseudoParameter(pp);
-            }
-
             return new List<string> { this.Reference };
         }
 

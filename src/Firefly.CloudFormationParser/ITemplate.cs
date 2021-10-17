@@ -8,6 +8,8 @@
 
     using QuikGraph;
 
+    using YamlDotNet.Serialization;
+
     /// <summary>
     /// Interface describing a CloudFormation Template.
     /// </summary>
@@ -195,5 +197,13 @@
         /// The parameter values.
         /// </value>
         IDictionary<string, object> UserParameterValues { get; }
+
+        /// <summary>
+        /// Gets any pseudo parameters discovered during template deserialization.
+        /// </summary>
+        /// <value>
+        /// The pseudo parameters.
+        /// </value>
+        public List<PseudoParameter> PseudoParameters { get; }
     }
 }

@@ -3,11 +3,11 @@
     using System;
     using System.Collections;
     using System.Collections.Generic;
+    using System.Linq;
 
     using Firefly.CloudFormationParser.Intrinsics.Abstractions;
     using Firefly.CloudFormationParser.Intrinsics.Utils;
     using Firefly.CloudFormationParser.Serialization.Serializers;
-    using Firefly.CloudFormationParser.TemplateObjects;
     using Firefly.CloudFormationParser.Utils;
 
     using YamlDotNet.Core;
@@ -53,12 +53,16 @@
                     regionToGet = s;
                     break;
 
-                case string _:
+                case string _:  // will always be a ref to AWS::Region here
 
-                    var internalTemplate = (Template)template;
-                    var pp = PseudoParameter.Create("AWS::Region");
-                    pp.SetCurrentValue(template.UserParameterValues);
-                    internalTemplate.AddPseudoParameter(pp);
+                    var pp = template.PseudoParameters.FirstOrDefault(p => p.Name == "AWS::Region");
+
+                    if (pp == null)
+                    {
+                        throw new InvalidOperationException(
+                            "Pseudo parameter AWS::Region not found. Should have been declared by now");
+                    }
+
                     regionToGet = pp.CurrentValue!.ToString();
                     break;
 
@@ -82,6 +86,11 @@
             if (this.Region is AbstractIntrinsic intrinsic)
             {
                 return intrinsic.GetReferencedObjects(template);
+            }
+
+            if (this.Region is string s && (s == "AWS::Region" || string.IsNullOrEmpty(s)))
+            {
+                return new[] { "AWS::Region" };
             }
 
             return new List<string>();

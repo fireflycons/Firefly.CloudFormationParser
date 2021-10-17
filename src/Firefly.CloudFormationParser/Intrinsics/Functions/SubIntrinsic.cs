@@ -10,7 +10,6 @@
     using Firefly.CloudFormationParser.Intrinsics.Abstractions;
     using Firefly.CloudFormationParser.Intrinsics.Utils;
     using Firefly.CloudFormationParser.Serialization.Serializers;
-    using Firefly.CloudFormationParser.TemplateObjects;
 
     using YamlDotNet.Core;
     using YamlDotNet.Core.Events;
@@ -90,15 +89,7 @@
                     {
                         case string s:
 
-                            if (s.StartsWith("AWS::"))
-                            {
-                                // Pseudo parameter reference
-                                var t = (Template)template;
-                                var pp = PseudoParameter.Create(s);
-                                pp.SetCurrentValue(template.UserParameterValues);
-                                t.AddPseudoParameter(pp);
-                            }
-
+                            refs.Add(s);
                             break;
 
                         case AbstractIntrinsic tag:
@@ -109,19 +100,7 @@
                 }
                 else
                 {
-                    // External reference
-                    if (param.StartsWith("AWS::"))
-                    {
-                        // Pseudo parameter reference
-                        var t = (Template)template;
-                        var pp = PseudoParameter.Create(param);
-                        pp.SetCurrentValue(template.UserParameterValues);
-                        t.AddPseudoParameter(pp);
-                    }
-                    else
-                    {
-                        refs.Add(param);
-                    }
+                    refs.Add(param);
                 }
             }
 

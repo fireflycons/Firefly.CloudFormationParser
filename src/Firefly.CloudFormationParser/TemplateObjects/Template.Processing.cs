@@ -50,44 +50,6 @@
         /// </summary>
         private DeserializationContext currentContext = DeserializationContext.None;
 
-        /// <inheritdoc />
-        [YamlIgnore]
-        public BidirectionalGraph<IVertex, TaggedEdge<IVertex, EdgeDetail>> DependencyGraph { get; private set; } = new BidirectionalGraph<IVertex, TaggedEdge<IVertex, EdgeDetail>>();
-
-        /// <inheritdoc />
-        [YamlIgnore]
-        public Dictionary<string, bool> EvaluatedConditions { get; } = new Dictionary<string, bool>();
-
-        /// <inheritdoc />
-        [YamlIgnore]
-        public IDictionary<string, object> UserParameterValues { get; private set; } = new Dictionary<string, object>();
-
-        /// <inheritdoc />
-        [YamlIgnore]
-        public bool IsSAMTemplate
-        {
-            get
-            {
-                const string Serverless = "AWS::Serverless-";
-
-                switch (this.Transform)
-                {
-                    case null:
-
-                        return false;
-
-                    case string s when s.StartsWith(Serverless):
-                    case List<object> lo when lo.Any(o => o.ToString().StartsWith(Serverless)):
-
-                        return true;
-
-                    default:
-
-                        return false;
-                }
-            }
-        }
-
         /// <summary>
         /// Gets vertices which are valid as the source of a relationship between two vertices
         /// </summary>
@@ -106,15 +68,6 @@
         [YamlIgnore]
         private IEnumerable<IVertex> ResourceVertices =>
             this.vertices.Where(v => v.GetType() == typeof(ResourceVertex));
-
-        /// <summary>
-        /// Gets the pseudo parameters.
-        /// </summary>
-        /// <value>
-        /// The pseudo parameters.
-        /// </value>
-        [YamlIgnore]
-        internal List<PseudoParameter> PseudoParameters { get; } = new List<PseudoParameter>();
 
         /// <summary>
         /// Deserializes a YAML or JSON template.
@@ -147,13 +100,16 @@
         /// <summary>
         /// Adds a pseudo parameter.
         /// </summary>
-        /// <param name="param">The parameter.</param>
-        internal void AddPseudoParameter(PseudoParameter param)
+        /// <param name="paramName">The parameter name, e.g. <c>WS::Region</c>.</param>
+        private void AddPseudoParameter(string paramName)
         {
-            if (this.PseudoParameters.All(p => p.Name != param.Name))
+            var pp = PseudoParameter.Create(paramName);
+
+            if (this.PseudoParameters.All(p => p.Name != pp.Name))
             {
-                this.PseudoParameters.Add(param);
-                this.vertices.Add(new PseudoParameterVertex(param));
+                pp.SetCurrentValue(this.UserParameterValues);
+                this.PseudoParameters.Add(pp);
+                this.vertices.Add(new PseudoParameterVertex(pp));
             }
         }
 
@@ -494,6 +450,11 @@
                         {
                             foreach (var @ref in tag.GetReferencedObjects(this))
                             {
+                                if (@ref.StartsWith("AWS::"))
+                                {
+                                    this.AddPseudoParameter(@ref);
+                                }
+
                                 this.AddEdge(vertex, @ref);
                             }
                         }
@@ -508,6 +469,11 @@
 
                         foreach (var @ref in tag1.GetReferencedObjects(this))
                         {
+                            if (@ref.StartsWith("AWS::"))
+                            {
+                                this.AddPseudoParameter(@ref);
+                            }
+
                             if (@ref.Contains("."))
                             {
                                 this.AddGetAttEdge(vertex, @ref);
@@ -551,6 +517,11 @@
 
                         foreach (var @ref in iftag.GetReferencedObjects(this))
                         {
+                            if (@ref.StartsWith("AWS::"))
+                            {
+                                this.AddPseudoParameter(@ref);
+                            }
+
                             this.AddEdge(targetVertex, @ref);
                         }
 
@@ -574,6 +545,11 @@
         {
             foreach (var @ref in intrinsic.GetReferencedObjects(this))
             {
+                if (@ref.StartsWith("AWS::"))
+                {
+                    this.AddPseudoParameter(@ref);
+                }
+
                 if (@ref.Contains("."))
                 {
                     this.AddGetAttEdge(targetVertex, @ref);

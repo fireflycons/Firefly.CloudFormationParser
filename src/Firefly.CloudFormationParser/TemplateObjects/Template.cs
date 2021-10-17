@@ -3,6 +3,10 @@
     using System.Collections.Generic;
     using System.Linq;
 
+    using Firefly.CloudFormationParser.GraphObjects;
+
+    using QuikGraph;
+
     using YamlDotNet.Serialization;
 
     /// <summary>
@@ -104,5 +108,47 @@
         /// </remarks>
         [YamlMember(Alias = "Resources", Order = 9)]
         public ResourceSection ParsedResources { get; set; } = new ResourceSection();
+
+        /// <inheritdoc />
+        [YamlIgnore]
+        public BidirectionalGraph<IVertex, TaggedEdge<IVertex, EdgeDetail>> DependencyGraph { get; private set; } = new BidirectionalGraph<IVertex, TaggedEdge<IVertex, EdgeDetail>>();
+
+        /// <inheritdoc />
+        [YamlIgnore]
+        public Dictionary<string, bool> EvaluatedConditions { get; } = new Dictionary<string, bool>();
+
+        /// <inheritdoc />
+        [YamlIgnore]
+        public IDictionary<string, object> UserParameterValues { get; private set; } = new Dictionary<string, object>();
+
+        /// <inheritdoc />
+        [YamlIgnore]
+        public bool IsSAMTemplate
+        {
+            get
+            {
+                const string Serverless = "AWS::Serverless-";
+
+                switch (this.Transform)
+                {
+                    case null:
+
+                        return false;
+
+                    case string s when s.StartsWith(Serverless):
+                    case List<object> lo when lo.Any(o => o.ToString().StartsWith(Serverless)):
+
+                        return true;
+
+                    default:
+
+                        return false;
+                }
+            }
+        }
+
+        /// <inheritdoc />
+        [YamlIgnore]
+        public List<PseudoParameter> PseudoParameters { get; } = new List<PseudoParameter>();
     }
 }
