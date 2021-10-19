@@ -16,19 +16,19 @@
     {
         private bool configuredExclusions;
 
-        private Dictionary<string, object> configuredParameterValues = new Dictionary<string, object>
-                                                                           {
-                                                                               { "AWS::Region", "eu-west-1" }
-                                                                           };
+        private readonly Dictionary<string, object> configuredParameterValues = new Dictionary<string, object>
+                                                                                    {
+                                                                                        { "AWS::Region", "eu-west-1" }
+                                                                                    };
 
-        private IAmazonS3? configuredS3Client = null;
+        private IAmazonS3? configuredS3Client;
 
         private AbstractDeserializerSettings? settings;
 
         /// <summary>
         /// Builds the settings used by <see cref="Template.Deserialize"/>.
         /// </summary>
-        /// <returns></returns>
+        /// <returns>A new implementation of <see cref="IDeserializerSettings"/> appropriate for the builder's configuration.</returns>
         public IDeserializerSettings Build()
         {
             if (this.settings == null)
@@ -49,7 +49,6 @@
         /// </summary>
         /// <param name="accountId">The 12 digit account identifier.</param>
         /// <returns>This builder</returns>
-
         // ReSharper disable once InconsistentNaming
         public DeserializerSettingsBuilder WithAWSAccountId(string accountId)
         {

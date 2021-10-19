@@ -33,7 +33,7 @@
         /// <inheritdoc />
         public override object Evaluate(ITemplate template)
         {
-            var conditionName = (string)this.Value!;
+            var conditionName = (string)this.Value;
 
             if (template.EvaluatedConditions.ContainsKey(conditionName))
             {
@@ -53,7 +53,7 @@
         /// <inheritdoc />
         internal override void WriteLongForm(IEmitter emitter, IValueSerializer nestedValueSerializer)
         {
-            var condition = this.Value!.ToString();
+            var condition = this.Value.ToString();
 
             emitter.Emit(new MappingStart());
             emitter.Emit(new Scalar(this.LongName));
@@ -71,7 +71,7 @@
         /// <inheritdoc />
         internal override void WriteShortForm(IEmitter emitter, IValueSerializer nestedValueSerializer)
         {
-            var condition = this.Value!.ToString();
+            var condition = this.Value.ToString();
 
             var t = new Scalar(
                 AnchorName.Empty,

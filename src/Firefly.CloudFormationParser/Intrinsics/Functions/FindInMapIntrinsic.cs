@@ -1,6 +1,5 @@
 ﻿namespace Firefly.CloudFormationParser.Intrinsics.Functions
 {
-    using System;
     using System.Collections.Generic;
     using System.Linq;
 
@@ -63,26 +62,65 @@
         /// <inheritdoc />
         public override object Evaluate(ITemplate template)
         {
-            throw new NotImplementedException();
+            if (template.Mappings == null)
+            {
+                throw new System.InvalidOperationException("Cannot evaluate FindInMap. Template has no mappings");
+            }
+
+            if (!template.Mappings.ContainsKey(this.MapName))
+            {
+                throw new System.InvalidOperationException($"FindInMap: Map not found '{this.MapName}'");
+            }
+
+            var map = (Dictionary<object, object>)template.Mappings[this.MapName]!;
+
+            map = (Dictionary<object, object>)this.GetNextMapLevel(template, map, this.TopLevelKey);
+            return this.GetNextMapLevel(template, map, this.SecondLevelKey);
+        }
+
+        private object GetNextMapLevel(ITemplate template, IReadOnlyDictionary<object, object> map, object key)
+        {
+            string nextLevelKey = key switch
+                {
+                    string s => s,
+                    IIntrinsic intrinsic => intrinsic.Evaluate(template).ToString(),
+                    _ => throw new System.InvalidOperationException(
+                             $"FindInMap: invalid type for top level key '{key.GetType().Name}'")
+                };
+
+            if (!map.ContainsKey(nextLevelKey))
+            {
+                throw new System.InvalidOperationException(
+                    $"FindInMap: Map '{this.MapName}' does not contain key '{nextLevelKey}'");
+            }
+
+            return map[nextLevelKey];
         }
 
         /// <inheritdoc />
         public override IEnumerable<string> GetReferencedObjects(ITemplate template)
         {
-            return new List<string>();
+            var refs = new List<string>();
+            
+            foreach (var k in new[] { this.TopLevelKey, this.SecondLevelKey })
+            {
+                if (k is IIntrinsic intrinsic)
+                {
+                    refs.AddRange(intrinsic.GetReferencedObjects(template));
+                }
+            }
+
+            return refs;
         }
 
         /// <inheritdoc />
         public override void SetValue(IEnumerable<object> values)
         {
-            var list = (List<object>)values;
+            var list = values.ToList();
 
             this.ValidateValues(this.MinValues, this.MaxValues, list);
             this.MapName = (string)list[0];
-            this.Items = list.Skip(1).ToList();
-
-            // this.TopLevelKey = list[1];
-            // this.SecondLevelKey = list[2];
+            this.Items = list.Skip(1).Select(this.UnpackIntrinsic).ToList();
         }
 
         /// <summary>

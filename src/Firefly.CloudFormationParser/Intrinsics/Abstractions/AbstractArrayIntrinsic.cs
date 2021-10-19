@@ -42,16 +42,16 @@
             var unresolved = new List<UnresolvedTagProperty>();
             var itemsProperty = this.GetType().GetProperty(nameof(AbstractScalarIntrinsic.Items));
 
-            foreach (var item in this.Items.WithIndex())
+            foreach (var (item, index) in this.Items.WithIndex())
             {
-                switch (item.item)
+                switch (item)
                 {
                     case IDictionary _:
 
                         unresolved.Add(
                             new UnresolvedTagProperty
                                 {
-                                    Property = itemsProperty, Index = item.index, Intrinsic = this
+                                    Property = itemsProperty, Index = index, Intrinsic = this
                                 });
                         break;
 

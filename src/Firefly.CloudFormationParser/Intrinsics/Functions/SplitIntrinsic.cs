@@ -57,19 +57,45 @@
         /// <inheritdoc />
         public override object Evaluate(ITemplate template)
         {
-            throw new NotImplementedException();
+            string source;
+
+            if (this.Source is IIntrinsic intrinsic)
+            {
+                var value = intrinsic.Evaluate(template);
+
+                if (value is string s)
+                {
+                    source = s;
+                }
+                else
+                {
+                    throw new InvalidOperationException(
+                        $"Fn::Split: Cannot split result of {intrinsic.LongName} as the result is not a single string");
+                }
+            }
+            else
+            {
+                source = this.Source.ToString();
+            }
+
+            return source.Split(new[] { this.Delimiter }, StringSplitOptions.None);
         }
 
         /// <inheritdoc />
         public override IEnumerable<string> GetReferencedObjects(ITemplate template)
         {
+            if (this.Source is IIntrinsic intrinsic)
+            {
+                return intrinsic.GetReferencedObjects(template);
+            }
+
             return new List<string>();
         }
 
         /// <inheritdoc />
         public override void SetValue(IEnumerable<object> values)
         {
-            var list = values.ToList();
+            var list = values.ToList().Select(this.UnpackIntrinsic).ToList();
 
             this.ValidateValues(this.MinValues, this.MaxValues, list);
             this.Delimiter = (string)list[0];

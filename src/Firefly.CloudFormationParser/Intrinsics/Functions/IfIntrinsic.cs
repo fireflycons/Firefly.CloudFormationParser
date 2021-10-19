@@ -6,6 +6,7 @@
 
     using Firefly.CloudFormationParser.Intrinsics.Abstractions;
     using Firefly.CloudFormationParser.Serialization.Serializers;
+    using Firefly.CloudFormationParser.Utils;
 
     using YamlDotNet.Core;
     using YamlDotNet.Serialization;
@@ -65,7 +66,15 @@
         {
             if (template.EvaluatedConditions.ContainsKey(this.Condition))
             {
-                return template.EvaluatedConditions[this.Condition] ? this.ValueIfTrue : this.ValueIfFalse;
+                var evaluation = template.EvaluatedConditions[this.Condition] ? this.ValueIfTrue : this.ValueIfFalse;
+
+                if (evaluation is IIntrinsic intrinsic)
+                {
+                    return intrinsic.Evaluate(template);
+                }
+
+                // Walk this object evaluating any nested intrinsics
+                return evaluation.CopyAndEvaluateIntrinsics(template)!;
             }
 
             throw new InvalidOperationException(
@@ -75,11 +84,21 @@
         /// <inheritdoc />
         public override IEnumerable<string> GetReferencedObjects(ITemplate template)
         {
-            var branch = this.Evaluate(template);
+            if (template.EvaluatedConditions.ContainsKey(this.Condition))
+            {
+                var evaluation = template.EvaluatedConditions[this.Condition] ? this.ValueIfTrue : this.ValueIfFalse;
 
-            return branch is AbstractIntrinsic intrinsic
-                       ? intrinsic.GetReferencedObjects(template)
-                       : new List<string>();
+                if (evaluation is IIntrinsic intrinsic)
+                {
+                    return intrinsic.GetReferencedObjects(template);
+                }
+
+                // Walk this object evaluating any nested intrinsic references
+                return evaluation.GetNestedReferences(template);
+            }
+
+            throw new InvalidOperationException(
+                $"Condition '{this.Condition} not found in Conditions section of template.");
         }
 
         /// <inheritdoc />
@@ -89,7 +108,7 @@
 
             this.ValidateValues(this.MinValues, this.MaxValues, list);
             this.Condition = (string)list[0];
-            this.Items = list.Skip(1).ToList();
+            this.Items = list.Skip(1).Select(this.UnpackIntrinsic).ToList();
         }
 
         /// <summary>

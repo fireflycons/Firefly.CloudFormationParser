@@ -92,7 +92,7 @@
 
             if (list[1] is IEnumerable enumerable)
             {
-                this.Items = enumerable.ToList();
+                this.Items = enumerable.ToList().Select(this.UnpackIntrinsic).ToList();
             }
             else
             {

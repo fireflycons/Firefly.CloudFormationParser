@@ -63,9 +63,7 @@
         /// <inheritdoc/>
         [YamlIgnore]
         public IEnumerable<IOutput> Outputs =>
-            this.ParsedOutputs == null
-                ? (IEnumerable<IOutput>)new List<IOutput>()
-                : (IEnumerable<Output>)this.ParsedOutputs.Select(kv => kv.Value);
+            this.ParsedOutputs?.Select(kv => kv.Value) ?? (IEnumerable<IOutput>)new List<IOutput>();
 
         /// <inheritdoc/>
         [YamlIgnore]
@@ -149,6 +147,6 @@
 
         /// <inheritdoc />
         [YamlIgnore]
-        public List<PseudoParameter> PseudoParameters { get; } = new List<PseudoParameter>();
+        public List<IParameter> PseudoParameters { get; } = new List<IParameter>();
     }
 }

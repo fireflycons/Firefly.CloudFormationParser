@@ -94,13 +94,10 @@
             var mergeParameters = stackResponse.Parameters.Where(p => !noEchoParameters.Contains(p.ParameterKey))
                 .ToDictionary(p => p.ParameterKey, p => (object)p.ParameterValue);
 
-            foreach (var pk in noEchoParameters)
+            foreach (var pk in noEchoParameters.Where(pk => this.ParameterValues.All(kv => kv.Key != pk)))
             {
-                if (this.ParameterValues.All(kv => kv.Key != pk))
-                {
-                    // Add fixed value for unreferenced NoEco params
-                    mergeParameters.Add(pk, "UNRESOLVED-NOECHO");
-                }
+                // Add fixed value for unreferenced NoEco params
+                mergeParameters.Add(pk, "UNRESOLVED-NOECHO");
             }
 
             foreach (var kv in mergeParameters)

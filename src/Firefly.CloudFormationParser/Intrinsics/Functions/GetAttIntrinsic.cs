@@ -85,7 +85,7 @@
 
             this.ValidateValues(this.MinValues, this.MaxValues, list);
             this.LogicalId = (string)list[0];
-            this.AttributeName = list[1];
+            this.AttributeName = this.UnpackIntrinsic(list[1]);
         }
 
         /// <inheritdoc />

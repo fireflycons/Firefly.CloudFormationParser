@@ -5,7 +5,6 @@
     using System;
     using System.Collections;
     using System.Collections.Generic;
-    using System.ComponentModel;
     using System.Diagnostics;
     using System.Linq;
     using System.Text.RegularExpressions;
@@ -19,7 +18,7 @@
     /// Represents a template parameter
     /// </summary>
     [DebuggerDisplay("Param {Name}")]
-    public class Parameter : ITemplateObject, IParameter
+    public class Parameter : IParameter
     {
         /// <summary>
         /// The allowed pattern regex.

@@ -1,6 +1,5 @@
 ﻿namespace Firefly.CloudFormationParser.Intrinsics.Functions
 {
-    using System;
     using System.Collections.Generic;
 
     using Firefly.CloudFormationParser.Intrinsics.Abstractions;
@@ -33,13 +32,13 @@
         /// <inheritdoc />
         public override object Evaluate(ITemplate template)
         {
-            throw new NotImplementedException();
+            return this.ExportName is IIntrinsic intrinsic ? intrinsic.Evaluate(template) : this.ExportName.ToString();
         }
 
         /// <inheritdoc />
         public override IEnumerable<string> GetReferencedObjects(ITemplate template)
         {
-            return new List<string>();
+            return this.ExportName is IIntrinsic intrinsic ? intrinsic.GetReferencedObjects(template) : new List<string>();
         }
     }
 }

@@ -1,6 +1,5 @@
 ﻿namespace Firefly.CloudFormationParser.Serialization.Settings
 {
-    using System.Collections.Generic;
     using System.IO;
     using System.Threading.Tasks;
 

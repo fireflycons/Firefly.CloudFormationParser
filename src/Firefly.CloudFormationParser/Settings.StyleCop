@@ -14,6 +14,8 @@
       <Value>stdout</Value>
       <Value>terraform</Value>
       <Value>intrinsics</Value>
+      <Value>CIDR</Value>
+      <Value>cidr</Value>
     </CollectionProperty>
   </GlobalSettings>
 </StyleCopSettings>

@@ -53,9 +53,9 @@
                     regionToGet = s;
                     break;
 
-                case string _:  // will always be a ref to AWS::Region here
+                case string _:
 
-                    var pp = template.PseudoParameters.FirstOrDefault(p => p.Name == "AWS::Region");
+                    var pp = template.Parameters.Concat(template.PseudoParameters).FirstOrDefault(p => p.Name == "AWS::Region");
 
                     if (pp == null)
                     {

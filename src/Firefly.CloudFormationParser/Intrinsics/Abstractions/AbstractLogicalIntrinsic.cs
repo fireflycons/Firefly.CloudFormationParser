@@ -1,6 +1,5 @@
 ﻿namespace Firefly.CloudFormationParser.Intrinsics.Abstractions
 {
-    using System;
     using System.Collections;
     using System.Collections.Generic;
     using System.Linq;
@@ -80,37 +79,8 @@
         /// <inheritdoc />
         public override void SetValue(IEnumerable<object> values)
         {
-            switch (values)
-            {
-                case IDictionary<object, object> dict:
-
-                    var kv = dict.ToDictionary(d => d.Key.ToString(), d => d.Value).First();
-
-                    if (kv.Value is AbstractIntrinsic intrinsic && kv.Key == intrinsic.LongName)
-                    {
-                        this.Items = new List<object> { intrinsic };
-                    }
-                    else
-                    {
-                        throw new InvalidCastException(
-                            $"Unexpected type {kv.Value.GetType().Name}  for {this.LongName}");
-                    }
-
-                    break;
-
-                case IIntrinsic _:
-
-                    this.Items = new List<object> { values };
-                    break;
-
-                default:
-
-                    var list = values.ToList();
-
-                    this.ValidateValues(this.MinValues, this.MaxValues, list);
-                    this.Items = list;
-                    break;
-            }
+            this.Items = values.Select(this.UnpackIntrinsic).ToList();
+            this.ValidateValues(this.MinValues, this.MaxValues, this.Items);
         }
 
         /// <summary>

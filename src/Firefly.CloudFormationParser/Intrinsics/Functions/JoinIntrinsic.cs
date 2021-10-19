@@ -1,10 +1,11 @@
 ﻿namespace Firefly.CloudFormationParser.Intrinsics.Functions
 {
-    using System;
     using System.Collections.Generic;
+    using System.Linq;
 
     using Firefly.CloudFormationParser.Intrinsics.Abstractions;
     using Firefly.CloudFormationParser.Serialization.Serializers;
+    using Firefly.CloudFormationParser.Utils;
 
     using YamlDotNet.Core;
     using YamlDotNet.Serialization;
@@ -46,7 +47,21 @@
         /// <inheritdoc />
         public override object Evaluate(ITemplate template)
         {
-            throw new NotImplementedException();
+            var evaluations = new List<string>();
+
+            foreach (var item in this.Items)
+            {
+                if (item is IIntrinsic intrinsic)
+                {
+                    evaluations.Add(intrinsic.Evaluate(template).ToString());
+                }
+                else
+                {
+                    evaluations.Add(item.ToString());
+                }
+            }
+
+            return string.Join(this.Separator, evaluations);
         }
 
         /// <inheritdoc />
@@ -54,63 +69,35 @@
         {
             var refs = new List<string>();
 
-            foreach (var item in this.Items)
+            foreach (var item in this.Items.Where(i => i is AbstractIntrinsic).Cast<AbstractIntrinsic>())
             {
-                switch (item)
-                {
-                    case AbstractIntrinsic intrinsic:
-
-                        refs.AddRange(intrinsic.GetReferencedObjects(template));
-                        break;
-                }
+                refs.AddRange(item.GetReferencedObjects(template));
             }
 
-            return refs;
+            return refs.Distinct();
         }
 
         /// <inheritdoc />
         public override void SetValue(IEnumerable<object> values)
         {
-            var list = (List<object>)values;
+            var list = EnumerableExtensions.ToList(values);
+            this.Items = new List<object>();
 
             this.ValidateValues(this.MinValues, this.MaxValues, list);
             this.Separator = (string)list[0];
 
-            if (list[1].GetType() == typeof(List<object>))
+            if (list[1] is IEnumerable<object> enumerable)
             {
-                this.Items = (List<object>)list[1];
+                foreach (var item in enumerable)
+                {
+                    this.Items.Add(this.UnpackIntrinsic(item));
+                }
             }
             else
             {
                 this.Items = new List<object> { list[1] };
             }
         }
-
-        ///// <inheritdoc />
-        // internal override IList<UnresolvedTagProperty> GetUnresolvedDictionaryProperties()
-        // {
-        // var unresolved = new List<UnresolvedTagProperty>();
-        // var property = this.GetType().GetProperty(nameof(this.Items));
-
-        // foreach (var (item, index) in this.Items.WithIndex())
-        // {
-        // switch (item)
-        // {
-        // case IDictionary _:
-
-        // unresolved.Add(
-        // new UnresolvedTagProperty { Property = property, Index = index, Intrinsic = this });
-        // break;
-
-        // case AbstractIntrinsic tag:
-
-        // unresolved.AddRange(tag.GetUnresolvedDictionaryProperties());
-        // break;
-        // }
-        // }
-
-        // return unresolved;
-        // }
 
         /// <inheritdoc />
         internal override void WriteLongForm(IEmitter emitter, IValueSerializer nestedValueSerializer)

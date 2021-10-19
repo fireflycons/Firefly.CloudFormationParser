@@ -57,7 +57,7 @@
         /// <inheritdoc />
         public override void SetValue(IEnumerable<object> values)
         {
-            var list = values.ToList();
+            var list = values.Select(this.UnpackIntrinsic).ToList();
 
             this.ValidateValues(1, 1, list);
             this.Value = list.First();

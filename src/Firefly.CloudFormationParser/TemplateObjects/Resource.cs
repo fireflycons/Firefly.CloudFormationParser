@@ -16,8 +16,6 @@
     /// </summary>
     public class Resource : IConditionalTemplateObject, IResource
     {
-        private object? transform;
-
         /// <inheritdoc cref="IResource.Condition"/>
         [YamlMember(Order = 0)]
         public string? Condition { get; set; }
@@ -57,12 +55,7 @@
         /// The function transform.
         /// </value>
         [YamlMember(Order = 11, Alias = "Fn::Transform", DefaultValuesHandling = DefaultValuesHandling.OmitNull)]
-        public object? FnTransform
-        {
-            get => this.transform;
-
-            set => this.transform = value;
-        }
+        public object? FnTransform { get; set; }
 
         /// <inheritdoc cref="IResource.Metadata"/>
         [YamlMember(Order = 9)]
@@ -87,7 +80,7 @@
         {
             get => null;
 
-            set => this.transform = value;
+            set => this.FnTransform = value;
         }
 
         /// <inheritdoc cref="IResource.Type"/>
@@ -183,7 +176,7 @@
 
             string finalSegment = string.Empty;
             string key = string.Empty;
-            bool finished = false;
+            var finished = false;
 
             foreach (var segment in pathSegments)
             {
@@ -225,12 +218,7 @@
                 }
             }
 
-            if (finalSegment == pathSegments.Last())
-            {
-                return new ResourceProperty(parent, key);
-            }
-
-            return null;
+            return finalSegment == pathSegments.Last() ? new ResourceProperty(parent, key) : null;
         }
 
         /// <summary>

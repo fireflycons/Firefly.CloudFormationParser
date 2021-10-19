@@ -41,6 +41,7 @@
 
             var mockTemplate = new Mock<ITemplate>();
             mockTemplate.Setup(t => t.Parameters).Returns(new List<IParameter> { mockParameter.Object });
+            mockTemplate.Setup(t => t.PseudoParameters).Returns(new List<IParameter>());
 
             var refIntrinsic = new RefIntrinsic();
             refIntrinsic.SetValue(LiteralValue);

@@ -5,6 +5,11 @@
     using YamlDotNet.Core;
     using YamlDotNet.Serialization;
 
+
+    /// <summary>
+    /// C# 8 detail - used to provide a default for <see cref="AbstractIntrinsicFunctionTypeConverter.ValueSerializer"/>
+    /// </summary>
+    /// <seealso cref="YamlDotNet.Serialization.IValueSerializer" />
     internal class NotImpementedValueSerializer : IValueSerializer
     {
         /// <summary>

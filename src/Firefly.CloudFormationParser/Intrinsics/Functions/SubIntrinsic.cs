@@ -69,7 +69,50 @@
         /// <inheritdoc />
         public override object Evaluate(ITemplate template)
         {
-            throw new NotImplementedException();
+            var replacements = new Dictionary<string, string>();
+
+            // Build list of replacements
+            foreach (var match in SubstitutionRx.Matches(this.Expression).Cast<Match>())
+            {
+                var reference = match.Groups["id"].Value;
+
+                if (this.Substitutions.ContainsKey(reference))
+                {
+                    var sub = this.Substitutions[reference];
+
+                    if (sub == null)
+                    {
+                        throw new InvalidOperationException($"Value for '{match}' in Fn::Sub map cannot be null.");
+                    }
+
+                    switch (sub)
+                    {
+                        case IIntrinsic intrinsic:
+
+                            replacements.Add(reference, intrinsic.Evaluate(template).ToString());
+                            break;
+
+                        default:
+
+                            replacements.Add(reference, sub.ToString());
+                            break;
+                    }
+
+                    continue;
+                }
+
+                // Implicit Ref
+                var @ref = new RefIntrinsic();
+
+                @ref.SetValue(reference);
+                replacements.Add(reference, @ref.Evaluate(template).ToString());
+            }
+
+            var evaluatedExpression = this.Expression;
+
+            return replacements.Aggregate(
+                evaluatedExpression,
+                (current, replacement) => current.Replace($"${{{replacement.Key}}}", replacement.Value));
         }
 
         /// <inheritdoc />
@@ -118,7 +161,9 @@
 
             if (list.Count > 1)
             {
-                this.Substitutions = (Dictionary<object, object>)list[1];
+                this.Substitutions = ((Dictionary<object, object>)list[1]).ToDictionary(
+                    kv => kv.Key,
+                    kv => this.UnpackIntrinsic(kv.Value));
             }
         }
 
@@ -192,17 +237,22 @@
             {
                 emitter.Emit(new Scalar(kv.Key.ToString()));
 
-                if (kv.Value is AbstractIntrinsic nestedIntrinsic)
+                switch (kv.Value)
                 {
-                    nestedIntrinsic.WriteYaml(emitter, nestedValueSerializer);
-                }
-                else if (kv.Value is IDictionary || kv.Value is IList)
-                {
-                    nestedValueSerializer.SerializeValue(emitter, kv.Value, kv.Value.GetType());
-                }
-                else
-                {
-                    emitter.Emit(new Scalar(kv.Value.ToString()));
+                    case AbstractIntrinsic nestedIntrinsic:
+
+                        nestedIntrinsic.WriteYaml(emitter, nestedValueSerializer);
+                        break;
+
+                    case IDictionary _:
+                    case IList _:
+
+                        nestedValueSerializer.SerializeValue(emitter, kv.Value, kv.Value.GetType());
+                        break;
+
+                    default:
+                        emitter.Emit(new Scalar(kv.Value.ToString()));
+                        break;
                 }
             }
 

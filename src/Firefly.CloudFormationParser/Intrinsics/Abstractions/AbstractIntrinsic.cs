@@ -3,6 +3,7 @@
     using System;
     using System.Collections;
     using System.Collections.Generic;
+    using System.Linq;
 
     using Firefly.CloudFormationParser.Intrinsics.Utils;
     using Firefly.CloudFormationParser.Serialization.Deserializers;
@@ -166,6 +167,21 @@
                     $"{this.LongName}: Expected between {minValues} and {maxValues} values. Got {values.Count}.",
                     nameof(values));
             }
+        }
+
+        /// <summary>
+        /// Unpack an intrinsic from a long form dictionary entry e.g. <c>{ "Fn::Sub", SubIntrinsic }</c>
+        /// </summary>
+        /// <param name="value">The value to unpack.</param>
+        /// <returns>If <paramref name="value"/> is a long form intrinsic, then the intrinsic else the original object.</returns>
+        protected object UnpackIntrinsic(object value)
+        {
+            if (value is Dictionary<object, object> dict && dict.Any() && dict.First().Value is IIntrinsic intrinsic && dict.First().Key.ToString() == intrinsic.LongName)
+            {
+                return intrinsic;
+            }
+
+            return value;
         }
     }
 }

@@ -3,7 +3,6 @@
     using System;
     using System.Collections.Generic;
 
-    using Firefly.CloudFormationParser.Intrinsics;
     using Firefly.CloudFormationParser.Intrinsics.Abstractions;
 
     using YamlDotNet.Core;
@@ -67,13 +66,11 @@
                         @event.End,
                         $"{tag.LongName}: Incorrect number of values {values.Count}. Expected {tag.MaxValues}.");
                 }
-                else
-                {
-                    throw new YamlException(
-                        @event!.Start,
-                        @event.End,
-                        $"{tag.LongName}: Incorrect number of values {values.Count}. Expected between {tag.MinValues} and {tag.MaxValues}.");
-                }
+
+                throw new YamlException(
+                    @event!.Start,
+                    @event.End,
+                    $"{tag.LongName}: Incorrect number of values {values.Count}. Expected between {tag.MinValues} and {tag.MaxValues}.");
             }
 
             tag.SetValue(values);

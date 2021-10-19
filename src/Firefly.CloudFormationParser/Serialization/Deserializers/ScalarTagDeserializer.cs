@@ -3,7 +3,6 @@
     using System;
 
     using Firefly.CloudFormationParser.Intrinsics;
-    using Firefly.CloudFormationParser.Intrinsics.Functions;
     using Firefly.CloudFormationParser.Intrinsics.Utils;
 
     using YamlDotNet.Core;

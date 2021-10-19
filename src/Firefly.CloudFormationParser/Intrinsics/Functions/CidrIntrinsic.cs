@@ -9,6 +9,7 @@
     using Firefly.CloudFormationParser.Intrinsics.Abstractions;
     using Firefly.CloudFormationParser.Intrinsics.Utils;
     using Firefly.CloudFormationParser.Serialization.Serializers;
+    using Firefly.CloudFormationParser.Utils;
 
     using YamlDotNet.Core;
     using YamlDotNet.Serialization;
@@ -24,6 +25,7 @@
         /// </summary>
         public const string Tag = "!Cidr";
 
+        // ReSharper disable once InconsistentNaming
         private static readonly Regex validIpv4Regex = new Regex(
             @"((25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)/(2[0-8]|1[6-9])");
 
@@ -82,13 +84,22 @@
                 throw new ArgumentException($"Fn::Cidr: {cidr} is not a valid IPv4 CIDR (must be in range /16 - /28)");
             }
 
-            throw new NotImplementedException();
+            var network = new Network(cidr);
+
+            return network.GetSubnets(this.Count, this.CidrBits);
         }
 
         /// <inheritdoc />
         public override IEnumerable<string> GetReferencedObjects(ITemplate template)
         {
-            return new List<string>();
+            var references = new List<string>();
+
+            if (this.IpBlock is IIntrinsic intrinsic)
+            {
+                references.AddRange(intrinsic.GetReferencedObjects(template));
+            }
+
+            return references;
         }
 
         /// <inheritdoc />
@@ -98,8 +109,19 @@
 
             this.ValidateValues(this.MinValues, this.MaxValues, list);
             this.IpBlock = list[0];
-            this.Count = int.Parse((string)list[1]);
-            this.CidrBits = int.Parse((string)list[2]);
+            this.Count = list[1] switch
+                {
+                    string s => int.Parse(s),
+                    int i => i,
+                    _ => throw new InvalidOperationException($"Invalid type {list[1].GetType().Name} for Fn::Cidr Count")
+                };
+            this.CidrBits = list[2] switch
+                {
+                    string s => int.Parse(s),
+                    int i => i,
+                    _ => throw new InvalidOperationException(
+                             $"Invalid type {list[1].GetType().Name} for Fn::Cidr CidrBits")
+                };
         }
 
         /// <inheritdoc />

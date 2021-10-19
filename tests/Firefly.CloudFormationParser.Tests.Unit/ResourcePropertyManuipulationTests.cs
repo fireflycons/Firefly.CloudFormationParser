@@ -130,7 +130,7 @@
                                         {
                                             new Parameter { Name = Param1Name, Type = "String", Default = Param1Value }
                                         });
-
+            template.Setup(t => t.PseudoParameters).Returns(new List<IParameter>());
             return template.Object;
         }
     }

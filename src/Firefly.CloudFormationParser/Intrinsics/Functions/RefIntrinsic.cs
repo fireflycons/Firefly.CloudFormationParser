@@ -37,8 +37,9 @@
         /// <inheritdoc />
         public override object Evaluate(ITemplate template)
         {
-            var param = template.Parameters.FirstOrDefault(p => p.Name == this.Reference);
+            var param = template.Parameters.Concat(template.PseudoParameters).FirstOrDefault(p => p.Name == this.Reference);
 
+            // Note that we can't dereference the physical ID of a resource here so we must return the logical name.
             return param == null ? this.Reference : param.GetCurrentValue();
         }
 

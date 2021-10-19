@@ -3,7 +3,6 @@
     using System;
     using System.Collections;
     using System.Collections.Generic;
-    using System.Dynamic;
     using System.Linq;
     using System.Text;
     using System.Threading.Tasks;
@@ -32,6 +31,7 @@
         /// <summary>
         /// Names of implicit SAM resources created by event declarations in Serverless::Function
         /// </summary>
+        // ReSharper disable once InconsistentNaming
         private static readonly List<string> ImplicitSAMResources = new List<string> { "ServerlessRestApi", "ServerlessHttpApi", "ServerlessDeploymentApplication" };
 
         /// <summary>
@@ -103,14 +103,16 @@
         /// <param name="paramName">The parameter name, e.g. <c>WS::Region</c>.</param>
         private void AddPseudoParameter(string paramName)
         {
+            if (this.PseudoParameters.Any(p => p.Name == paramName))
+            {
+                return;
+            }
+
             var pp = PseudoParameter.Create(paramName);
 
-            if (this.PseudoParameters.All(p => p.Name != pp.Name))
-            {
-                pp.SetCurrentValue(this.UserParameterValues);
-                this.PseudoParameters.Add(pp);
-                this.vertices.Add(new PseudoParameterVertex(pp));
-            }
+            pp.SetCurrentValue(this.UserParameterValues);
+            this.PseudoParameters.Add(pp);
+            this.vertices.Add(new PseudoParameterVertex(pp));
         }
 
         /// <summary>
@@ -140,6 +142,7 @@
         internal Template PostProcess(bool excludeConditionalResources, IDictionary<string, object> parameterValues)
         {
             this.UserParameterValues = parameterValues;
+            this.UserParameterValues["AWS::NoValue"] = new AWSNoValue();
 
             // Name these objects from their parent keys in the template schema.
             FixNames(this.ParsedParameters);
@@ -167,7 +170,7 @@
                     {
                         case Resource _:
 
-                            this.ParsedResources!.Remove(objectToRemove.Name);
+                            this.ParsedResources.Remove(objectToRemove.Name);
                             break;
 
                         case Output _:
@@ -369,7 +372,6 @@
                 foreach (var dependency in resource.ExplicitDependencies)
                 {
                     var source = this.ResourceVertices.FirstOrDefault(v => v.Name == dependency);
-                    var samLinked = this.SourceVertices.FirstOrDefault(v => dependency.StartsWith(v.Name)) != null;
 
                     if (source == null)
                     {
@@ -541,7 +543,7 @@
         /// </summary>
         /// <param name="targetVertex">The target vertex.</param>
         /// <param name="intrinsic">The intrinsic.</param>
-        private void AddEdgesFromIntrinsic(IVertex targetVertex, AbstractIntrinsic intrinsic)
+        private void AddEdgesFromIntrinsic(IVertex targetVertex, IIntrinsic intrinsic)
         {
             foreach (var @ref in intrinsic.GetReferencedObjects(this))
             {
@@ -634,7 +636,6 @@
         private void AddReferenceEdge(IVertex targetVertex, string sourceObject)
         {
             var sourceVertex = this.SourceVertices.FirstOrDefault(v => v.Name == sourceObject);
-            var samLinked = this.SourceVertices.FirstOrDefault(v => sourceObject.StartsWith(v.Name)) != null;
 
             if (sourceVertex == null)
             {

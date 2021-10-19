@@ -8,8 +8,6 @@
 
     using QuikGraph;
 
-    using YamlDotNet.Serialization;
-
     /// <summary>
     /// Interface describing a CloudFormation Template.
     /// </summary>
@@ -28,6 +26,7 @@
         /// <value>
         /// The AWS template format version.
         /// </value>
+        // ReSharper disable once InconsistentNaming
         string? AWSTemplateFormatVersion { get; set; }
 
         /// <summary>
@@ -188,6 +187,9 @@
         /// <value>
         ///   <c>true</c> if this instance is a SAM template; otherwise, <c>false</c>.
         /// </value>
+        // ReSharper disable once StyleCop.SA1650
+        // ReSharper disable once UnusedMemberInSuper.Global
+        // ReSharper disable once InconsistentNaming
         bool IsSAMTemplate { get; }
 
         /// <summary>
@@ -204,6 +206,6 @@
         /// <value>
         /// The pseudo parameters.
         /// </value>
-        public List<PseudoParameter> PseudoParameters { get; }
+        public List<IParameter> PseudoParameters { get; }
     }
 }

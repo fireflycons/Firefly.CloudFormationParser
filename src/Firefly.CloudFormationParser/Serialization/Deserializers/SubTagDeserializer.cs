@@ -3,7 +3,6 @@
     using System;
     using System.Collections.Generic;
 
-    using Firefly.CloudFormationParser.Intrinsics;
     using Firefly.CloudFormationParser.Intrinsics.Functions;
     using Firefly.CloudFormationParser.Intrinsics.Utils;
 
@@ -41,7 +40,7 @@
 
             var tag = new SubIntrinsic();
             var haveScalar = parser.Accept<Scalar>(out var scalar);
-            var haveSequence = parser.Accept<SequenceStart>(out var seq);
+            var haveSequence = parser.Accept<SequenceStart>(out _);
 
             if (!(haveScalar || haveSequence))
             {
