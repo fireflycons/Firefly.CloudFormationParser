@@ -20,14 +20,9 @@
     [DebuggerDisplay("Param {Name}")]
     public class Parameter : IParameter
     {
-        /// <summary>
-        /// The allowed pattern regex.
-        /// </summary>
-        private Regex? allowedPattern;
-
         /// <inheritdoc cref="IParameter.AllowedPattern"/>>
         [YamlIgnore]
-        public Regex? AllowedPattern => this.allowedPattern;
+        public Regex? AllowedPattern { get; private set; }
 
         /// <summary>
         /// <para>
@@ -43,9 +38,9 @@
         [YamlMember(Order = 5, Alias = "AllowedPattern", ScalarStyle = ScalarStyle.SingleQuoted, DefaultValuesHandling = DefaultValuesHandling.OmitNull)]
         public string? AllowedPatternString
         {
-            get => this.allowedPattern?.ToString();
+            get => this.AllowedPattern?.ToString();
 
-            set => this.allowedPattern = value == null ? null : new Regex(value);
+            set => this.AllowedPattern = value == null ? null : new Regex(value);
         }
 
         /// <inheritdoc cref="IParameter.AllowedValues"/>>

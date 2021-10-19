@@ -31,6 +31,7 @@
 
             if (self != null)
             {
+                // ReSharper disable once LoopCanBeConvertedToQuery - Incorrect refactoring
                 foreach (var obj in self)
                 {
                     retval.Add(obj);

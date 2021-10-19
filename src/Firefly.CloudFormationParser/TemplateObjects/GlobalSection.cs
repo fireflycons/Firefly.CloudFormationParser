@@ -18,7 +18,7 @@
 
         /// <summary>
         /// <para>
-        /// Gets a named section from the globals map.
+        /// Gets a named section from the global declarations map.
         /// </para>
         /// <para>
         /// Section can be one of <c>Function</c>, <c>Api</c>, <c>HttpApi</c> or <c>SimpleTable</c>.
@@ -28,12 +28,11 @@
         /// <returns>The section if declared, else <c>null</c></returns>
         public Dictionary<string, object>? GetSection(string sectionName)
         {
-            if (!this.ContainsKey(sectionName))
-            {
-                return null;
-            }
-
-            return ((Dictionary<object, object>)this[sectionName]).ToDictionary(kv => kv.Key.ToString(), kv => kv.Value);
+            return !this.ContainsKey(sectionName)
+                       ? null
+                       : ((Dictionary<object, object>)this[sectionName]).ToDictionary(
+                           kv => kv.Key.ToString(),
+                           kv => kv.Value);
         }
     }
 }

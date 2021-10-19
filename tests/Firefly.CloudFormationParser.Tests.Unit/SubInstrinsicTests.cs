@@ -3,8 +3,7 @@
     using System.Collections.Generic;
 
     using Firefly.CloudFormationParser.Intrinsics.Functions;
-    using Firefly.CloudFormationParser.TemplateObjects;
-
+    
     using FluentAssertions;
 
     using Moq;

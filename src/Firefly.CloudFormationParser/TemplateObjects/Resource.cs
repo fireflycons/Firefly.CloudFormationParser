@@ -269,7 +269,7 @@
                 throw new ArgumentNullException(nameof(propertyPath), "Argument cannot be null");
             }
 
-            var pathSegments = new System.Collections.Generic.Queue<string>(propertyPath.Split('.'));
+            var pathSegments = new Queue<string>(propertyPath.Split('.'));
             var lastSegment = pathSegments.Last();
 
             if (propertiesToSearch == null)
@@ -342,7 +342,7 @@
             /// <param name="unresolvedProperties">The unresolved properties.</param>
             public ResourceProperty(
                 object container,
-                System.Collections.Generic.Queue<string> unresolvedProperties)
+                Queue<string> unresolvedProperties)
                 : this(container, (string?)null)
             {
                 this.UnresolvedProperties = unresolvedProperties;
@@ -383,7 +383,7 @@
             /// </value>
             private string? Key { get; }
 
-            public System.Collections.Generic.Queue<string> UnresolvedProperties { get; } = new System.Collections.Generic.Queue<string>();
+            public Queue<string> UnresolvedProperties { get; } = new Queue<string>();
 
             /// <summary>
             /// Gets the value at the selected container and key.
@@ -394,7 +394,7 @@
                 if (this.Key == null)
                 {
                     throw new InvalidOperationException(
-                        $"Cannot get value on partially matched property.");
+                        "Cannot get value on partially matched property.");
                 }
 
                 return this.Container switch
@@ -415,7 +415,7 @@
                 if (this.Key == null)
                 {
                     throw new InvalidOperationException(
-                        $"Cannot set value on partially matched property.");
+                        "Cannot set value on partially matched property.");
                 }
 
                 switch (this.Container)
