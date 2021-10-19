@@ -1,6 +1,7 @@
 ﻿namespace Firefly.CloudFormationParser.TemplateObjects
 {
     using System.Collections.Generic;
+    using System.Linq;
 
     using Firefly.CloudFormationParser.Serialization.Deserializers;
 
@@ -14,5 +15,25 @@
     {
         /// <inheritdoc cref="ITemplateSection.Context"/>
         public DeserializationContext Context => DeserializationContext.Globals;
+
+        /// <summary>
+        /// <para>
+        /// Gets a named section from the globals map.
+        /// </para>
+        /// <para>
+        /// Section can be one of <c>Function</c>, <c>Api</c>, <c>HttpApi</c> or <c>SimpleTable</c>.
+        /// </para>
+        /// </summary>
+        /// <param name="sectionName">Name of the section.</param>
+        /// <returns>The section if declared, else <c>null</c></returns>
+        public Dictionary<string, object>? GetSection(string sectionName)
+        {
+            if (!this.ContainsKey(sectionName))
+            {
+                return null;
+            }
+
+            return ((Dictionary<object, object>)this[sectionName]).ToDictionary(kv => kv.Key.ToString(), kv => kv.Value);
+        }
     }
 }

@@ -66,6 +66,29 @@
         }
 
 
+        [Fact]
+        public void ShouldCreatePropertyWhenItDoesNotExist()
+        {
+            var expectedSecurityGroups = new List<string> { "sg-123", "sg-456", "sg-first" };
+
+            var resource = new Resource
+                               {
+                                   Name = "MyFunction",
+                                   Type = "AWS::Serverless::Function",
+                                   Properties = new Dictionary<string, object>()
+                               };
+
+            var template = new Mock<ITemplate>();
+            template.Setup(t => t.Resources).Returns(new List<IResource> { resource });
+
+            resource.Template = template.Object;
+
+            resource.UpdateResourceProperty("VpcConfig.SecurityGroupIds", expectedSecurityGroups);
+
+            resource.GetResourcePropertyValue("VpcConfig.SecurityGroupIds").Should()
+                .BeEquivalentTo(expectedSecurityGroups);
+        }
+
         private static IResource SetupDictionaryResource()
         {
             IResource resource = new Resource

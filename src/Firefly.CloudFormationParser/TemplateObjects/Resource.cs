@@ -16,6 +16,12 @@
     /// </summary>
     public class Resource : IConditionalTemplateObject, IResource
     {
+        /// <summary>
+        /// For SAM resources, list of types that can have properties in global section.
+        /// </summary>
+        private static readonly List<string> ValidGlobalSectionResources =
+            new List<string> { "Function", "Api", "HttpApi", "SimpleTable" };
+
         /// <inheritdoc cref="IResource.Condition"/>
         [YamlMember(Order = 0)]
         public string? Condition { get; set; }
@@ -47,6 +53,10 @@
                     _ => throw new InvalidCastException(
                              $"Unexpected type {this.DependsOn.GetType().Name} for DependsOn in resource {this.Name}")
                 };
+
+        /// <inheritdoc cref="IResource.IsSAMResource"/>
+        [YamlIgnore]
+        public bool IsSAMResource => this.Type != null && this.Type.StartsWith("AWS::Serverless");
 
         /// <summary>
         /// Gets or sets the function transform.
@@ -99,31 +109,90 @@
         [YamlMember(Order = 8)]
         public string? Version { get; set; }
 
+        /// <inheritdoc cref="IResource.Template"/>
         [YamlIgnore]
-        internal ITemplate? Template { get; set; }
+        public ITemplate? Template { get; set; }
 
         /// <inheritdoc cref="IResource.GetResourcePropertyValue"/>
         public object? GetResourcePropertyValue(string propertyPath)
         {
-            var prop = this.GetPropertyAtPath(propertyPath);
+            var prop = this.GetPropertyAtPath(this.Properties, propertyPath, false);
             var propValue = prop?.GetValue();
 
-            if (!(propValue is IIntrinsic intrinsic))
+            if (propValue is IIntrinsic intrinsic)
             {
-                // Value is scalar, list or dictionary
-                return propValue;
+                if (this.Template == null)
+                {
+                    // Should only get this for incorrectly set up tests.
+                    throw new InvalidOperationException(
+                        $"Resource {this.Name}: Cannot evaluate intrinsic when template property is null");
+                }
+
+                // Evaluate the intrinsic and return its result
+                return intrinsic.Evaluate(this.Template);
             }
 
-            if (this.Template == null)
+            // Value is null, scalar, list or dictionary
+            if (this.IsSAMResource)
             {
-                // Should only get this for incorrectly set up tests.
-                throw new InvalidOperationException(
-                    $"Resource {this.Name}: Cannot evaluate intrinsic when template property is null");
+                if (this.Template?.Globals == null)
+                {
+                    return propValue;
+                }
+
+                // Maybe property is in globals section
+                var globalType = this.Type!.Split(new[] { "::" }, StringSplitOptions.None).Last();
+
+                if (!ValidGlobalSectionResources.Contains(globalType))
+                {
+                    return propValue;
+                }
+
+                if (this.Template == null)
+                {
+                    // Should only get this for incorrectly set up tests.
+                    throw new InvalidOperationException(
+                        $"Resource {this.Name}: Cannot evaluate globals when template property is null");
+                }
+
+                var section = this.Template.Globals.GetSection(globalType);
+
+                if (section == null)
+                {
+                    return propValue;
+                }
+
+                var globalProp = this.GetPropertyAtPath(section, propertyPath, false);
+
+                if (globalProp == null)
+                {
+                    return propValue;
+                }
+
+                var globalValue = globalProp.GetValue();
+
+                switch (propValue)
+                {
+                    case null:
+                        return globalValue;
+
+                    case IDictionary<object, object> dict
+                        when globalValue is IDictionary<object, object> globalValueDict:
+
+                        foreach (var kv in dict)
+                        {
+                            globalValueDict[kv.Key] = dict[kv.Key];
+                        }
+
+                        return globalValueDict;
+
+                    case IList<object> list when globalValue is IList<object> globalList:
+
+                        return list.Union(globalList).ToList();
+                }
             }
 
-            // Evaluate the intrinsic and return its result
-            return intrinsic.Evaluate(this.Template);
-
+            return propValue;
         }
 
         /// <summary>
@@ -140,46 +209,84 @@
         /// <inheritdoc cref="IResource.UpdateResourceProperty"/>
         public void UpdateResourceProperty(string propertyPath, object newValue)
         {
-            var prop = this.GetPropertyAtPath(propertyPath);
+            var prop = this.GetPropertyAtPath(this.Properties, propertyPath, true)!;
 
-            // TODO - If null, create property
-            if (prop == null)
+            if (!prop.IsIncompleteMatch)
             {
-                throw new InvalidOperationException($"Resource {this.Name}: No property to set at {propertyPath}");
+                prop.SetValue(newValue);
+                return;
             }
 
-            prop.SetValue(newValue);
+            var current = prop.Container;
+            var leafPropName = prop.UnresolvedProperties.Last();
+
+            while (prop.UnresolvedProperties.Count > 1)
+            {
+                var propName = prop.UnresolvedProperties.Dequeue();
+
+                switch (current)
+                {
+                    case IDictionary<string, object> dict:
+
+                        current = new Dictionary<object, object>();
+                        dict[propName] = current;
+                        break;
+
+                    case IDictionary<object, object> dict:
+
+                        current = new Dictionary<object, object>();
+                        dict[propName] = current;
+                        break;
+                }
+            }
+
+            // Last one gets the value
+            switch (current)
+            {
+                case IDictionary<string, object> dict:
+
+                    dict[leafPropName] = newValue;
+                    break;
+
+                case IDictionary<object, object> dict:
+
+                    dict[leafPropName] = newValue;
+                    break;
+            }
         }
 
         /// <summary>
         /// Gets an object that references a property value within the properties hierarchy.
         /// </summary>
+        /// <param name="propertiesToSearch">Object graph to search. Can be resource or global properties.</param>
         /// <param name="propertyPath">The property path.</param>
+        /// <param name="returnClosestNode">If <c>true</c> return the closest node to the requested property.</param>
         /// <returns>Object that can be used to get or set the value of the property within the resource.</returns>
-        private ResourceProperty? GetPropertyAtPath(string propertyPath)
+        private ResourceProperty? GetPropertyAtPath(IDictionary<string, object>?  propertiesToSearch, string propertyPath, bool returnClosestNode)
         {
-            // TODO: Handle Serverless Globals, which when setting will have to create new properties on target object. Will need ref to parent template.
             if (propertyPath == null)
             {
                 throw new ArgumentNullException(nameof(propertyPath), "Argument cannot be null");
             }
 
-            var pathSegments = propertyPath.Split('.');
+            var pathSegments = new System.Collections.Generic.Queue<string>(propertyPath.Split('.'));
+            var lastSegment = pathSegments.Last();
 
-            if (this.Properties == null)
+            if (propertiesToSearch == null)
             {
                 throw new FormatException($"Cannot find resource property {propertyPath} in resource {this.Name}");
             }
 
-            object current = this.Properties;
-            object parent = this.Properties;
-
+            object? current = propertiesToSearch;
+            object? parent = propertiesToSearch;
+            
             string finalSegment = string.Empty;
             string key = string.Empty;
             var finished = false;
 
-            foreach (var segment in pathSegments)
+            while (pathSegments.Any())
             {
+                var segment = pathSegments.Peek();
                 finalSegment = segment;
                 parent = current;
                 key = segment;
@@ -194,7 +301,7 @@
                             break;
                         }
 
-                        return null;
+                        return returnClosestNode ? new ResourceProperty(current, pathSegments) : null;
 
                     case IList<object> list:
 
@@ -204,7 +311,7 @@
                             break;
                         }
 
-                        return null;
+                        return returnClosestNode ? new ResourceProperty(current, pathSegments) : null;
 
                     default:
 
@@ -216,9 +323,11 @@
                 {
                     break;
                 }
+
+                pathSegments.Dequeue();
             }
 
-            return finalSegment == pathSegments.Last() ? new ResourceProperty(parent, key) : null;
+            return finalSegment == lastSegment ? new ResourceProperty(parent!, key) : null;
         }
 
         /// <summary>
@@ -226,7 +335,25 @@
         /// </summary>
         private class ResourceProperty
         {
-            public ResourceProperty(object container, string key)
+            /// <summary>
+            /// Initializes a new instance of the <see cref="ResourceProperty"/> class.
+            /// </summary>
+            /// <param name="container">The container.</param>
+            /// <param name="unresolvedProperties">The unresolved properties.</param>
+            public ResourceProperty(
+                object container,
+                System.Collections.Generic.Queue<string> unresolvedProperties)
+                : this(container, (string?)null)
+            {
+                this.UnresolvedProperties = unresolvedProperties;
+            }
+
+            /// <summary>
+            /// Initializes a new instance of the <see cref="ResourceProperty"/> class.
+            /// </summary>
+            /// <param name="container">The container.</param>
+            /// <param name="key">The key.</param>
+            public ResourceProperty(object container, string? key)
             {
                 this.Container = container;
                 this.Key = key;
@@ -238,15 +365,25 @@
             /// <value>
             /// The container.
             /// </value>
-            private object Container { get; }
+            public object Container { get; }
 
+            /// <summary>
+            /// Gets a value indicating whether this represents an incomplete match which it will if there are ant unresolved properties. 
+            /// </summary>
+            /// <value>
+            ///   <c>true</c> if this instance is incomplete match; otherwise, <c>false</c>.
+            /// </value>
+            public bool IsIncompleteMatch => this.UnresolvedProperties.Any();
+            
             /// <summary>
             /// Gets the key to the container - key name for dict, index for list.
             /// </summary>
             /// <value>
             /// The key.
             /// </value>
-            private string Key { get; }
+            private string? Key { get; }
+
+            public System.Collections.Generic.Queue<string> UnresolvedProperties { get; } = new System.Collections.Generic.Queue<string>();
 
             /// <summary>
             /// Gets the value at the selected container and key.
@@ -254,6 +391,12 @@
             /// <returns>The value</returns>
             public object GetValue()
             {
+                if (this.Key == null)
+                {
+                    throw new InvalidOperationException(
+                        $"Cannot get value on partially matched property.");
+                }
+
                 return this.Container switch
                     {
                         IDictionary dict => dict[this.Key],
@@ -269,6 +412,12 @@
             /// <param name="value">The value.</param>
             public void SetValue(object? value)
             {
+                if (this.Key == null)
+                {
+                    throw new InvalidOperationException(
+                        $"Cannot set value on partially matched property.");
+                }
+
                 switch (this.Container)
                 {
                     case IDictionary dict:

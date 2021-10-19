@@ -24,6 +24,35 @@
         string? Condition { get; set; }
 
         /// <summary>
+        /// Gets or sets the creation policy.
+        /// </summary>
+        /// <value>
+        /// The creation policy.
+        /// </value>
+        Dictionary<string, object>? CreationPolicy { get; set; }
+
+        /// <summary>
+        /// Gets or sets the deletion policy.
+        /// </summary>
+        /// <value>
+        /// The deletion policy.
+        /// </value>
+        string? DeletionPolicy { get; set; }
+
+        /// <summary>
+        /// <para>
+        /// Gets or sets explicit dependencies on other resources in the template.
+        /// </para>
+        /// <para>
+        /// You should use the convenience property <see cref="ExplicitDependencies"/> to get the list of dependencies.
+        /// </para>
+        /// </summary>
+        /// <value>
+        /// The dependencies which will be <c>null</c> if the template did not provide this property. 
+        /// </value>
+        object? DependsOn { get; set; }
+
+        /// <summary>
         /// <para>
         /// Gets or sets the resource's description.
         /// </para>
@@ -37,28 +66,44 @@
         object? Description { get; set; }
 
         /// <summary>
-        /// <para>
-        /// Gets or sets the resource type.
-        /// </para>
-        /// The resource type identifies the type of resource that you are declaring. For example, AWS::EC2::Instance declares an EC2 instance.
-        /// <para>
-        /// </para>
+        /// Gets the explicit dependencies on other resources in the template.
         /// </summary>
         /// <value>
-        /// The type.
+        /// A list of explicit dependencies.
         /// </value>
-        string? Type { get; set; }
+        IEnumerable<string> ExplicitDependencies { get; }
 
         /// <summary>
-        /// Gets or sets the resource version.
+        /// Gets a value indicating whether this resource is a SAM declaration..
         /// </summary>
         /// <value>
-        /// The version.
+        ///   <c>true</c> if this instance is sam resource; otherwise, <c>false</c>.
         /// </value>
-        /// <remarks>
-        /// This property is valid for custom resources.
-        /// </remarks>
-        string? Version { get; set; }
+        // ReSharper disable once UnusedMember.Global
+        // ReSharper disable once InconsistentNaming
+        bool IsSAMResource { get; }
+
+        /// <summary>
+        /// Gets the template that declares this resource.
+        /// </summary>
+        /// <value>
+        /// The template.
+        /// </value>
+        ITemplate? Template { get; }
+
+        /// <summary>
+        /// <para>
+        /// Gets or sets the metadata.
+        /// </para>
+        /// <para>
+        /// You can use the optional Metadata section to include arbitrary JSON or YAML objects that provide details about the resource.
+        /// Often used with instances or launch templates to provide data for <c>cfn-init</c>.
+        /// </para>
+        /// </summary>
+        /// <value>
+        /// The metadata.
+        /// </value>
+        Dictionary<string, object>? Metadata { get; set; }
 
         /// <summary>
         /// <para>
@@ -76,25 +121,16 @@
 
         /// <summary>
         /// <para>
-        /// Gets or sets the metadata.
+        /// Gets or sets the resource type.
         /// </para>
+        /// The resource type identifies the type of resource that you are declaring. For example, AWS::EC2::Instance declares an EC2 instance.
         /// <para>
-        /// You can use the optional Metadata section to include arbitrary JSON or YAML objects that provide details about the resource.
-        /// Often used with instances or launch templates to provide data for <c>cfn-init</c>.
         /// </para>
         /// </summary>
         /// <value>
-        /// The metadata.
+        /// The type.
         /// </value>
-        Dictionary<string, object>? Metadata { get; set; }
-
-        /// <summary>
-        /// Gets or sets the creation policy.
-        /// </summary>
-        /// <value>
-        /// The creation policy.
-        /// </value>
-        Dictionary<string, object>? CreationPolicy { get; set; }
+        string? Type { get; set; }
 
         /// <summary>
         /// Gets or sets the update policy.
@@ -105,14 +141,6 @@
         Dictionary<string, object>? UpdatePolicy { get; set; }
 
         /// <summary>
-        /// Gets or sets the deletion policy.
-        /// </summary>
-        /// <value>
-        /// The deletion policy.
-        /// </value>
-        string? DeletionPolicy { get; set; }
-
-        /// <summary>
         /// Gets or sets the update replace policy.
         /// </summary>
         /// <value>
@@ -121,25 +149,15 @@
         string? UpdateReplacePolicy { get; set; }
 
         /// <summary>
-        /// <para>
-        /// Gets or sets explicit dependencies on other resources in the template.
-        /// </para>
-        /// <para>
-        /// You should use the convenience property <see cref="ExplicitDependencies"/> to get the list of dependencies.
-        /// </para>
+        /// Gets or sets the resource version.
         /// </summary>
         /// <value>
-        /// The dependencies which will be <c>null</c> if the template did not provide this property. 
+        /// The version.
         /// </value>
-        object? DependsOn { get; set; }
-
-        /// <summary>
-        /// Gets the explicit dependencies on other resources in the template.
-        /// </summary>
-        /// <value>
-        /// A list of explicit dependencies.
-        /// </value>
-        IEnumerable<string> ExplicitDependencies { get; }
+        /// <remarks>
+        /// This property is valid for custom resources.
+        /// </remarks>
+        string? Version { get; set; }
 
         /// <summary>
         /// Gets a resource property value.
@@ -147,7 +165,6 @@
         /// <param name="propertyPath">The property path.</param>
         /// <returns>The value of the property; else <c>null</c> if the property path was not found.</returns>
         object? GetResourcePropertyValue(string propertyPath);
-
 
         /// <summary>
         /// <para>
