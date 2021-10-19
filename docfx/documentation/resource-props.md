@@ -1,33 +1,78 @@
-# Accessing Resource Properties
+# Property Manipulation
 
-The properties of a resource may be read or modified using the property accessor methods on [IResource](xref:Firefly.CloudFormationParser.IResource). This permits the modification of resources that would be associated with making a CloudFormation Package.
+Using this library it is possible to read, change or create properties on resources prior to re-serializing the template. This is especially useful when implementing functionality such as `aws cloudformation package` where you would package local files to S3 and then adjust the resource to point to the uploaded S3 object.
+
+## Methods for Property Manipulation
+
+* [IResource.GetPropertyValue](xref:Firefly.CloudFormationParser.IResource.GetResourcePropertyValue(System.String)) - Gets the value at the given property path. This may be a scalar value if the property is a leaf node in the resource declaration, or a dictionary or list if the requested property has descendants. If it is a leaf node and there is an intrinsic at the node, then the library attempts to evaluate the result of the intrinsic. The evaluation will depend on values provided for template parameters. If the property is not found, then `null` is returned.
+* [IResource.UpdateResourceProperty](xref:Firefly.CloudFormationParser.IResource.UpdateResourceProperty(System.String,System.Object)) - Sets the value of the property at the given property path. The value of the property at the given path is replaced with the value you provide. This value may be a scalar or a complete object graph. If the given path does not resolve, then object graph is added for the unresolved path segments before the value is placed at the new leaf node.
 
 ## Property Path Syntax
 
-To reference a particular property, use a path syntax as follows.
+Paths are expressed in dotted notation, and list elements with a zero-based index e.g.
 
 ```yaml
-  ConfigRole: # Role for config service, allowing access to S3 bucket and SNS
-    Type: "AWS::IAM::Role"
-    Properties:
-      AssumeRolePolicyDocument:
-        Version: "2012-10-17"
-        Statement:
-          - Effect: "Allow"
-            Principal:
-              Service: "config.amazonaws.com"
-            Action:
-              - "sts:AssumeRole"
+  MyLambda:
+    Type: AWS::Serverless::Function
+    Properies:
+      VpcConfig:
+        SecurityGroupIds:
+          - sg-123
+          - sg-456
 ```
+`VpcConfig.SecurityGroupIds` as a path will return a `List<object>` containing the security group IDs
 
-If we wanted to get to value of the `Action` in the policy document above, the path syntax would be
+```yaml
+  iamRole:
+    Type: AWS::IAM::Role
+    Properties:
+      Path: /
+      AssumeRolePolicyDocument:
+        Statement:
+          - Effect: Allow
+            Action: sts:AssumeRole
+            Principal:
+              Service:
+                - lambda.amazonaws.com
+      Policies:
+        - PolicyName: ADConnector
+          PolicyDocument:
+            Version: 2012-10-17
+            Statement:
+              - Sid: CreateAdConnectorEc2Resources
+                Effect: Allow
+                Action:
+                  - ec2:DescribeSubnets
+                Resource: '*'
+                Condition:
+                  Bool:
+                    aws:ViaAWSService: true
+              - Sid: DeleteAdConnectorEc2Resources
+                Effect: Allow
+                Action:
+                  - ec2:DeleteSecurityGroup
+                Resource: '*'
+                Condition:
+                  Bool:
+                    aws:ViaAWSService: true
+```
+* `Polices.0.PolicyDocument.Statement.0.Sid` will return the value `CreateAdConnectorEc2Resources`
+* `Polices.0.PolicyDocument.Statement` will return a `List<object>` containing all the statements.
 
-`AssumeRolePolicyDocument.Statement.0.Action.0`
+```yaml
+Parameters:
+  Param1:
+    Type: String
+    Value: MyValue
 
-That is to say, for mapping entries use the key name and for list entries, use the zero-based index.
+Resources:
+  SSMParameter:
+    Type: AWS::SSM::Parameter
+    Properties:
+      Type: String
+      Name: MyName
+      Value: !Ref Param1
+```
+`Value` will return `MyValue`. If an alternate value for parameter `Param1` is set by the [deserializer builder](xref:Firefly.CloudFormationParser.Serialization.Settings.DeserializerSettingsBuilder.WithParameterValues(System.Collections.Generic.IDictionary{System.String,System.Object})) then that value will be returned.
 
-## Property Accessor Methods
-
-* [IResource.GetResourcePropertyValue](xref:Firefly.CloudFormationParser.IResource.GetResourcePropertyValue(System.String)) - Gets the value of a property at the given path.
-* [IResource.UpdateResourceProperty](xref:Firefly.CloudFormationParser.IResource.UpdateResourceProperty(System.String,System.Object)) - Replaces the value of a propery at the given path.
 

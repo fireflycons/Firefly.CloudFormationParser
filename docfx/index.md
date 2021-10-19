@@ -11,3 +11,7 @@ Using this library, templates may be parsed from a number of sources, currently:
 * A stream
 * From a deployed CloudFormation Stack
 * From a template stored in S3
+
+<hr>
+
+[Return to GitHub](https://github.com/fireflycons/Firefly.CloudFormationParser)
