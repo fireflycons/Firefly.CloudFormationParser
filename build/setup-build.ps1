@@ -83,9 +83,16 @@ if ($env:APPVEYOR_REPO_TAG -eq "true")
     # Full release
     if ($tagParts.Length -eq 1) # X.Y.Z
     {
+        if (-not ($env:APPVEYOR_REPO_TAG_NAME -match '(?<ver>\d+\.\d+\.\d+)'))
+        {
+            throw "Invalid tag version: $env:APPVEYOR_REPO_TAG_NAME"
+        }
+
+        $version = $Matches.ver
+
         Update-AllPackagesGeneration
-        $env:Build_Version = $env:APPVEYOR_REPO_TAG_NAME
-        $env:Release_Name = $env:Build_Version
+        $env:Build_Version = $version
+        $env:Release_Name = $version
     }
     # Partial release
     else # Slug/X.Y.Z
