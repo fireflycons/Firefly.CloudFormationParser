@@ -66,12 +66,17 @@ build_script:
 test_script:
   - ps: ./build/run-tests.ps1
 
-## Documentation
-after_test:
+artifacts:
+  - path: '**\bin\Release\*.nupkg'
+    name: NuGet
+  - path: '**\bin\Release\*.snupkg'
+    name: NuGet symbols
+
+before_deploy:
   # Release documentation
   - ps: ./build/publish-docs.ps1
 
-## Deploy
+
 deploy:
   ## GitHub
   - provider: GitHub
