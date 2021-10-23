@@ -1,5 +1,6 @@
 ﻿namespace Firefly.CloudFormationParser.Intrinsics.Functions
 {
+    using System;
     using System.Collections.Generic;
     using System.Linq;
 
@@ -29,7 +30,7 @@
         /// <value>
         /// The name of the map.
         /// </value>
-        public string MapName { get; set; } = "##UNSET";
+        object MapName { get; set; } = "##UNSET";
 
         /// <summary>
         /// Gets or sets the second level key.
@@ -62,17 +63,25 @@
         /// <inheritdoc />
         public override object Evaluate(ITemplate template)
         {
+            var evaluatedMapName = this.MapName switch
+                {
+                    string s => s,
+                    IIntrinsic intrinsic => intrinsic.Evaluate(template).ToString(),
+                    _ => throw new InvalidOperationException(
+                             $"{this.LongName}: Invalid type {this.MapName.GetType().Name} for map name")
+                };
+
             if (template.Mappings == null)
             {
                 throw new System.InvalidOperationException("Cannot evaluate FindInMap. Template has no mappings");
             }
 
-            if (!template.Mappings.ContainsKey(this.MapName))
+            if (!template.Mappings.ContainsKey(evaluatedMapName))
             {
                 throw new System.InvalidOperationException($"FindInMap: Map not found '{this.MapName}'");
             }
 
-            var map = (Dictionary<object, object>)template.Mappings[this.MapName]!;
+            var map = (Dictionary<object, object>)template.Mappings[evaluatedMapName]!;
 
             map = (Dictionary<object, object>)this.GetNextMapLevel(template, map, this.TopLevelKey);
             return this.GetNextMapLevel(template, map, this.SecondLevelKey);
@@ -102,7 +111,7 @@
         {
             var refs = new List<string>();
             
-            foreach (var k in new[] { this.TopLevelKey, this.SecondLevelKey })
+            foreach (var k in new[] { this.MapName, this.TopLevelKey, this.SecondLevelKey })
             {
                 if (k is IIntrinsic intrinsic)
                 {
@@ -119,7 +128,7 @@
             var list = values.ToList();
 
             this.ValidateValues(this.MinValues, this.MaxValues, list);
-            this.MapName = (string)list[0];
+            this.MapName = list[0];
             this.Items = list.Skip(1).Select(this.UnpackIntrinsic).ToList();
         }
 
