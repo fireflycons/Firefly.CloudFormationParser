@@ -2,6 +2,9 @@
 
 [![Build status](https://ci.appveyor.com/api/projects/status/710rkxeyw1inj39w/branch/master?svg=true)](https://ci.appveyor.com/project/fireflycons/firefly-cloudformationparser/branch/master)
 
+
+![Nuget](https://img.shields.io/nuget/v/Firefly.CloudFormationParser)
+
 **WORK IN PROGESS**
 
 There are so many questions on Stack Overflow and other sites related to the parsing of CloudFormation Templates in .NET. This is a problem I really wanted to solve once and for all, as I have several other repos here that have half-cocked CloudFormation support, and this package will be gradually integrated into them.
@@ -26,15 +29,6 @@ To get it working you need to:
 - Uncheck option "Enable Just My Code"
 - Add the NuGet symbol server (*https://symbols.nuget.org/download/symbols*)
 - Check option "Enable Source Link support"
-
-
-## Usage
-
-### Packages
-
-There will soon be...
-
-* `Firefly.CloudFormationParser` - Core functionality with support for reading templates from stream, string or file.
 
 ## Next Steps
 
