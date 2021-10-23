@@ -3,7 +3,7 @@
 [![Build status](https://ci.appveyor.com/api/projects/status/710rkxeyw1inj39w/branch/master?svg=true)](https://ci.appveyor.com/project/fireflycons/firefly-cloudformationparser/branch/master)
 
 
-![Nuget](https://img.shields.io/nuget/v/Firefly.CloudFormationParser)
+[![Nuget](https://img.shields.io/nuget/v/Firefly.CloudFormationParser)](https://www.nuget.org/packages/Firefly.CloudFormationParser/)
 
 **WORK IN PROGESS**
 
