@@ -30,7 +30,7 @@
         /// <value>
         /// The name of the map.
         /// </value>
-        object MapName { get; set; } = "##UNSET";
+        public object MapName { get; set; } = "##UNSET";
 
         /// <summary>
         /// Gets or sets the second level key.
