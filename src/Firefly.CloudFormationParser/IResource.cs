@@ -160,7 +160,7 @@
         string? Version { get; set; }
 
         /// <summary>
-        /// Gets a resource property value. <see href="https://fireflycons.github.io/Firefly.CloudFormationParser/documentation/resource-props.html">Property Manipulation</see> in the documentation.
+        /// Gets a resource property value. See <see href="https://fireflycons.github.io/Firefly.CloudFormationParser/documentation/resource-props.html">Property Manipulation</see> in the documentation.
         /// </summary>
         /// <param name="propertyPath">The property path.</param>
         /// <returns>The value of the property; else <c>null</c> if the property path was not found.</returns>
@@ -168,7 +168,7 @@
 
         /// <summary>
         /// <para>
-        /// Updates a property of this resource. <see href="https://fireflycons.github.io/Firefly.CloudFormationParser/documentation/resource-props.html">Property Manipulation</see> in the documentation.
+        /// Updates a property of this resource. See <see href="https://fireflycons.github.io/Firefly.CloudFormationParser/documentation/resource-props.html">Property Manipulation</see> in the documentation.
         /// </para>
         /// <para>
         /// You would want to do this if you were implementing the functionality of <c>aws cloudformation package</c>

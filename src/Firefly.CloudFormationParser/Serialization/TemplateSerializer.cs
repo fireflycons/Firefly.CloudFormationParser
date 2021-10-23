@@ -12,6 +12,7 @@
 
     using YamlDotNet.Core;
     using YamlDotNet.Serialization;
+    using YamlDotNet.Serialization.EventEmitters;
 
     /// <summary>
     /// Serialize/Deserialize a CloudFormation Template
@@ -102,7 +103,9 @@
                                      };
 
             var serializerBuilder =
-                new SerializerBuilder().WithEmissionPhaseObjectGraphVisitor(
+                new SerializerBuilder()
+                    .WithEventEmitter(inner => new CloudFormationTypeAssigningEventEmitter(inner), loc => loc.InsteadOf<TypeAssigningEventEmitter>())
+                    .WithEmissionPhaseObjectGraphVisitor(
                     args => new SkipNullObjectGraphVisitor(args.InnerVisitor)); // Don't emit empty template sections
 
             // Register the type converters

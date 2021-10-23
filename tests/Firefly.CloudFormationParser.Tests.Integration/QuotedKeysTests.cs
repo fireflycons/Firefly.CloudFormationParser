@@ -19,9 +19,15 @@
         private string templateContent;
 #pragma warning restore
 
-        public async void ShouldQuoteNumericKeyOnSerialization()
+        [Fact]
+        public async void ShouldQuoteNumericKeysOnSerialization()
         {
-            const string numericKey = "0123456789012";
+            const string numericKey1 = "1";
+            const string numericKey2 = "2";
+            const string numericKey3 = "3";
+            const string numericKey4 = "4";
+            const string numericKey300 = "300";
+
             string yaml;
 
             var template = await Template.Deserialize(new DeserializerSettingsBuilder().WithTemplateString(this.templateContent).Build());
@@ -39,7 +45,8 @@
                 throw;
             }
 
-            yaml.Should().Contain($"'{numericKey}'");
+            yaml.Should().Contain($"'{numericKey1}'").And.Contain($"'{numericKey2}'").And.Contain($"'{numericKey3}'")
+                .And.Contain($"'{numericKey4}'").And.NotContain($"'{numericKey300}'");
         }
     }
 }
