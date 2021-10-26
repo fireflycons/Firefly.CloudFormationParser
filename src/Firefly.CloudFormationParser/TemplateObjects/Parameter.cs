@@ -20,6 +20,63 @@
     [DebuggerDisplay("Param {Name}")]
     public class Parameter : IParameter
     {
+        /// <summary>
+        /// Map of AWS-Specific parameter type to validation regex
+        /// </summary>
+        private static readonly Dictionary<string, Regex> AwsParameterTypeRegexes = new Dictionary<string, Regex>
+                                                                                        {
+                                                                                            {
+                                                                                                "AWS::EC2::AvailabilityZone::Name",
+                                                                                                new Regex(
+                                                                                                    @"^\w{2}-\w+-(\w+-)?\d[a-f]$")
+                                                                                            },
+                                                                                            {
+                                                                                                "AWS::EC2::Image::Id",
+                                                                                                new Regex(
+                                                                                                    @"^ami-([0-9a-f]{8}|[0-9a-f]{17})$")
+                                                                                            },
+                                                                                            {
+                                                                                                "AWS::EC2::Instance::Id",
+                                                                                                new Regex(
+                                                                                                    @"^i-([0-9a-f]{8}|[0-9a-f]{17})$")
+                                                                                            },
+                                                                                            {
+                                                                                                "AWS::EC2::KeyPair::KeyName",
+                                                                                                new Regex(
+                                                                                                    @"^[^\s].{1,253}[^\s]$")
+                                                                                            },
+                                                                                            {
+                                                                                                "AWS::EC2::SecurityGroup::GroupName",
+                                                                                                new Regex(
+                                                                                                    @"^[\sa-zA-Z0-9_\-\.\:\/\(\}\#\,\@\[\]\+\=\&\;\{\}\!\$\*]{1-255}$")
+                                                                                            },
+                                                                                            {
+                                                                                                "AWS::EC2::SecurityGroup::Id",
+                                                                                                new Regex(
+                                                                                                    @"^sg-([0-9a-f]{8}|[0-9a-f]{17})$")
+                                                                                            },
+                                                                                            {
+                                                                                                "AWS::EC2::Subnet::Id",
+                                                                                                new Regex(
+                                                                                                    @"^subnet-([0-9a-f]{8}|[0-9a-f]{17})$")
+                                                                                            },
+                                                                                            {
+                                                                                                "AWS::EC2::Volume::Id",
+                                                                                                new Regex(
+                                                                                                    @"^vol-([0-9a-f]{8}|[0-9a-f]{17})$")
+                                                                                            },
+                                                                                            {
+                                                                                                "AWS::EC2::VPC::Id",
+                                                                                                new Regex(
+                                                                                                    @"^vpc-([0-9a-f]{8}|[0-9a-f]{17})$")
+                                                                                            },
+                                                                                            {
+                                                                                                "AWS::Route53::HostedZone::Id",
+                                                                                                new Regex(
+                                                                                                    @"^Z[0-9A-Z]+$")
+                                                                                            }
+                                                                                        };
+
         /// <inheritdoc cref="IParameter.AllowedPattern"/>>
         [YamlIgnore]
         public Regex? AllowedPattern { get; private set; }
@@ -184,6 +241,7 @@
 
             var value = parameterValues[name];
             var valueType = value.GetType();
+            var stringVal = value.ToString();
 
             switch (this.Type)
             {
@@ -271,8 +329,6 @@
                             $"Parameter {name} - cannot assign array value to String type");
                     }
 
-                    var stringVal = value.ToString();
-
                     // ReSharper disable once AssignNullToNotNullAttribute - checked by IsNullOrEmpty
                     if (this.AllowedPattern != null && !this.AllowedPattern.IsMatch(stringVal))
                     {
@@ -291,19 +347,64 @@
 
                 case "CommaDelimitedList":
 
-                    this.CurrentValue = ((string)value).Split(',').Select(s => s.Trim()).ToList();
+                    this.CurrentValue = ((string)value).Split(',').Select(item => item.Trim()).ToList();
                     break;
 
-                default: // Remaining List<*>, which are all string lists
+                case "List<String>":
 
-                    if (value is IEnumerable enumerable)
+                    this.CurrentValue = (value as IEnumerable)?.ToList().Cast<string>().ToList();
+                    break;
+
+                default: // AWS:: types or remaining List<*>, which are all string lists
+
+                    // TODO: Verify AWS types
+                    if (AwsParameterTypeRegexes.ContainsKey(this.Type))
                     {
-                        var values = enumerable.ToList().Cast<string>().ToList();
+                        if (!AwsParameterTypeRegexes[this.Type].IsMatch(stringVal))
+                        {
+                            throw new ArgumentException(
+                                $"Parameter {name} - Value '{stringVal}' does not match required pattern for {this.Type}");
+                        }
 
-                        this.CurrentValue = values;
+                        this.CurrentValue = stringVal;
+                        break;
                     }
 
-                    break;
+                    if (value is string s)
+                    {
+                        this.CurrentValue = s;
+                        break;
+                    }
+
+                    var mc = Regex.Match(this.Type, @"List\<(?<type>[^\>]+)\>");
+                    
+                    if (mc.Success && value is IEnumerable enumerable)
+                    {
+                        var listType = mc.Groups["type"].Value;
+
+                        if (!AwsParameterTypeRegexes.ContainsKey(listType))
+                        {
+                            throw new ArgumentException($"Parameter {name} - Invalid type {this.Type}");
+                        }
+
+                        var listValues = new List<string>();
+
+                        foreach (var id in enumerable.ToList().Cast<string>())
+                        {
+                            if (!AwsParameterTypeRegexes[listType].IsMatch(id))
+                            {
+                                throw new ArgumentException(
+                                    $"Parameter {name} - Value '{id}' does not match required pattern for {this.Type}");
+                            }
+
+                            listValues.Add(id);
+                        }
+
+                        this.CurrentValue = listValues;
+                        break;
+                    }
+
+                    throw new ArgumentException($"Parameter {name} - Invalid type {this.Type}");
             }
         }
 
