@@ -61,24 +61,35 @@
         /// <inheritdoc />
         internal override int MinValues => 3;
 
-        /// <inheritdoc />
-        public override object Evaluate(ITemplate template)
+        /// <summary>
+        /// Gets the branch based on condition evaluation.
+        /// </summary>
+        /// <param name="template">The template.</param>
+        /// <returns>Either <see cref="ValueIfTrue" /> or <see cref="ValueIfFalse" /> based on conditions.</returns>
+        /// <exception cref="Amazon.CloudFormation.Model.InvalidOperationException">Condition '{this.Condition} not found in Conditions section of template.</exception>
+        public object GetBranch(ITemplate template)
         {
             if (template.EvaluatedConditions.ContainsKey(this.Condition))
             {
-                var evaluation = template.EvaluatedConditions[this.Condition] ? this.ValueIfTrue : this.ValueIfFalse;
-
-                if (evaluation is IIntrinsic intrinsic)
-                {
-                    return intrinsic.Evaluate(template);
-                }
-
-                // Walk this object evaluating any nested intrinsics
-                return evaluation.CopyAndEvaluateIntrinsics(template)!;
+                return template.EvaluatedConditions[this.Condition] ? this.ValueIfTrue : this.ValueIfFalse;
             }
 
             throw new InvalidOperationException(
                 $"Condition '{this.Condition} not found in Conditions section of template.");
+        }
+
+        /// <inheritdoc />
+        public override object Evaluate(ITemplate template)
+        {
+            var evaluation = this.GetBranch(template);
+
+            if (evaluation is IIntrinsic intrinsic)
+            {
+                return intrinsic.Evaluate(template);
+            }
+
+            // Walk this object evaluating any nested intrinsics
+            return evaluation.CopyAndEvaluateIntrinsics(template)!;
         }
 
         /// <inheritdoc />
