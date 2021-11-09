@@ -143,7 +143,7 @@
         {
             this.UserParameterValues = parameterValues;
             this.UserParameterValues["AWS::NoValue"] = new AWSNoValue();
-
+            
             // Name these objects from their parent keys in the template schema.
             FixNames(this.ParsedParameters);
             FixNames(this.ParsedResources);
@@ -153,6 +153,12 @@
             foreach (var resource in this.ParsedResources.Select(kvp => kvp.Value))
             {
                 resource.Template = this;
+            }
+            
+            // Set parameters with any user values
+            foreach (var param in this.Parameters)
+            {
+                param.SetCurrentValue(parameterValues);
             }
 
             this.ProcessConditions();
@@ -585,9 +591,14 @@
                         this.GenerateGraphEdges(targetVertex, list1);
                         break;
 
-                    case AbstractIntrinsic tag1:
+                    case AbstractArrayIntrinsic arrayIntrinsic:
 
-                        switch (tag1)
+                        this.GenerateGraphEdges(targetVertex, arrayIntrinsic.Items);
+                        break;
+
+                    case AbstractIntrinsic abstractIntrinsic:
+
+                        switch (abstractIntrinsic)
                         {
                             case RefIntrinsic @ref:
 
@@ -635,17 +646,16 @@
         /// <param name="sourceObject">Object whose vertex will be the source of the edge relationship.</param>
         private void AddReferenceEdge(IVertex targetVertex, string sourceObject)
         {
+            if (sourceObject.StartsWith("AWS::"))
+            {
+                this.AddPseudoParameter(sourceObject);
+            }
+
             var sourceVertex = this.SourceVertices.FirstOrDefault(v => v.Name == sourceObject);
 
             if (sourceVertex == null)
             {
-                if (!this.IsSAMReference(this.SourceVertices, sourceObject))
-                {
-                    throw new FormatException(
-                        $"Reference '{sourceObject}' not found for {targetVertex.TemplateObject.GetType().Name} '{targetVertex.Name}'");
-                }
-
-                // SAM template, but can't create reference now
+                // Can't create reference now
                 return;
             }
 
