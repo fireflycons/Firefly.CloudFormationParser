@@ -352,7 +352,10 @@
 
                 case "List<String>":
 
-                    this.CurrentValue = (value as IEnumerable)?.ToList().Cast<string>().ToList();
+                    this.CurrentValue = value is string
+                                            ? new List<string> { stringVal }
+                                            : (value as IEnumerable)?.ToList().Cast<string>().ToList();
+
                     break;
 
                 default: // AWS:: types or remaining List<*>, which are all string lists
