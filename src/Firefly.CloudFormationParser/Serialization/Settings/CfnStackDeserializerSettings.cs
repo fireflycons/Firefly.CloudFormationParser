@@ -92,7 +92,7 @@
             // Overwrite user ones from stack, but omit any NoEcho ones from 
             // stack as these will be undefined.
             var mergeParameters = stackResponse.Parameters.Where(p => !noEchoParameters.Contains(p.ParameterKey))
-                .ToDictionary(p => p.ParameterKey, p => (object)p.ParameterValue);
+                .ToDictionary(p => p.ParameterKey, p => string.IsNullOrEmpty(p.ResolvedValue) ? (object)p.ParameterValue : p.ResolvedValue);
 
             foreach (var pk in noEchoParameters.Where(pk => this.ParameterValues.All(kv => kv.Key != pk)))
             {
