@@ -239,7 +239,8 @@
                 return;
             }
 
-            var value = parameterValues[name];
+            var value = parameterValues[name] ?? string.Empty;
+
             var valueType = value.GetType();
             var stringVal = value.ToString();
 
