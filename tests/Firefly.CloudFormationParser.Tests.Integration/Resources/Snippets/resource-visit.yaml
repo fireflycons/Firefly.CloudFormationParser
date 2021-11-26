@@ -1,0 +1,78 @@
+AWSTemplateFormatVersion: 2010-09-09
+Parameters:
+  P1:
+    Type: String
+    Default: foo
+
+  P2:
+    Type: String
+    Default: bar
+
+  P3:
+    Type: String
+    Default: fizz
+
+  PValue:
+    Type: String
+    Default: Value
+
+  PNumber:
+    Type: Number
+    Default: 1
+
+Conditions:
+  NumberIsOne: !Equals
+    - !Ref PNumber
+    - 1
+
+Resources:
+
+  SingleReferenceIsLocated:
+    Type: AWS::SSM::Parameter
+    Properties:
+      Type: String
+      Value: !Ref P1
+
+  IfConditionReturnsOneOfTwoPossibleRefs:
+    Type: AWS::SSM::Parameter
+    Properties:
+      Type: String
+      Value: !If
+        - NumberIsOne
+        - !Ref P1
+        - !Ref P2
+
+  SelectReturnsOneOfTwoPossibleRefs:
+    Type: AWS::SSM::Parameter
+    Properties:
+      Type: String
+      Value: !Select
+        - 0
+        - - !Ref P1
+          - !Ref P2
+          - fizz
+
+  SubWithTwoRefArgumentsAndOneImplicitRef:
+    Type: AWS::SSM::Parameter
+    Properties:
+      Type: String
+      Value: !Sub
+        - '${S1}.${S2}.${P3}'
+        - S1: !Ref P1
+          S2: !Ref P2
+
+  GetAttIsLocated:
+    Type: AWS::SSM::Parameter
+    Properties:
+      Type: String
+      Value: !GetAtt
+        - SingleReferenceIsLocated
+        - Value
+
+  GetAttWithRef:
+    Type: AWS::SSM::Parameter
+    Properties:
+      Type: String
+      Value: !GetAtt
+        - SingleReferenceIsLocated
+        - !Ref PValue

@@ -30,5 +30,13 @@
         /// The name.
         /// </value>
         string Name { get; set; }
+
+        /// <summary>
+        /// Gets or sets the template which this object is contained in.
+        /// </summary>
+        /// <value>
+        /// The template.
+        /// </value>
+        ITemplate? Template { get; set; }
     }
 }

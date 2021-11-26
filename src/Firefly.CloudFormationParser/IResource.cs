@@ -8,7 +8,7 @@
     /// <summary>
     /// Interface describing a CloudFormation Resource.
     /// </summary>
-    public interface IResource : ITemplateObject
+    public interface IResource : ITemplateObject, IVisitable
     {
         /// <summary>
         /// <para>
@@ -82,14 +82,6 @@
         // ReSharper disable once UnusedMember.Global
         // ReSharper disable once InconsistentNaming
         bool IsSAMResource { get; }
-
-        /// <summary>
-        /// Gets the template that declares this resource.
-        /// </summary>
-        /// <value>
-        /// The template.
-        /// </value>
-        ITemplate? Template { get; }
 
         /// <summary>
         /// <para>

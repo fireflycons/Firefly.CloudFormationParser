@@ -168,6 +168,10 @@
         [YamlIgnore]
         public bool IsSsmParameter => this.Type.StartsWith("AWS::SSM::Parameter");
 
+        /// <inheritdoc />
+        /// [YamlIgnore]
+        public ITemplate? Template { get; set; }
+
         /// <inheritdoc cref="IParameter.GetClrType"/>>
         public Type GetClrType()
         {

@@ -206,6 +206,20 @@
             return $"Resource {this.Name}";
         }
 
+        /// <summary>
+        /// Walks the resource properties, visiting each one.
+        /// </summary>
+        /// <param name="templateObjectVisitor">The visitor.</param>
+        public void Accept(ITemplateObjectVisitor templateObjectVisitor)
+        {
+            if (this.Properties == null)
+            {
+                return;
+            }
+
+            this.Visit(this.Properties, templateObjectVisitor);
+        }
+
         /// <inheritdoc cref="IResource.UpdateResourceProperty"/>
         public void UpdateResourceProperty(string propertyPath, object newValue)
         {

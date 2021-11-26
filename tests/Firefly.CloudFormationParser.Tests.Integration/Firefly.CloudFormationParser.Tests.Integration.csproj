@@ -12,6 +12,7 @@
     <None Remove="Resources\Snippets\policy-condition-post.yaml" />
     <None Remove="Resources\Snippets\policy-condition-pre.yaml" />
     <None Remove="Resources\Snippets\quoted-keys.yaml" />
+    <None Remove="Resources\Snippets\resource-visit.yaml" />
     <None Remove="Resources\Snippets\template1.json" />
     <None Remove="Resources\Snippets\template1.yaml" />
     <None Remove="Resources\Snippets\sam-dependencies.yaml" />
@@ -26,6 +27,7 @@
     <EmbeddedResource Include="Resources\Snippets\policy-condition-post.yaml" />
     <EmbeddedResource Include="Resources\Snippets\policy-condition-pre.yaml" />
     <EmbeddedResource Include="Resources\Snippets\quoted-keys.yaml" />
+    <EmbeddedResource Include="Resources\Snippets\resource-visit.yaml" />
     <EmbeddedResource Include="Resources\Snippets\template1.json" />
     <EmbeddedResource Include="Resources\Snippets\template1.yaml" />
     <EmbeddedResource Include="Resources\Snippets\sam-dependencies.yaml" />

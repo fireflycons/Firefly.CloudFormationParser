@@ -31,8 +31,10 @@
         /// <summary>
         /// Names of implicit SAM resources created by event declarations in Serverless::Function
         /// </summary>
+
         // ReSharper disable once InconsistentNaming
-        private static readonly List<string> ImplicitSAMResources = new List<string> { "ServerlessRestApi", "ServerlessHttpApi", "ServerlessDeploymentApplication" };
+        private static readonly List<string> ImplicitSAMResources =
+            new List<string> { "ServerlessRestApi", "ServerlessHttpApi", "ServerlessDeploymentApplication" };
 
         /// <summary>
         /// Template graph vertices
@@ -143,18 +145,23 @@
         {
             this.UserParameterValues = parameterValues;
             this.UserParameterValues["AWS::NoValue"] = new AWSNoValue();
-            
+
             // Name these objects from their parent keys in the template schema.
-            FixNames(this.ParsedParameters);
-            FixNames(this.ParsedResources);
-            FixNames(this.ParsedOutputs);
+            this.FixNames(this.ParsedParameters);
+            this.FixNames(this.ParsedResources);
+            this.FixNames(this.ParsedOutputs);
+
+            if (this.Mappings != null)
+            {
+                this.Mappings.Template = this;
+            }
 
             // Point resources to the template, as resources need this for intrinsic evaluations
             foreach (var resource in this.ParsedResources.Select(kvp => kvp.Value))
             {
                 resource.Template = this;
             }
-            
+
             // Set parameters with any user values
             foreach (var param in this.Parameters)
             {
@@ -166,10 +173,10 @@
             if (excludeConditionalResources)
             {
                 foreach (var objectToRemove in this.Resources.Cast<IConditionalTemplateObject>()
-                    .Concat(this.Outputs.Cast<Output>())
-                    .Where(conditionalTemplateObject => !string.IsNullOrEmpty(conditionalTemplateObject.Condition)
+                    .Concat(this.Outputs.Cast<Output>()).Where(
+                        conditionalTemplateObject => !string.IsNullOrEmpty(conditionalTemplateObject.Condition)
 #pragma warning disable 8604 // string.IsNullOrEmpty checks this
-                                                        && !this.EvaluatedConditions[conditionalTemplateObject.Condition]))
+                                                     && !this.EvaluatedConditions[conditionalTemplateObject.Condition]))
 #pragma warning restore 8604
                 {
                     switch (objectToRemove)
@@ -225,6 +232,7 @@
             this.DependencyGraph.AddEdgeRange(this.edges);
 
 #if DEBUG
+
             // Generate a DOT graph of resources.
             // View by pasting the string content of dotGraph variable into https://dreampuf.github.io/GraphvizOnline
             var dotGraph = this.DependencyGraph.ToGraphviz(
@@ -256,7 +264,7 @@
         /// </summary>
         /// <typeparam name="T">Type of template section being processed</typeparam>
         /// <param name="section">The section.</param>
-        private static void FixNames<T>(IDictionary<string, T>? section)
+        private void FixNames<T>(IDictionary<string, T>? section)
             where T : ITemplateObject
         {
             if (section == null)
@@ -266,8 +274,11 @@
 
             foreach (var kv in section)
             {
-                // ReSharper disable once PossibleStructMemberModificationOfNonVariableStruct - These are ITemplateObject which are references, not values.
+                // ReSharper disable PossibleStructMemberModificationOfNonVariableStruct - These are ITemplateObject which are references, not values.
                 kv.Value.Name = kv.Key;
+                kv.Value.Template = this;
+
+                // ReSharper restore PossibleStructMemberModificationOfNonVariableStruct
             }
         }
 
@@ -678,11 +689,12 @@
         /// <returns>
         ///   <c>true</c> if [is sam reference] [the specified source vertices]; otherwise, <c>false</c>.
         /// </returns>
+
         // ReSharper disable once InconsistentNaming
         private bool IsSAMReference(IEnumerable<IVertex> sourceVertices, string reference)
         {
             return this.IsSAMTemplate && (ImplicitSAMResources.Contains(reference)
-                   || sourceVertices.FirstOrDefault(v => reference.StartsWith(v.Name)) != null);
+                                          || sourceVertices.FirstOrDefault(v => reference.StartsWith(v.Name)) != null);
         }
 
         /// <summary>

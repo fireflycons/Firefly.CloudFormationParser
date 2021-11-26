@@ -27,6 +27,10 @@
         [YamlIgnore]
         public string Name { get; set; } = string.Empty;
 
+        /// <inheritdoc />
+        /// [YamlIgnore]
+        public ITemplate? Template { get; set; }
+
         /// <inheritdoc cref="IOutput.Value"/>
         [YamlMember(Order = 2)]
         public object Value { get; set; } = new object();
