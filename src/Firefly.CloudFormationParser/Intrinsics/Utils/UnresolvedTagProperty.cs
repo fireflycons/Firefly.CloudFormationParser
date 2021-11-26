@@ -3,6 +3,7 @@
     using System;
     using System.Collections;
     using System.Collections.Generic;
+    using System.Linq;
     using System.Reflection;
 
     /// <summary>
@@ -57,6 +58,7 @@
             return value switch
                 {
                     IList list => (Dictionary<object, object>)list[this.Index],
+                    Dictionary<string, object> dicts => dicts.ToDictionary(kv => (object)kv.Key, kv => kv.Value),
                     Dictionary<object, object> dict => dict,
                     _ => throw new InvalidCastException(
                              $"Unexpected type {value.GetType().Name} on property {this.Property.Name} for {this.Intrinsic?.LongName}")

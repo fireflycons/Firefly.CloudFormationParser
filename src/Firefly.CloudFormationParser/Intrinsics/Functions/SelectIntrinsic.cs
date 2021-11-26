@@ -15,7 +15,7 @@
     ///  Represents the <see href="https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/intrinsic-function-reference-select.html">Fn::Select</see> intrinsic.
     /// </summary>
     /// <seealso cref="IIntrinsic" />
-    public class SelectIntrinsic : AbstractArrayIntrinsic
+    public class SelectIntrinsic : AbstractArrayIntrinsic, IBranchableIntrinsic
     {
         /// <summary>
         /// The tag
@@ -57,7 +57,19 @@
                     return enumerable.ToList()[this.Index];
                 }
             }
-            
+
+            return this.Items[this.Index];
+        }
+
+        /// <summary>
+        /// Gets the item indicated by the selection index.
+        /// </summary>
+        /// <param name="template">The template.</param>
+        /// <returns>
+        /// Selected item based on template or intrinsic conditions
+        /// </returns>
+        public object GetBranch(ITemplate? template)
+        {
             return this.Items[this.Index];
         }
 
@@ -103,13 +115,21 @@
         /// <inheritdoc />
         internal override void WriteLongForm(IEmitter emitter, IValueSerializer nestedValueSerializer)
         {
-            this.EmitterTrait.WriteLongForm(this, emitter, nestedValueSerializer, new[] { this.Index, (object)this.Items });
+            this.EmitterTrait.WriteLongForm(
+                this,
+                emitter,
+                nestedValueSerializer,
+                new[] { this.Index, (object)this.Items });
         }
 
         /// <inheritdoc />
         internal override void WriteShortForm(IEmitter emitter, IValueSerializer nestedValueSerializer)
         {
-            this.EmitterTrait.WriteShortForm(this, emitter, nestedValueSerializer, new[] { this.Index, (object)this.Items });
+            this.EmitterTrait.WriteShortForm(
+                this,
+                emitter,
+                nestedValueSerializer,
+                new[] { this.Index, (object)this.Items });
         }
     }
 }

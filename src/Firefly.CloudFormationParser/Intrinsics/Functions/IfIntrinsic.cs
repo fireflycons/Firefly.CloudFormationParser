@@ -15,7 +15,7 @@
     /// Represents the <see href="https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/intrinsic-function-reference-conditions.html#intrinsic-function-reference-conditions-if">Fn::If</see> intrinsic.
     /// </summary>
     /// <seealso cref="IIntrinsic" />
-    public class IfIntrinsic : AbstractArrayIntrinsic
+    public class IfIntrinsic : AbstractArrayIntrinsic, IBranchableIntrinsic
     {
         /// <summary>
         /// The tag
@@ -67,8 +67,13 @@
         /// <param name="template">The template.</param>
         /// <returns>Either <see cref="ValueIfTrue" /> or <see cref="ValueIfFalse" /> based on conditions.</returns>
         /// <exception cref="Amazon.CloudFormation.Model.InvalidOperationException">Condition '{this.Condition} not found in Conditions section of template.</exception>
-        public object GetBranch(ITemplate template)
+        public object GetBranch(ITemplate? template)
         {
+            if (template == null)
+            {
+                throw new ArgumentNullException(nameof(template), "Template cannot be null to call GetBranch");
+            }
+
             if (template.EvaluatedConditions.ContainsKey(this.Condition))
             {
                 return template.EvaluatedConditions[this.Condition] ? this.ValueIfTrue : this.ValueIfFalse;

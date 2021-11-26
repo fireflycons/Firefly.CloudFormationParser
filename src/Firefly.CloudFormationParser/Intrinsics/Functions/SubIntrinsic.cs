@@ -42,6 +42,14 @@
         public string Expression { get; set; } = string.Empty;
 
         /// <summary>
+        /// Gets the implicit references, that is any !Ref inferred by interpolated arguments in the expression
+        /// </summary>
+        /// <value>
+        /// The implicit references.
+        /// </value>
+        public List<RefIntrinsic> ImplicitReferences { get; } = new List<RefIntrinsic>();
+
+        /// <summary>
         /// Gets or sets the item list for the intrinsic
         /// </summary>
         /// <value>
@@ -58,7 +66,7 @@
         /// <value>
         /// The substitutions.
         /// </value>
-        public Dictionary<object, object> Substitutions { get; set; } = new Dictionary<object, object>();
+        public Dictionary<string, object> Substitutions { get; set; } = new Dictionary<string, object>();
 
         /// <inheritdoc />
         public override string TagName => Tag;
@@ -162,8 +170,19 @@
             if (list.Count > 1)
             {
                 this.Substitutions = ((Dictionary<object, object>)list[1]).ToDictionary(
-                    kv => kv.Key,
+                    kv => kv.Key.ToString(),
                     kv => this.UnpackIntrinsic(kv.Value));
+            }
+
+            // Extract implicit references
+            foreach (var match in SubstitutionRx.Matches(this.Expression).Cast<Match>())
+            {
+                var token = match.Groups["id"].Value;
+
+                if (!this.Substitutions.ContainsKey(token))
+                {
+                    this.ImplicitReferences.Add(new RefIntrinsic { Value = token });
+                }
             }
         }
 
