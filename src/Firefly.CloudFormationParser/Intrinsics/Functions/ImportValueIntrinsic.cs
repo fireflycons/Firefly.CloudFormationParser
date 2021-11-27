@@ -18,6 +18,7 @@
         /// <summary>
         /// Initializes a new instance of the <see cref="ImportValueIntrinsic"/> class.
         /// </summary>
+        // ReSharper disable once UnusedMember.Global - used in TagRepository
         public ImportValueIntrinsic()
         {
         }
@@ -26,6 +27,7 @@
         /// Initializes a new instance of the <see cref="ImportValueIntrinsic"/> class.
         /// </summary>
         /// <param name="value">The value.</param>
+        // ReSharper disable once UnusedMember.Global
         public ImportValueIntrinsic(object value)
             : base(value)
         {

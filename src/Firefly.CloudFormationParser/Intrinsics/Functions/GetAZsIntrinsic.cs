@@ -27,6 +27,7 @@
         /// <summary>
         /// Initializes a new instance of the <see cref="GetAZsIntrinsic"/> class.
         /// </summary>
+        // ReSharper disable once UnusedMember.Global - used in TagRepository
         public GetAZsIntrinsic()
         {
         }

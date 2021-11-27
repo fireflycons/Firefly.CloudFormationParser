@@ -23,6 +23,7 @@
         /// <summary>
         /// Initializes a new instance of the <see cref="Base64Intrinsic"/> class.
         /// </summary>
+        // ReSharper disable once UnusedMember.Global - used in TagRepository
         public Base64Intrinsic()
         {
         }

@@ -24,6 +24,7 @@
         /// <summary>
         /// Initializes a new instance of the <see cref="JoinIntrinsic"/> class.
         /// </summary>
+        // ReSharper disable once UnusedMember.Global - used in TagRepository
         public JoinIntrinsic()
         {
         }

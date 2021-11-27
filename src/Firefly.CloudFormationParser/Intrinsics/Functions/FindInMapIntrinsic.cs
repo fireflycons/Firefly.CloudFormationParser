@@ -24,6 +24,7 @@
         /// <summary>
         /// Initializes a new instance of the <see cref="FindInMapIntrinsic"/> class.
         /// </summary>
+        // ReSharper disable once UnusedMember.Global - used in TagRepository
         public FindInMapIntrinsic()
         {
         }
@@ -32,6 +33,7 @@
         /// Initializes a new instance of the <see cref="FindInMapIntrinsic"/> class.
         /// </summary>
         /// <param name="value">The value.</param>
+        // ReSharper disable once UnusedMember.Global
         public FindInMapIntrinsic(object value)
             : base(value)
         {

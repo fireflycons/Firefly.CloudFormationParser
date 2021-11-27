@@ -12,6 +12,7 @@
     /// <summary>
     /// Represents an entire CloudFormation Template
     /// </summary>
+    // ReSharper disable once RedundantExtendsListEntry - needed for inheritdoc
     public partial class Template : ITemplate
     {
         /// <inheritdoc/>

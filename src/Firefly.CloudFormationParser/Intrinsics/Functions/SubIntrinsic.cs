@@ -286,7 +286,7 @@
 
             foreach (var kv in this.Substitutions)
             {
-                emitter.Emit(new Scalar(kv.Key.ToString()));
+                emitter.Emit(new Scalar(kv.Key));
 
                 switch (kv.Value)
                 {

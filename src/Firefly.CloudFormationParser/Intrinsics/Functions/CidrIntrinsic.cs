@@ -32,6 +32,7 @@
         /// <summary>
         /// Initializes a new instance of the <see cref="CidrIntrinsic"/> class.
         /// </summary>
+        // ReSharper disable once UnusedMember.Global - used in TagRepository
         public CidrIntrinsic()
         {
         }

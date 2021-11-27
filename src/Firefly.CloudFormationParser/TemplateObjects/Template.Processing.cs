@@ -26,6 +26,7 @@
     /// <summary>
     /// Represents an entire CloudFormation Template
     /// </summary>
+    // ReSharper disable once RedundantExtendsListEntry
     public partial class Template : ITemplate
     {
         /// <summary>
@@ -587,7 +588,7 @@
         /// </summary>
         /// <param name="targetVertex">The target vertex for any edge.</param>
         /// <param name="list">The list being examined.</param>
-        private void GenerateGraphEdges(IVertex targetVertex, IList list)
+        private void GenerateGraphEdges(IVertex targetVertex, IEnumerable list)
         {
             foreach (var obj in list)
             {
@@ -768,11 +769,17 @@
                         break;
 
                     case IList list:
+                        
                         this.WalkList(list, changes);
                         break;
 
-                    case Resource r when r.Properties != null:
-                        this.WalkDict(r.Properties, r, parentKey, changes);
+                    case Resource { Properties: { } } r:
+                        
+                        if (r.Properties != null)
+                        {
+                            this.WalkDict(r.Properties, r, parentKey, changes);
+                        }
+
                         break;
 
                     case AbstractIntrinsic tag1:
@@ -792,7 +799,7 @@
         /// </summary>
         /// <param name="list">The list.</param>
         /// <param name="changes">The changes to apply to the model.</param>
-        private void WalkList(IList list, List<IntrinsicConvert> changes)
+        private void WalkList(IEnumerable list, List<IntrinsicConvert> changes)
         {
             var index = -1;
 
@@ -893,7 +900,7 @@
                     return false;
                 }
 
-                return x.Source.Equals(y.Source) && x.Tag.Equals(y.Tag) && x.Target.Equals(y.Target);
+                return x.Source.Equals(y.Source) && x.Tag!.Equals(y.Tag) && x.Target.Equals(y.Target);
             }
 
             /// <summary>

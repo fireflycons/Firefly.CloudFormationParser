@@ -27,6 +27,7 @@
         /// <summary>
         /// Initializes a new instance of the <see cref="ConditionIntrinsic"/> class.
         /// </summary>
+        // ReSharper disable once UnusedMember.Global - used in TagRepository
         public ConditionIntrinsic()
         {
         }
@@ -35,6 +36,7 @@
         /// Initializes a new instance of the <see cref="ConditionIntrinsic"/> class.
         /// </summary>
         /// <param name="value">The value.</param>
+        // ReSharper disable once UnusedMember.Global
         public ConditionIntrinsic(object value)
             : base(value)
         {

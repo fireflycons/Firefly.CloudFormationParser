@@ -10,6 +10,7 @@
     /// <summary>
     /// Extension methods for <see cref="ITemplateObject"/>
     /// </summary>
+    // ReSharper disable once InconsistentNaming
     internal static class ITemplateObjectExtensions
     {
         public static void Visit(

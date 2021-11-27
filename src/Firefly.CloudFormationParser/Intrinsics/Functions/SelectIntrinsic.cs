@@ -25,6 +25,7 @@
         /// <summary>
         /// Initializes a new instance of the <see cref="SelectIntrinsic"/> class.
         /// </summary>
+        // ReSharper disable once UnusedMember.Global - used in TagRepository
         public SelectIntrinsic()
         {
         }

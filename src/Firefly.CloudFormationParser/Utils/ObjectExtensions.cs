@@ -19,6 +19,7 @@
         /// <summary>
         /// The clone method
         /// </summary>
+        // ReSharper disable once AssignNullToNotNullAttribute
         private static readonly MethodInfo CloneMethod = typeof(object).GetMethod(
             "MemberwiseClone",
             BindingFlags.NonPublic | BindingFlags.Instance);
@@ -110,7 +111,7 @@
             object originalObject,
             IDictionary<object, object> visited,
             object cloneObject,
-            Type typeToReflect,
+            IReflect typeToReflect,
             ITemplate? template,
             BindingFlags bindingFlags =
                 BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Public | BindingFlags.FlattenHierarchy,
@@ -268,6 +269,7 @@
             /// <returns>
             ///   <c>true</c> if the specified <see cref="System.Object" /> is equal to this instance; otherwise, <c>false</c>.
             /// </returns>
+            // ReSharper disable once MemberHidesStaticFromOuterClass
             public override bool Equals(object x, object y)
             {
                 return object.ReferenceEquals(x, y);
@@ -282,12 +284,7 @@
             /// </returns>
             public override int GetHashCode(object? obj)
             {
-                if (obj == null)
-                {
-                    return 0;
-                }
-
-                return obj.GetHashCode();
+                return obj == null ? 0 : obj.GetHashCode();
             }
         }
     }

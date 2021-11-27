@@ -19,6 +19,7 @@
         /// <summary>
         /// Accesses the private events field on the emitter
         /// </summary>
+        // ReSharper disable AssignNullToNotNullAttribute
         private static readonly FieldInfo EventsField = typeof(Emitter).GetField(
             "events",
             BindingFlags.Instance | BindingFlags.NonPublic);
@@ -29,6 +30,7 @@
         private static readonly FieldInfo StateField = typeof(Emitter).GetField(
             "state",
             BindingFlags.Instance | BindingFlags.NonPublic);
+        // ReSharper restore AssignNullToNotNullAttribute
 
         /// <summary>
         /// Determines whether the emitter is about to emit a key.
@@ -62,7 +64,7 @@
         /// </summary>
         /// <param name="emitter">The emitter.</param>
         /// <returns>Event queue</returns>
-        private static Queue<ParsingEvent> GetEventQueue(IEmitter emitter)
+        private static IEnumerable<ParsingEvent> GetEventQueue(IEmitter emitter)
         {
             return (Queue<ParsingEvent>)EventsField.GetValue(emitter);
         }

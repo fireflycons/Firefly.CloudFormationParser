@@ -1,53 +1,16 @@
 ﻿namespace Firefly.CloudFormationParser.Serialization.Serializers
 {
     using System;
-    using System.Collections.Generic;
     using System.Globalization;
     using System.Linq;
-    using System.Reflection;
 
     using YamlDotNet.Core;
-    using YamlDotNet.Core.Events;
     using YamlDotNet.Serialization;
     using YamlDotNet.Serialization.EventEmitters;
     using YamlDotNet.Serialization.Schemas;
 
     internal class CloudFormationTypeAssigningEventEmitter : ChainedEventEmitter
     {
-        private static readonly FieldInfo EventsField = typeof(Emitter).GetField(
-            "events",
-            BindingFlags.Instance | BindingFlags.NonPublic);
-
-        private static readonly FieldInfo StateField = typeof(Emitter).GetField(
-            "state",
-            BindingFlags.Instance | BindingFlags.NonPublic);
-
-        private static readonly MethodInfo CheckSimpleKeyMethod = typeof(Emitter).GetMethod(
-            "CheckSimpleKey",
-            BindingFlags.Instance | BindingFlags.NonPublic);
-
-        private enum EmitterState
-        {
-            StreamStart,
-            StreamEnd,
-            FirstDocumentStart,
-            DocumentStart,
-            DocumentContent,
-            DocumentEnd,
-            FlowSequenceFirstItem,
-            FlowSequenceItem,
-            FlowMappingFirstKey,
-            FlowMappingKey,
-            FlowMappingSimpleValue,
-            FlowMappingValue,
-            BlockSequenceFirstItem,
-            BlockSequenceItem,
-            BlockMappingFirstKey,
-            BlockMappingKey,
-            BlockMappingSimpleValue,
-            BlockMappingValue
-        }
-
         /// <summary>
         /// Initializes a new instance of the <see cref="CloudFormationTypeAssigningEventEmitter"/> class.
         /// </summary>
@@ -77,6 +40,8 @@
             else
             {
                 var typeCode = Type.GetTypeCode(eventInfo.Source.Type);
+
+                // ReSharper disable once SwitchStatementHandlesSomeKnownEnumValuesWithDefault
                 switch (typeCode)
                 {
                     case TypeCode.Boolean:

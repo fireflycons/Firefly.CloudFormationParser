@@ -53,15 +53,10 @@
                 // - An intrinsic function tag with a scalar value
                 if (scalar.Tag.IsEmpty)
                 {
-                    if (scalar.Value == string.Empty)
-                    {
-                        // Empty or null value refers to current region
-                        tag = new GetAZsIntrinsic(new RefIntrinsic("AWS::Region"));
-                    }
-                    else
-                    {
-                        tag = new GetAZsIntrinsic(scalar.Value);
-                    }
+                    // Empty or null refers to current region
+                    tag = scalar.Value == string.Empty
+                              ? new GetAZsIntrinsic(new RefIntrinsic("AWS::Region"))
+                              : new GetAZsIntrinsic(scalar.Value);
 
                     parser.MoveNext();
                 }

@@ -1,9 +1,7 @@
 ﻿namespace Firefly.CloudFormationParser.Serialization.Deserializers
 {
     using System;
-    using System.Net;
 
-    using Firefly.CloudFormationParser.Intrinsics;
     using Firefly.CloudFormationParser.Intrinsics.Abstractions;
     using Firefly.CloudFormationParser.Intrinsics.Utils;
 

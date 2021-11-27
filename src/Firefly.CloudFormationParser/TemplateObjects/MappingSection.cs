@@ -26,7 +26,7 @@
         /// <param name="templateObjectVisitor">The visitor.</param>
         public void Accept(ITemplateObjectVisitor templateObjectVisitor)
         {
-            this.Visit(this.ToDictionary(kv => kv.Key, kv => (object)kv.Value), templateObjectVisitor);
+            this.Visit(this.ToDictionary(kv => kv.Key, kv => kv.Value), templateObjectVisitor);
         }
     }
 }

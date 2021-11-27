@@ -45,13 +45,14 @@
             }
 
             object nestedObject;
-            Base64Intrinsic tag;
 
             if (parser.Accept<Scalar>(out var scalar))
             {
                 // Next event is scalar. Could be one of
                 // - A literal value
                 // - An intrinsic function tag with a scalar value
+                Base64Intrinsic tag;
+
                 if (scalar.Tag.IsEmpty)
                 {
                     tag = new Base64Intrinsic(scalar.Value);

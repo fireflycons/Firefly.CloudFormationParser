@@ -29,6 +29,8 @@
             }
 
             this.ReferenceType = referenceType;
+
+            // ReSharper disable once SwitchExpressionHandlesSomeKnownEnumValuesWithExceptionInDefault
             this.AttributeName = referenceType switch
                 {
                     ReferenceType.DependsOn => "#Explicit",

@@ -26,6 +26,7 @@
         /// <summary>
         /// Initializes a new instance of the <see cref="SplitIntrinsic"/> class.
         /// </summary>
+        // ReSharper disable once UnusedMember.Global - used in TagRepository
         public SplitIntrinsic()
         {
         }

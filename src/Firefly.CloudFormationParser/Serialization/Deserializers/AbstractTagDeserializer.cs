@@ -5,7 +5,6 @@
     using System.Linq;
 
     using Firefly.CloudFormationParser.Intrinsics;
-    using Firefly.CloudFormationParser.Intrinsics.Abstractions;
     using Firefly.CloudFormationParser.TemplateObjects;
 
     using YamlDotNet.Core;
