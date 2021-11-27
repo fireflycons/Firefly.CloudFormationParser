@@ -2,9 +2,9 @@
 {
     using System;
     using System.Collections.Generic;
+    using System.Linq;
 
     using Firefly.CloudFormationParser.Intrinsics.Functions;
-    using Firefly.CloudFormationParser.Intrinsics.Utils;
 
     using YamlDotNet.Core;
     using YamlDotNet.Core.Events;
@@ -38,7 +38,6 @@
                 return false;
             }
 
-            var tag = new SubIntrinsic();
             var haveScalar = parser.Accept<Scalar>(out var scalar);
             var haveSequence = parser.Accept<SequenceStart>(out _);
 
@@ -49,11 +48,10 @@
 
             if (haveScalar && !scalar!.Tag.IsEmpty)
             {
-                if (scalar.Tag.Value == tag.TagName)
+                if (scalar.Tag.Value == SubIntrinsic.Tag)
                 {
                     // Short form
-                    tag.SetValue(new[] { scalar.Value });
-                    value = tag;
+                    value = new SubIntrinsic(scalar.Value);
 
                     // Move off the tag we just read
                     parser.MoveNext();
@@ -61,23 +59,34 @@
                 }
 
                 // Long form, but with a short form intrinsic as the value.
-                var nestedTag = TagRepository.GetTagByName(scalar.Tag.Value);
-                tag.SetValue(this.SafeNestedObjectDeserializer(parser, nestedObjectDeserializer, nestedTag.GetType()));
-                value = tag;
-                return true;
+                // Shouldn't get here.
+                throw new YamlException(
+                    parser.Current!.Start,
+                    parser.Current.End,
+                    $"{SubIntrinsic.Tag}: Unexpected intrinsic as substitution expression.");
             }
 
             if (haveSequence)
             {
-                tag.SetValue(this.SafeNestedObjectDeserializer(ParsingEventBuffer.FromNestedSequence(parser), nestedObjectDeserializer, typeof(List<object>)));
-                value = tag;
+                var values = (List<object>)this.SafeNestedObjectDeserializer(
+                    ParsingEventBuffer.FromNestedSequence(parser),
+                    nestedObjectDeserializer,
+                    typeof(List<object>));
+
+                this.ValidateValues(parser, SubIntrinsic.Tag, 1, 2, values);
+                value = new SubIntrinsic(
+                    values[0].ToString(),
+                    ((Dictionary<object, object>)values[1]).ToDictionary(
+                        kv => kv.Key.ToString(),
+                        kv => this.UnpackIntrinsic(kv.Value)));
+
                 return true;
             }
 
 
-            // Long form, with a literal as the value.
-            tag.SetValue(this.SafeNestedObjectDeserializer(parser, nestedObjectDeserializer, typeof(object)));
-            value = tag;
+            // Long form, with a string literal as the value.
+            value = new SubIntrinsic(
+                (string)this.SafeNestedObjectDeserializer(parser, nestedObjectDeserializer, typeof(string)));
             return true;
         }
     }

@@ -36,28 +36,5 @@
         /// <param name="template">Reference to the template being processed</param>
         /// <returns>List of references</returns>
         IEnumerable<string> GetReferencedObjects(ITemplate template);
-
-        /// <summary>
-        /// <para>
-        /// Sets the values for the intrinsic.
-        /// </para>
-        /// <para>
-        /// This is a list of objects, whose length depends on the number of properties (usually list elements) supported by the intrinsic.
-        /// Each element depending on the intrinsic, may be a scalar value, another intrinsic or another list of items e.g. for <c>!Join</c> or <c>!Select</c> 
-        /// </para>
-        /// </summary>
-        /// <param name="values">Values to assign to the intrinsic</param>
-        void SetValue(IEnumerable<object> values);
-
-        /// <summary>
-        /// <para>
-        /// Sets the values for the intrinsic.
-        /// </para>
-        /// <para>
-        /// This is a single scalar or intrinsic object or a list of objects. This is a convenience method which wraps a scalar and then calls <see cref="SetValue(System.Collections.Generic.IEnumerable{object})"/>
-        /// </para>
-        /// </summary>
-        /// <param name="value">Value to assign to the intrinsic</param>
-        void SetValue(object value);
     }
 }

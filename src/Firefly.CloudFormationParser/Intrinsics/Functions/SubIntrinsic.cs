@@ -34,6 +34,44 @@
             new Regex(@"\$\{(?<id>(([a-zA-Z][a-zA-Z0-9]+(\.[a-zA-Z]+)?)|(AWS::[a-zA-Z]+))*)\}");
 
         /// <summary>
+        /// Initializes a new instance of the <see cref="SubIntrinsic"/> class.
+        /// </summary>
+        public SubIntrinsic()
+        {
+        }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="SubIntrinsic"/> class.
+        /// </summary>
+        /// <param name="expression">The expression.</param>
+        public SubIntrinsic(string expression)
+        {
+            this.Expression = expression;
+        }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="SubIntrinsic"/> class.
+        /// </summary>
+        /// <param name="expression">The expression.</param>
+        /// <param name="substitutions">The substitutions.</param>
+        public SubIntrinsic(string expression, IDictionary<string, object> substitutions)
+            : this(expression)
+        {
+            this.Substitutions = substitutions.ToDictionary(kv => kv.Key, kv => kv.Value);
+            this.ExtractImplicitReferences();
+        }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="SubIntrinsic"/> class.
+        /// </summary>
+        /// <param name="value">The value.</param>
+        /// <param name="useLongForm">If set to <c>true</c>, emit long form of intrinsic when serializing.</param>
+        public SubIntrinsic(object value, bool useLongForm)
+            : base(value, useLongForm)
+        {
+        }
+
+        /// <summary>
         /// Gets or sets the expression.
         /// </summary>
         /// <value>
@@ -110,9 +148,8 @@
                 }
 
                 // Implicit Ref
-                var @ref = new RefIntrinsic();
+                var @ref = new RefIntrinsic(reference);
 
-                @ref.SetValue(reference);
                 replacements.Add(reference, @ref.Evaluate(template).ToString());
             }
 
@@ -159,34 +196,6 @@
         }
 
         /// <inheritdoc />
-        public override void SetValue(IEnumerable<object> values)
-        {
-            var list = values.ToList();
-
-            this.ValidateValues(1, 2, list);
-
-            this.Expression = (string)list[0];
-
-            if (list.Count > 1)
-            {
-                this.Substitutions = ((Dictionary<object, object>)list[1]).ToDictionary(
-                    kv => kv.Key.ToString(),
-                    kv => this.UnpackIntrinsic(kv.Value));
-            }
-
-            // Extract implicit references
-            foreach (var match in SubstitutionRx.Matches(this.Expression).Cast<Match>())
-            {
-                var token = match.Groups["id"].Value;
-
-                if (!this.Substitutions.ContainsKey(token))
-                {
-                    this.ImplicitReferences.Add(new RefIntrinsic { Value = token });
-                }
-            }
-        }
-
-        /// <inheritdoc />
         internal override IList<UnresolvedTagProperty> GetUnresolvedDictionaryProperties()
         {
             var unresolved = new List<UnresolvedTagProperty>();
@@ -226,13 +235,36 @@
         {
             if (!this.Substitutions.Any())
             {
-                new ScalarEmitterTrait().WriteShortForm(this, emitter, nestedValueSerializer, new[] { this.Expression });
+                new ScalarEmitterTrait().WriteShortForm(
+                    this,
+                    emitter,
+                    nestedValueSerializer,
+                    new[] { this.Expression });
                 return;
             }
 
             emitter.Emit(new SequenceStart(AnchorName.Empty, new TagName(this.TagName), false, SequenceStyle.Block));
 
             this.EmitSubsitutions(emitter, nestedValueSerializer);
+        }
+
+        /// <inheritdoc />
+        protected override void SetValue(IEnumerable<object> values)
+        {
+            var list = values.ToList();
+
+            this.ValidateValues(1, 2, list);
+
+            this.Expression = (string)list[0];
+
+            if (list.Count > 1)
+            {
+                this.Substitutions = ((Dictionary<object, object>)list[1]).ToDictionary(
+                    kv => kv.Key.ToString(),
+                    kv => this.UnpackIntrinsic(kv.Value));
+            }
+
+            this.ExtractImplicitReferences();
         }
 
         /// <summary>
@@ -277,6 +309,23 @@
 
             emitter.Emit(new MappingEnd());
             emitter.Emit(new SequenceEnd());
+        }
+
+        /// <summary>
+        /// Extract the implicit references and create a list of <see cref="RefIntrinsic"/> from them.
+        /// </summary>
+        private void ExtractImplicitReferences()
+        {
+            // Extract implicit references
+            foreach (var match in SubstitutionRx.Matches(this.Expression).Cast<Match>())
+            {
+                var token = match.Groups["id"].Value;
+
+                if (!this.Substitutions.ContainsKey(token))
+                {
+                    this.ImplicitReferences.Add(new RefIntrinsic(token));
+                }
+            }
         }
     }
 }

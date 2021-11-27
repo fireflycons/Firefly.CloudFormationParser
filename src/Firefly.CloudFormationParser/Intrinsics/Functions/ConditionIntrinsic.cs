@@ -24,6 +24,32 @@
         /// </summary>
         public const string Tag = "!Condition";
 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="ConditionIntrinsic"/> class.
+        /// </summary>
+        public ConditionIntrinsic()
+        {
+        }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="ConditionIntrinsic"/> class.
+        /// </summary>
+        /// <param name="value">The value.</param>
+        public ConditionIntrinsic(object value)
+            : base(value)
+        {
+        }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="ConditionIntrinsic"/> class.
+        /// </summary>
+        /// <param name="value">The value.</param>
+        /// <param name="useLongForm">If set to <c>true</c>, emit long form of intrinsic when serializing.</param>
+        public ConditionIntrinsic(object value, bool useLongForm)
+            : base(value, useLongForm)
+        {
+        }
+
         /// <inheritdoc />
         public override string LongName => "Condition";
 
@@ -48,6 +74,16 @@
         public override IEnumerable<string> GetReferencedObjects(ITemplate template)
         {
             return new List<string>();
+        }
+
+        /// <inheritdoc />
+        /// <remarks>
+        /// When the parser is currently in the Resources section, do not deserialize a key named Condition as an intrinsic.
+        /// </remarks>
+        /// <seealso cref="IntrinsicFunctionNodeTypeResolver.DeserializationContextChanged"/>
+        internal override bool ShouldDeserialize(DeserializationContext context)
+        {
+            return context != DeserializationContext.Resources;
         }
 
         /// <inheritdoc />
@@ -81,16 +117,6 @@
                 false,
                 false);
             emitter.Emit(t);
-        }
-
-        /// <inheritdoc />
-        /// <remarks>
-        /// When the parser is currently in the Resources section, do not deserialize a key named Condition as an intrinsic.
-        /// </remarks>
-        /// <seealso cref="IntrinsicFunctionNodeTypeResolver.DeserializationContextChanged"/>
-        internal override bool ShouldDeserialize(DeserializationContext context)
-        {
-            return context != DeserializationContext.Resources;
         }
     }
 }

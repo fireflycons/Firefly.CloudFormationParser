@@ -26,17 +26,34 @@
         public static IEnumerable<IIntrinsic> AllTags => KnownTags;
 
         /// <summary>
-        /// Gets a tag instance by YAML tag name
+        /// Gets an intrinsic instance by YAML tag name
         /// </summary>
         /// <param name="tagName">Name of the tag.</param>
         /// <returns>Instance of tag type identified by <paramref name="tagName"/></returns>
-        public static IIntrinsic GetTagByName(string tagName)
+        public static IIntrinsic GetIntrinsicByTagName(string tagName)
         {
             var tag = KnownTags.FirstOrDefault(t => t.TagName == tagName);
 
             if (tag == null)
             {
                 throw new InvalidOperationException($"Unknown or unsupported intrinsic '{tagName}");
+            }
+
+            return tag;
+        }
+
+        /// <summary>
+        /// Gets the type of the intrinsic by type.
+        /// </summary>
+        /// <param name="type">The type.</param>
+        /// <returns>Instance of tag type identified by <paramref name="type"/></returns>
+        public static IIntrinsic GetIntrinsicByType(Type type)
+        {
+            var tag = KnownTags.FirstOrDefault(t => t.GetType() == type);
+
+            if (tag == null)
+            {
+                throw new InvalidOperationException($"Unknown or unsupported intrinsic '{type.Name}");
             }
 
             return tag;

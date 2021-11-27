@@ -109,14 +109,10 @@
             template.Setup(t => t.Parameters).Returns(new List<IParameter> { parameter.Object });
             template.Setup(t => t.PseudoParameters).Returns(new List<IParameter> { noValue.Object });
 
-            var refIntrinsic = new RefIntrinsic();
-            refIntrinsic.SetValue(ParameterName);
+            var refIntrinsic = new RefIntrinsic(ParameterName);
+            var noValueIntrinsic = new RefIntrinsic(NoValue);
 
-            var noValueIntrinsic = new RefIntrinsic();
-            noValueIntrinsic.SetValue(NoValue);
-
-            ifIntrinsic = new IfIntrinsic();
-            ifIntrinsic.SetValue(
+            ifIntrinsic = new IfIntrinsic(
                 new List<object>
                     {
                         logic ? TrueConditionName : FalseConditionName,

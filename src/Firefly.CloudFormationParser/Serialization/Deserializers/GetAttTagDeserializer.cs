@@ -36,8 +36,8 @@
                 return false;
             }
 
-            var tag = new GetAttIntrinsic();
             ParsingEvent @event;
+
             if (parser.Accept<Scalar>(out var scalar))
             {
                 // Scalar version
@@ -55,12 +55,11 @@
                     throw new YamlException(@event.Start, @event.End, "Fn::GetAtt: Expected LogicalID.Attribute.");
                 }
 
-                var logicalId = props.First();
+                var logicalId = props.First().ToString();
                 var attribute = string.Join(".", props.Skip(1).Cast<string>());
 
-                tag.SetValue(new List<object> { logicalId, attribute });
                 parser.MoveNext();
-                value = tag;
+                value = new GetAttIntrinsic(logicalId, attribute);
                 return true;
             }
 
@@ -80,24 +79,15 @@
                 values.Add(this.SafeNestedObjectDeserializer(parser, nestedObjectDeserializer, typeof(object)));
             }
 
-            if (values.Count < tag.MinValues || values.Count > tag.MaxValues)
+            if (values.Count != 2)
             {
-                if (tag.MinValues == tag.MaxValues)
-                {
-                    throw new YamlException(
-                        @event.Start,
-                        @event.End,
-                        $"{tag.LongName}: Incorrect number of values {values.Count}. Expected {tag.MaxValues}.");
-                }
-
                 throw new YamlException(
                     @event.Start,
                     @event.End,
-                    $"{tag.LongName}: Incorrect number of values {values.Count}. Expected between {tag.MinValues} and {tag.MaxValues}.");
+                    $"{GetAttIntrinsic.Tag}: Incorrect number of values {values.Count}. Expected 2.");
             }
-
-            tag.SetValue(values);
-            value = tag;
+            
+            value = new GetAttIntrinsic(values[0].ToString(), values[1]);
             return true;
         }
     }

@@ -54,8 +54,7 @@
         [Fact]
         public void ShouldReturnIntrinsicResourceValue()
         {
-            var @ref = new RefIntrinsic();
-            @ref.SetValue(new object[] { Param1Name });
+            var @ref = new RefIntrinsic(Param1Name);
             
             var template = SetupMockTemplate();
             var resource = SetupIntrinsicResource(template, @ref);

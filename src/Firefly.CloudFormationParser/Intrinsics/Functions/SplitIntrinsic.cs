@@ -24,6 +24,32 @@
         public const string Tag = "!Split";
 
         /// <summary>
+        /// Initializes a new instance of the <see cref="SplitIntrinsic"/> class.
+        /// </summary>
+        public SplitIntrinsic()
+        {
+        }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="SplitIntrinsic"/> class.
+        /// </summary>
+        /// <param name="value">The value.</param>
+        public SplitIntrinsic(object value)
+            : base(value)
+        {
+        }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="SplitIntrinsic"/> class.
+        /// </summary>
+        /// <param name="value">The value.</param>
+        /// <param name="useLongForm">If set to <c>true</c>, emit long form of intrinsic when serializing.</param>
+        public SplitIntrinsic(object value, bool useLongForm)
+            : base(value, useLongForm)
+        {
+        }
+
+        /// <summary>
         /// Gets the delimiter on which to split.
         /// </summary>
         /// <value>
@@ -93,16 +119,6 @@
         }
 
         /// <inheritdoc />
-        public override void SetValue(IEnumerable<object> values)
-        {
-            var list = values.ToList().Select(this.UnpackIntrinsic).ToList();
-
-            this.ValidateValues(this.MinValues, this.MaxValues, list);
-            this.Delimiter = (string)list[0];
-            this.Source = list[1];
-        }
-
-        /// <inheritdoc />
         internal override IList<UnresolvedTagProperty> GetUnresolvedDictionaryProperties()
         {
             if (this.Source is IDictionary)
@@ -122,13 +138,31 @@
         /// <inheritdoc />
         internal override void WriteLongForm(IEmitter emitter, IValueSerializer nestedValueSerializer)
         {
-            this.EmitterTrait.WriteLongForm(this, emitter, nestedValueSerializer, new[] { this.Delimiter, this.Source });
+            this.EmitterTrait.WriteLongForm(
+                this,
+                emitter,
+                nestedValueSerializer,
+                new[] { this.Delimiter, this.Source });
         }
 
         /// <inheritdoc />
         internal override void WriteShortForm(IEmitter emitter, IValueSerializer nestedValueSerializer)
         {
-            this.EmitterTrait.WriteShortForm(this, emitter, nestedValueSerializer, new[] { this.Delimiter, this.Source });
+            this.EmitterTrait.WriteShortForm(
+                this,
+                emitter,
+                nestedValueSerializer,
+                new[] { this.Delimiter, this.Source });
+        }
+
+        /// <inheritdoc />
+        protected override void SetValue(IEnumerable<object> values)
+        {
+            var list = values.ToList().Select(this.UnpackIntrinsic).ToList();
+
+            this.ValidateValues(this.MinValues, this.MaxValues, list);
+            this.Delimiter = (string)list[0];
+            this.Source = list[1];
         }
     }
 }

@@ -20,6 +20,32 @@
     public abstract class AbstractLogicalIntrinsic : AbstractArrayIntrinsic
     {
         /// <summary>
+        /// Initializes a new instance of the <see cref="AbstractLogicalIntrinsic"/> class.
+        /// </summary>
+        protected AbstractLogicalIntrinsic()
+        {
+        }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="AbstractLogicalIntrinsic"/> class.
+        /// </summary>
+        /// <param name="value">The value.</param>
+        protected AbstractLogicalIntrinsic(object value)
+        : base(value)
+        {
+        }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="AbstractLogicalIntrinsic"/> class.
+        /// </summary>
+        /// <param name="value">The value.</param>
+        /// <param name="useLongForm">If set to <c>true</c>, emit long form of intrinsic when serializing.</param>
+        protected AbstractLogicalIntrinsic(object value, bool useLongForm)
+            : base(value, useLongForm)
+        {
+        }
+
+        /// <summary>
         /// Parses a boolean value as per the YAML specification.
         /// </summary>
         private static readonly Regex YamlBoolean = new Regex(
@@ -77,7 +103,7 @@
         }
 
         /// <inheritdoc />
-        public override void SetValue(IEnumerable<object> values)
+        protected override void SetValue(IEnumerable<object> values)
         {
             this.Items = values.Select(this.UnpackIntrinsic).ToList();
             this.ValidateValues(this.MinValues, this.MaxValues, this.Items);

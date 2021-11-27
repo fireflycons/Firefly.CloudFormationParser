@@ -30,6 +30,32 @@
             @"((25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)/(2[0-8]|1[6-9])");
 
         /// <summary>
+        /// Initializes a new instance of the <see cref="CidrIntrinsic"/> class.
+        /// </summary>
+        public CidrIntrinsic()
+        {
+        }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="CidrIntrinsic"/> class.
+        /// </summary>
+        /// <param name="value">The value.</param>
+        public CidrIntrinsic(object value)
+            : base(value)
+        {
+        }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="CidrIntrinsic"/> class.
+        /// </summary>
+        /// <param name="value">The value.</param>
+        /// <param name="useLongForm">If set to <c>true</c>, emit long form of intrinsic when serializing.</param>
+        public CidrIntrinsic(object value, bool useLongForm)
+            : base(value, useLongForm)
+        {
+        }
+
+        /// <summary>
         /// Gets or sets the number of subnet bits for the CIDR. For example, specifying a value "8" for this parameter will create a CIDR with a mask of "/24"..
         /// </summary>
         /// <value>
@@ -103,28 +129,6 @@
         }
 
         /// <inheritdoc />
-        public override void SetValue(IEnumerable<object> values)
-        {
-            var list = values.ToList();
-
-            this.ValidateValues(this.MinValues, this.MaxValues, list);
-            this.IpBlock = list[0];
-            this.Count = list[1] switch
-                {
-                    string s => int.Parse(s),
-                    int i => i,
-                    _ => throw new InvalidOperationException($"Invalid type {list[1].GetType().Name} for Fn::Cidr Count")
-                };
-            this.CidrBits = list[2] switch
-                {
-                    string s => int.Parse(s),
-                    int i => i,
-                    _ => throw new InvalidOperationException(
-                             $"Invalid type {list[1].GetType().Name} for Fn::Cidr CidrBits")
-                };
-        }
-
-        /// <inheritdoc />
         internal override IList<UnresolvedTagProperty> GetUnresolvedDictionaryProperties()
         {
             if (this.IpBlock is IDictionary)
@@ -159,6 +163,29 @@
                 emitter,
                 nestedValueSerializer,
                 new List<object> { this.IpBlock, this.Count, this.CidrBits });
+        }
+
+        /// <inheritdoc />
+        protected override void SetValue(IEnumerable<object> values)
+        {
+            var list = values.ToList();
+
+            this.ValidateValues(this.MinValues, this.MaxValues, list);
+            this.IpBlock = list[0];
+            this.Count = list[1] switch
+                {
+                    string s => int.Parse(s),
+                    int i => i,
+                    _ => throw new InvalidOperationException(
+                             $"Invalid type {list[1].GetType().Name} for Fn::Cidr Count")
+                };
+            this.CidrBits = list[2] switch
+                {
+                    string s => int.Parse(s),
+                    int i => i,
+                    _ => throw new InvalidOperationException(
+                             $"Invalid type {list[1].GetType().Name} for Fn::Cidr CidrBits")
+                };
         }
     }
 }

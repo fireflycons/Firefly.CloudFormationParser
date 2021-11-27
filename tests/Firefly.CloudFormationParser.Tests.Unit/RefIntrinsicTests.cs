@@ -4,6 +4,7 @@
     using System.Collections.Generic;
     using System.Linq;
 
+    using Firefly.CloudFormationParser.Intrinsics;
     using Firefly.CloudFormationParser.Intrinsics.Functions;
 
     using FluentAssertions;
@@ -19,9 +20,8 @@
         {
             const string Reference = "MyParameter";
             var template = new Mock<ITemplate>();
-            var @ref = new RefIntrinsic();
+            var @ref = new RefIntrinsic(Reference);
 
-            @ref.SetValue(new object[] { Reference });
             @ref.GetReferencedObjects(template.Object).First().Should().Be(Reference);
         }
 
@@ -31,12 +31,11 @@
         public void ShouldThrowForIncorrectNumberOfOperands(string operands)
         {
             var refs = operands == string.Empty ? new List<object>() : operands.Split(',').Cast<object>().ToList();
-            var intrinsic = new RefIntrinsic();
 
-            var action = new Action(() => intrinsic.SetValue(refs));
+            var action = new Func<IIntrinsic>(() => new RefIntrinsic(refs));
 
             action.Should().Throw<ArgumentException>().WithMessage(
-                $"{intrinsic.LongName}: Expected 1 values. Got {refs.Count}. (Parameter 'values')");
+                $"{RefIntrinsic.Tag}: Expected 1 values. Got {refs.Count}. (Parameter 'values')");
         }
     }
 }

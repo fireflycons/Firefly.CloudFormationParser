@@ -20,6 +20,32 @@
         /// </summary>
         public const string Tag = "!Base64";
 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="Base64Intrinsic"/> class.
+        /// </summary>
+        public Base64Intrinsic()
+        {
+        }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="Base64Intrinsic"/> class.
+        /// </summary>
+        /// <param name="value">The value.</param>
+        public Base64Intrinsic(object value)
+            : base(value)
+        {
+        }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="Base64Intrinsic"/> class.
+        /// </summary>
+        /// <param name="value">The value.</param>
+        /// <param name="useLongForm">If set to <c>true</c>, emit long form of intrinsic when serializing.</param>
+        public Base64Intrinsic(object value, bool useLongForm)
+            : base(value, useLongForm)
+        {
+        }
+
         /// <inheritdoc />
         public override string LongName => "Fn::Base64";
 

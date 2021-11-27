@@ -3,6 +3,7 @@
     using System;
     using System.Collections.Generic;
 
+    using Firefly.CloudFormationParser.Intrinsics;
     using Firefly.CloudFormationParser.Intrinsics.Functions;
 
     using FluentAssertions;
@@ -24,8 +25,7 @@
             bool expectedResult)
         {
             var template = new Mock<ITemplate>();
-            var intrinsic = new EqualsIntrinsic();
-            intrinsic.SetValue(new List<object> { leftOperand, rightOperand });
+            var intrinsic = new EqualsIntrinsic(new List<object> { leftOperand, rightOperand });
 
             ((bool)intrinsic.Evaluate(template.Object)).Should().Be(expectedResult);
         }
@@ -41,8 +41,7 @@
             bool expectedResult)
         {
             var template = new Mock<ITemplate>();
-            var intrinsic = new EqualsIntrinsic();
-            intrinsic.SetValue(new List<object> { leftOperand, rightOperand });
+            var intrinsic = new EqualsIntrinsic(new List<object> { leftOperand, rightOperand });
 
             ((bool)intrinsic.Evaluate(template.Object)).Should().Be(expectedResult);
         }
@@ -56,8 +55,7 @@
             bool expectedResult)
         {
             var template = new Mock<ITemplate>();
-            var intrinsic = new EqualsIntrinsic();
-            intrinsic.SetValue(new List<object> { leftOperand, rightOperand });
+            var intrinsic = new EqualsIntrinsic(new List<object> { leftOperand, rightOperand });
 
             ((bool)intrinsic.Evaluate(template.Object)).Should().Be(expectedResult);
         }
@@ -68,12 +66,11 @@
         public void ShouldThrowForIncorrectNumberOfOperands(string operands)
         {
             var operandList = operands.Split(".");
-            var intrinsic = new EqualsIntrinsic();
 
-            var action = new Action(() => intrinsic.SetValue(operandList));
+            var action = new Func<IIntrinsic>(() => new EqualsIntrinsic(operandList));
 
             action.Should().Throw<ArgumentException>().WithMessage(
-                $"{intrinsic.LongName}: Expected 2 values. Got {operandList.Length}. (Parameter 'values')");
+                $"{EqualsIntrinsic.Tag}: Expected 2 values. Got {operandList.Length}. (Parameter 'values')");
         }
     }
 }

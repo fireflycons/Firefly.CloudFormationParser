@@ -23,6 +23,32 @@
         public const string Tag = "!Select";
 
         /// <summary>
+        /// Initializes a new instance of the <see cref="SelectIntrinsic"/> class.
+        /// </summary>
+        public SelectIntrinsic()
+        {
+        }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="SelectIntrinsic"/> class.
+        /// </summary>
+        /// <param name="value">The value.</param>
+        public SelectIntrinsic(object value)
+            : base(value)
+        {
+        }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="SelectIntrinsic"/> class.
+        /// </summary>
+        /// <param name="value">The value.</param>
+        /// <param name="useLongForm">If set to <c>true</c>, emit long form of intrinsic when serializing.</param>
+        public SelectIntrinsic(object value, bool useLongForm)
+            : base(value, useLongForm)
+        {
+        }
+
+        /// <summary>
         /// Gets the index.
         /// </summary>
         /// <value>
@@ -87,7 +113,27 @@
         }
 
         /// <inheritdoc />
-        public override void SetValue(IEnumerable<object> values)
+        internal override void WriteLongForm(IEmitter emitter, IValueSerializer nestedValueSerializer)
+        {
+            this.EmitterTrait.WriteLongForm(
+                this,
+                emitter,
+                nestedValueSerializer,
+                new[] { this.Index, (object)this.Items });
+        }
+
+        /// <inheritdoc />
+        internal override void WriteShortForm(IEmitter emitter, IValueSerializer nestedValueSerializer)
+        {
+            this.EmitterTrait.WriteShortForm(
+                this,
+                emitter,
+                nestedValueSerializer,
+                new[] { this.Index, (object)this.Items });
+        }
+
+        /// <inheritdoc />
+        protected override void SetValue(IEnumerable<object> values)
         {
             var list = values.ToList();
 
@@ -110,26 +156,6 @@
             {
                 this.Items = new List<object> { list[1] };
             }
-        }
-
-        /// <inheritdoc />
-        internal override void WriteLongForm(IEmitter emitter, IValueSerializer nestedValueSerializer)
-        {
-            this.EmitterTrait.WriteLongForm(
-                this,
-                emitter,
-                nestedValueSerializer,
-                new[] { this.Index, (object)this.Items });
-        }
-
-        /// <inheritdoc />
-        internal override void WriteShortForm(IEmitter emitter, IValueSerializer nestedValueSerializer)
-        {
-            this.EmitterTrait.WriteShortForm(
-                this,
-                emitter,
-                nestedValueSerializer,
-                new[] { this.Index, (object)this.Items });
         }
     }
 }

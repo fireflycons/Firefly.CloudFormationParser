@@ -15,6 +15,32 @@
         /// </summary>
         public const string Tag = "!And";
 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="AndIntrinsic"/> class.
+        /// </summary>
+        public AndIntrinsic()
+        {
+        }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="AndIntrinsic"/> class.
+        /// </summary>
+        /// <param name="value">The value.</param>
+        public AndIntrinsic(object value)
+            : base(value)
+        {
+        }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="AndIntrinsic"/> class.
+        /// </summary>
+        /// <param name="value">The value.</param>
+        /// <param name="useLongForm">If set to <c>true</c>, emit long form of intrinsic when serializing.</param>
+        public AndIntrinsic(object value, bool useLongForm)
+            : base(value, useLongForm)
+        {
+        }
+
         /// <inheritdoc />
         public override string LongName => "Fn::And";
 

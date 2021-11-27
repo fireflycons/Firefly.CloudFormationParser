@@ -6,6 +6,7 @@
     using Firefly.CloudFormationParser.Intrinsics;
     using Firefly.CloudFormationParser.Intrinsics.Abstractions;
     using Firefly.CloudFormationParser.Intrinsics.Functions;
+    using Firefly.CloudFormationParser.Intrinsics.Utils;
 
     using YamlDotNet.Core;
     using YamlDotNet.Core.Events;
@@ -44,7 +45,7 @@
             }
 
             object nestedObject;
-            var tag = new Base64Intrinsic();
+            Base64Intrinsic tag;
 
             if (parser.Accept<Scalar>(out var scalar))
             {
@@ -53,42 +54,24 @@
                 // - An intrinsic function tag with a scalar value
                 if (scalar.Tag.IsEmpty)
                 {
-                    tag.SetValue(new[] { scalar.Value });
+                    tag = new Base64Intrinsic(scalar.Value);
                     parser.MoveNext();
                 }
                 else
                 {
                     // Tagged scalar
-                    if (scalar.Value == string.Empty || (!scalar.Tag.IsEmpty && scalar.Tag.Value == tag.TagName))
+                    if (scalar.Value == string.Empty || (!scalar.Tag.IsEmpty && scalar.Tag.Value == TagRepository.GetIntrinsicByType(expectedType).TagName))
                     {
                         nestedObject = this.SafeNestedObjectDeserializer(
                             ParsingEventBuffer.FromNestedScalar(parser),
                             nestedObjectDeserializer,
                             typeof(object));
 
-                        // Kludgy
-                        if (nestedObject.GetType() == typeof(NullNestedObject))
-                        {
-                            if (tag.GetType() == typeof(GetAZsIntrinsic))
-                            {
-                                tag.SetValue(string.Empty);
-                            }
-                            else
-                            {
-                                throw new YamlException(
-                                    parser.Current!.Start,
-                                    parser.Current!.End,
-                                    $"{tag.LongName}: Null value unexpected.");
-                            }
-                        }
-                        else
-                        {
-                            tag.SetValue(nestedObject);
-                        }
+                            tag = new Base64Intrinsic(nestedObject);
                     }
                     else
                     {
-                        tag.SetValue(
+                        tag = new Base64Intrinsic(
                             this.SafeNestedObjectDeserializer(parser, nestedObjectDeserializer, typeof(IIntrinsic)));
                     }
                 }
@@ -96,6 +79,8 @@
                 value = tag;
                 return true;
             }
+
+            var useLongForm = false;
 
             if (parser.Accept<MappingStart>(out var mapping))
             {
@@ -108,11 +93,10 @@
                 if (nestedObject is AbstractIntrinsic && !mapping.Tag.IsEmpty)
                 {
                     // Parent must be emitted long form
-                    tag.UseLongForm = true;
+                    useLongForm = true;
                 }
 
-                tag.SetValue(new[] { nestedObject });
-                value = tag;
+                value = new Base64Intrinsic(nestedObject, useLongForm);
                 return true;
             }
 
@@ -124,11 +108,10 @@
                 if (nestedObject is AbstractIntrinsic && !seq.Tag.IsEmpty)
                 {
                     // Parent must be an intrinsic and must be emitted long form
-                    tag.UseLongForm = true;
+                    useLongForm = true;
                 }
 
-                tag.SetValue(new[] { nestedObject });
-                value = tag;
+                value = new Base64Intrinsic(nestedObject, useLongForm);
                 return true;
             }
 

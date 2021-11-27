@@ -40,9 +40,7 @@
                         }
                     });
 
-            var intrinsic = new FindInMapIntrinsic();
-
-            intrinsic.SetValue(new object[] { MapName, TopLevelKey, SecondLevelKey });
+            var intrinsic = new FindInMapIntrinsic(MapName, TopLevelKey, SecondLevelKey);
 
             intrinsic.Evaluate(template.Object).Should().BeEquivalentTo(expectedValue);
         }
@@ -68,9 +66,7 @@
                         }
                     });
 
-            var intrinsic = new FindInMapIntrinsic();
-
-            intrinsic.SetValue(new object[] { MapName, TopLevelKey, SecondLevelKey });
+            var intrinsic = new FindInMapIntrinsic(MapName, TopLevelKey, SecondLevelKey);
 
             intrinsic.Evaluate(template.Object).Should().Be(ExpectedValue);
         }
@@ -82,8 +78,7 @@
             const string Region = "eu-west-1";
             const string ExpectedValue = "value";
 
-            var @ref = new RefIntrinsic();
-            @ref.SetValue("AWS::Region");
+            var @ref = new RefIntrinsic("AWS::Region");
 
             var pp = PseudoParameter.Create(RegionRef);
             pp.SetCurrentValue(new Dictionary<string, object> { { RegionRef, Region } });
@@ -105,8 +100,7 @@
             template.Setup(t => t.UserParameterValues)
                 .Returns(new Dictionary<string, object> { { RegionRef, Region } });
 
-            var intrinsic = new FindInMapIntrinsic();
-            intrinsic.SetValue(new object[] { MapName, @ref, SecondLevelKey });
+            var intrinsic = new FindInMapIntrinsic(MapName, @ref, SecondLevelKey);
 
             intrinsic.Evaluate(template.Object).Should().Be(ExpectedValue);
         }
@@ -120,8 +114,7 @@
             const string Region = "eu-west-1";
             const string ExpectedValue = "value";
 
-            var @ref = new RefIntrinsic();
-            @ref.SetValue(ParamName);
+            var @ref = new RefIntrinsic(ParamName);
 
             var param = new Mock<IParameter>();
             param.Setup(p => p.Name).Returns(ParamName);
@@ -145,8 +138,7 @@
             template.Setup(t => t.UserParameterValues)
                 .Returns(new Dictionary<string, object> { { RegionRef, Region } });
 
-            var intrinsic = new FindInMapIntrinsic();
-            intrinsic.SetValue(new object[] { @ref, Region, SecondLevelKey });
+            var intrinsic = new FindInMapIntrinsic(@ref, Region, SecondLevelKey);
 
             intrinsic.Evaluate(template.Object).Should().Be(ExpectedValue);
         }

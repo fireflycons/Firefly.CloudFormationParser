@@ -33,8 +33,7 @@
             var template = new Mock<ITemplate>();
             var items = new[] { "zero", "one", "two", "three", "four" };
             
-            var select = new SelectIntrinsic();
-            select.SetValue(new object[] { index, items });
+            var select = new SelectIntrinsic(new object[] { index, items });
 
             select.Evaluate(template.Object).ToString().Should().Be(expected);
         }
@@ -48,8 +47,7 @@
             var template = new Mock<ITemplate>();
             var items = new[] { "zero", "one", "two", "three", "four" };
 
-            var select = new SelectIntrinsic();
-            select.SetValue(new object[] { 5, items });
+            var select = new SelectIntrinsic(new object[] { 5, items });
 
             var action = new Action(() => select.Evaluate(template.Object));
 
@@ -77,11 +75,9 @@
             template.Setup(t => t.Parameters).Returns(new List<IParameter> { parameter });
             template.Setup(t => t.PseudoParameters).Returns(new List<IParameter>());
 
-            var refIntrinsic = new RefIntrinsic();
-            refIntrinsic.SetValue(ParameterName);
+            var refIntrinsic = new RefIntrinsic(ParameterName);
 
-            var select = new SelectIntrinsic();
-            select.SetValue(new object[] { index, refIntrinsic });
+            var select = new SelectIntrinsic(new object[] { index, refIntrinsic });
 
             select.Evaluate(template.Object).ToString().Should().Be(expected);
         }
@@ -107,11 +103,9 @@
             template.Setup(t => t.Parameters).Returns(new List<IParameter> { parameter });
             template.Setup(t => t.PseudoParameters).Returns(new List<IParameter>());
 
-            var refIntrinsic = new RefIntrinsic();
-            refIntrinsic.SetValue(ParameterName);
+            var refIntrinsic = new RefIntrinsic(ParameterName);
 
-            var select = new SelectIntrinsic();
-            select.SetValue(new object[] { index, refIntrinsic });
+            var select = new SelectIntrinsic(new object[] { index, refIntrinsic });
 
             select.Evaluate(template.Object).ToString().Should().Be(expected);
         }
@@ -136,11 +130,9 @@
 
         private static ITemplate SetupTemplate(out SelectIntrinsic selectIntrinsic)
         {
-            var refIntrinsic = new RefIntrinsic();
-            refIntrinsic.SetValue(RegionRef);
+            var refIntrinsic = new RefIntrinsic(RegionRef);
 
-            var getAzsIntrinsic = new GetAZsIntrinsic();
-            getAzsIntrinsic.SetValue(refIntrinsic);
+            var getAzsIntrinsic = new GetAZsIntrinsic(new RefIntrinsic(RegionRef));
 
             var pseudoParameter = new Mock<IParameter>();
             pseudoParameter.Setup(p => p.Name).Returns(RegionRef);
@@ -150,8 +142,7 @@
             template.Setup(t => t.Parameters).Returns(new List<IParameter>());
             template.Setup(t => t.PseudoParameters).Returns(new List<IParameter> { pseudoParameter.Object });
 
-            selectIntrinsic = new SelectIntrinsic();
-            selectIntrinsic.SetValue(new object[] { 1, getAzsIntrinsic });
+            selectIntrinsic = new SelectIntrinsic(new object[] { 1, getAzsIntrinsic });
             return template.Object;
         }
     }

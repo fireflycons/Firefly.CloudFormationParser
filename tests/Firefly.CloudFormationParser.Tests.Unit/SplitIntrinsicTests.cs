@@ -23,8 +23,7 @@
 
             var template = new Mock<ITemplate>();
 
-            var splitIntrinsic = new SplitIntrinsic();
-            splitIntrinsic.SetValue(new object[] { Delimeter, string.Join(Delimeter, strings) });
+            var splitIntrinsic = new SplitIntrinsic(new object[] { Delimeter, string.Join(Delimeter, strings) });
 
             splitIntrinsic.Evaluate(template.Object).Should().BeEquivalentTo(strings);
         }
@@ -37,8 +36,7 @@
 
             var template = new Mock<ITemplate>();
 
-            var splitIntrinsic = new SplitIntrinsic();
-            splitIntrinsic.SetValue(new object[] { Delimeter, string.Join(Delimeter, strings) });
+            var splitIntrinsic = new SplitIntrinsic(new object[] { Delimeter, string.Join(Delimeter, strings) });
 
             splitIntrinsic.Evaluate(template.Object).Should().BeEquivalentTo(strings);
         }
@@ -72,11 +70,9 @@
             template.Setup(t => t.Parameters).Returns(new List<IParameter> { param.Object });
             template.Setup(t => t.PseudoParameters).Returns(new List<IParameter>());
 
-            var refIntrinsic = new RefIntrinsic();
-            refIntrinsic.SetValue(ParameterName);
+            var refIntrinsic = new RefIntrinsic(ParameterName);
 
-            splitIntrinsic = new SplitIntrinsic();
-            splitIntrinsic.SetValue(new object[] { Delimeter, refIntrinsic });
+            splitIntrinsic = new SplitIntrinsic(new object[] { Delimeter, refIntrinsic });
             return template.Object;
         }
     }

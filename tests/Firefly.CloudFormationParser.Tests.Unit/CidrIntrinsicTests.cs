@@ -26,8 +26,7 @@
 
             var template = new Mock<ITemplate>();
 
-            var intrinsic = new CidrIntrinsic();
-            intrinsic.SetValue(new object[] { "10.0.0.0/16", 4, 8 });
+            var intrinsic = new CidrIntrinsic(new object[] { "10.0.0.0/16", 4, 8 });
 
             intrinsic.Evaluate(template.Object).Should().BeEquivalentTo(expectedSubnets);
         }
@@ -64,11 +63,8 @@
             template.Setup(t => t.Parameters).Returns(new List<IParameter> { parameter.Object });
             template.Setup(t => t.PseudoParameters).Returns(new List<IParameter>());
 
-            var @ref = new RefIntrinsic();
-            @ref.SetValue(ParameterName);
-
-            cidr = new CidrIntrinsic();
-            cidr.SetValue(new object[] { @ref, 4, 8 });
+            var @ref = new RefIntrinsic(ParameterName);
+            cidr = new CidrIntrinsic(new object[] { @ref, 4, 8 });
 
             return template.Object;
         }

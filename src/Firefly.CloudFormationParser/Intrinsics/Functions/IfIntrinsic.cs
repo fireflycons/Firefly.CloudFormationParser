@@ -23,6 +23,32 @@
         public const string Tag = "!If";
 
         /// <summary>
+        /// Initializes a new instance of the <see cref="IfIntrinsic"/> class.
+        /// </summary>
+        public IfIntrinsic()
+        {
+        }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="IfIntrinsic"/> class.
+        /// </summary>
+        /// <param name="value">The value.</param>
+        public IfIntrinsic(object value)
+            : base(value)
+        {
+        }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="IfIntrinsic"/> class.
+        /// </summary>
+        /// <param name="value">The value.</param>
+        /// <param name="useLongForm">If set to <c>true</c>, emit long form of intrinsic when serializing.</param>
+        public IfIntrinsic(object value, bool useLongForm)
+            : base(value, useLongForm)
+        {
+        }
+
+        /// <summary>
         /// Gets or sets the condition.
         /// </summary>
         /// <value>
@@ -61,6 +87,20 @@
         /// <inheritdoc />
         internal override int MinValues => 3;
 
+        /// <inheritdoc />
+        public override object Evaluate(ITemplate template)
+        {
+            var evaluation = this.GetBranch(template);
+
+            if (evaluation is IIntrinsic intrinsic)
+            {
+                return intrinsic.Evaluate(template);
+            }
+
+            // Walk this object evaluating any nested intrinsics
+            return evaluation.CopyAndEvaluateIntrinsics(template)!;
+        }
+
         /// <summary>
         /// Gets the branch based on condition evaluation.
         /// </summary>
@@ -84,20 +124,6 @@
         }
 
         /// <inheritdoc />
-        public override object Evaluate(ITemplate template)
-        {
-            var evaluation = this.GetBranch(template);
-
-            if (evaluation is IIntrinsic intrinsic)
-            {
-                return intrinsic.Evaluate(template);
-            }
-
-            // Walk this object evaluating any nested intrinsics
-            return evaluation.CopyAndEvaluateIntrinsics(template)!;
-        }
-
-        /// <inheritdoc />
         public override IEnumerable<string> GetReferencedObjects(ITemplate template)
         {
             if (template.EvaluatedConditions.ContainsKey(this.Condition))
@@ -115,16 +141,6 @@
 
             throw new InvalidOperationException(
                 $"Condition '{this.Condition} not found in Conditions section of template.");
-        }
-
-        /// <inheritdoc />
-        public override void SetValue(IEnumerable<object> values)
-        {
-            var list = values.ToList();
-
-            this.ValidateValues(this.MinValues, this.MaxValues, list);
-            this.Condition = (string)list[0];
-            this.Items = list.Skip(1).Select(this.UnpackIntrinsic).ToList();
         }
 
         /// <summary>
@@ -156,6 +172,16 @@
                 emitter,
                 nestedValueSerializer,
                 new[] { this.Condition, this.ValueIfTrue, this.ValueIfFalse });
+        }
+
+        /// <inheritdoc />
+        protected override void SetValue(IEnumerable<object> values)
+        {
+            var list = values.ToList();
+
+            this.ValidateValues(this.MinValues, this.MaxValues, list);
+            this.Condition = (string)list[0];
+            this.Items = list.Skip(1).Select(this.UnpackIntrinsic).ToList();
         }
     }
 }

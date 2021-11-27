@@ -17,6 +17,32 @@
         /// </summary>
         public const string Tag = "!Ref";
 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="RefIntrinsic"/> class.
+        /// </summary>
+        public RefIntrinsic()
+        {
+        }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="RefIntrinsic"/> class.
+        /// </summary>
+        /// <param name="value">The value.</param>
+        public RefIntrinsic(object value)
+            : base(value)
+        {
+        }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="RefIntrinsic"/> class.
+        /// </summary>
+        /// <param name="value">The value.</param>
+        /// <param name="useLongForm">If set to <c>true</c>, emit long form of intrinsic when serializing.</param>
+        public RefIntrinsic(object value, bool useLongForm)
+            : base(value, useLongForm)
+        {
+        }
+
         /// <inheritdoc />
         public override string LongName => "Ref";
 
@@ -37,7 +63,8 @@
         /// <inheritdoc />
         public override object Evaluate(ITemplate template)
         {
-            var param = template.Parameters.Concat(template.PseudoParameters).FirstOrDefault(p => p.Name == this.Reference);
+            var param = template.Parameters.Concat(template.PseudoParameters)
+                .FirstOrDefault(p => p.Name == this.Reference);
 
             // Note that we can't dereference the physical ID of a resource here so we must return the logical name.
             return param == null ? this.Reference : param.GetCurrentValue();

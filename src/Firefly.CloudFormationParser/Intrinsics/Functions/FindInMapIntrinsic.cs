@@ -21,6 +21,44 @@
         /// </summary>
         public const string Tag = "!FindInMap";
 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="FindInMapIntrinsic"/> class.
+        /// </summary>
+        public FindInMapIntrinsic()
+        {
+        }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="FindInMapIntrinsic"/> class.
+        /// </summary>
+        /// <param name="value">The value.</param>
+        public FindInMapIntrinsic(object value)
+            : base(value)
+        {
+        }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="FindInMapIntrinsic"/> class.
+        /// </summary>
+        /// <param name="value">The value.</param>
+        /// <param name="useLongForm">If set to <c>true</c>, emit long form of intrinsic when serializing.</param>
+        public FindInMapIntrinsic(object value, bool useLongForm)
+            : base(value, useLongForm)
+        {
+        }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="FindInMapIntrinsic"/> class.
+        /// </summary>
+        /// <param name="mapName">Name of the map. String or reference to intrinsic.</param>
+        /// <param name="topLevelKey">The top level key. String or reference to intrinsic.</param>
+        /// <param name="secondLevelKey">The second level key. String or reference to intrinsic.</param>
+        public FindInMapIntrinsic(object mapName, object topLevelKey, object secondLevelKey)
+        {
+            this.MapName = mapName;
+            this.Items = new List<object> { topLevelKey, secondLevelKey };
+        }
+
         /// <inheritdoc />
         public override string LongName => "Fn::FindInMap";
 
@@ -73,12 +111,12 @@
 
             if (template.Mappings == null)
             {
-                throw new System.InvalidOperationException("Cannot evaluate FindInMap. Template has no mappings");
+                throw new InvalidOperationException("Cannot evaluate FindInMap. Template has no mappings");
             }
 
             if (!template.Mappings.ContainsKey(evaluatedMapName))
             {
-                throw new System.InvalidOperationException($"FindInMap: Map not found '{this.MapName}'");
+                throw new InvalidOperationException($"FindInMap: Map not found '{this.MapName}'");
             }
 
             var map = (Dictionary<object, object>)template.Mappings[evaluatedMapName]!;
@@ -87,30 +125,11 @@
             return this.GetNextMapLevel(template, map, this.SecondLevelKey);
         }
 
-        private object GetNextMapLevel(ITemplate template, IReadOnlyDictionary<object, object> map, object key)
-        {
-            string nextLevelKey = key switch
-                {
-                    string s => s,
-                    IIntrinsic intrinsic => intrinsic.Evaluate(template).ToString(),
-                    _ => throw new System.InvalidOperationException(
-                             $"FindInMap: invalid type for top level key '{key.GetType().Name}'")
-                };
-
-            if (!map.ContainsKey(nextLevelKey))
-            {
-                throw new System.InvalidOperationException(
-                    $"FindInMap: Map '{this.MapName}' does not contain key '{nextLevelKey}'");
-            }
-
-            return map[nextLevelKey];
-        }
-
         /// <inheritdoc />
         public override IEnumerable<string> GetReferencedObjects(ITemplate template)
         {
             var refs = new List<string>();
-            
+
             foreach (var k in new[] { this.MapName, this.TopLevelKey, this.SecondLevelKey })
             {
                 if (k is IIntrinsic intrinsic)
@@ -120,16 +139,6 @@
             }
 
             return refs;
-        }
-
-        /// <inheritdoc />
-        public override void SetValue(IEnumerable<object> values)
-        {
-            var list = values.ToList();
-
-            this.ValidateValues(this.MinValues, this.MaxValues, list);
-            this.MapName = list[0];
-            this.Items = list.Skip(1).Select(this.UnpackIntrinsic).ToList();
         }
 
         /// <summary>
@@ -161,6 +170,35 @@
                 emitter,
                 nestedValueSerializer,
                 new[] { this.MapName, this.TopLevelKey, this.SecondLevelKey });
+        }
+
+        /// <inheritdoc />
+        protected override void SetValue(IEnumerable<object> values)
+        {
+            var list = values.ToList();
+
+            this.ValidateValues(this.MinValues, this.MaxValues, list);
+            this.MapName = list[0];
+            this.Items = list.Skip(1).Select(this.UnpackIntrinsic).ToList();
+        }
+
+        private object GetNextMapLevel(ITemplate template, IReadOnlyDictionary<object, object> map, object key)
+        {
+            string nextLevelKey = key switch
+                {
+                    string s => s,
+                    IIntrinsic intrinsic => intrinsic.Evaluate(template).ToString(),
+                    _ => throw new InvalidOperationException(
+                             $"FindInMap: invalid type for top level key '{key.GetType().Name}'")
+                };
+
+            if (!map.ContainsKey(nextLevelKey))
+            {
+                throw new InvalidOperationException(
+                    $"FindInMap: Map '{this.MapName}' does not contain key '{nextLevelKey}'");
+            }
+
+            return map[nextLevelKey];
         }
     }
 }

@@ -26,6 +26,43 @@
         public const string Tag = "!GetAtt";
 
         /// <summary>
+        /// Initializes a new instance of the <see cref="GetAttIntrinsic"/> class.
+        /// </summary>
+        public GetAttIntrinsic()
+        {
+        }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="GetAttIntrinsic"/> class.
+        /// </summary>
+        /// <param name="value">The value.</param>
+        public GetAttIntrinsic(object value)
+            : base(value)
+        {
+        }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="GetAttIntrinsic"/> class.
+        /// </summary>
+        /// <param name="logicalId">The logical identifier.</param>
+        /// <param name="attributeName">Name of the attribute. String or reference to an intrinsic.</param>
+        public GetAttIntrinsic(string logicalId, object attributeName)
+        {
+            this.LogicalId = logicalId;
+            this.AttributeName = attributeName;
+        }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="GetAttIntrinsic"/> class.
+        /// </summary>
+        /// <param name="value">The value.</param>
+        /// <param name="useLongForm">If set to <c>true</c>, emit long form of intrinsic when serializing.</param>
+        public GetAttIntrinsic(object value, bool useLongForm)
+            : base(value, useLongForm)
+        {
+        }
+
+        /// <summary>
         /// Gets or sets the name of the attribute. This may be a <see cref="RefIntrinsic"/> or a string.
         /// </summary>
         /// <value>
@@ -79,16 +116,6 @@
         }
 
         /// <inheritdoc />
-        public override void SetValue(IEnumerable<object> values)
-        {
-            var list = (List<object>)values;
-
-            this.ValidateValues(this.MinValues, this.MaxValues, list);
-            this.LogicalId = (string)list[0];
-            this.AttributeName = this.UnpackIntrinsic(list[1]);
-        }
-
-        /// <inheritdoc />
         internal override IList<UnresolvedTagProperty> GetUnresolvedDictionaryProperties()
         {
             if (this.AttributeName is IDictionary)
@@ -109,13 +136,31 @@
         /// <inheritdoc />
         internal override void WriteLongForm(IEmitter emitter, IValueSerializer nestedValueSerializer)
         {
-            this.EmitterTrait.WriteLongForm(this, emitter, nestedValueSerializer, new[] { this.LogicalId, this.AttributeName });
+            this.EmitterTrait.WriteLongForm(
+                this,
+                emitter,
+                nestedValueSerializer,
+                new[] { this.LogicalId, this.AttributeName });
         }
 
         /// <inheritdoc />
         internal override void WriteShortForm(IEmitter emitter, IValueSerializer nestedValueSerializer)
         {
-            this.EmitterTrait.WriteShortForm(this, emitter, nestedValueSerializer, new[] { this.LogicalId, this.AttributeName });
+            this.EmitterTrait.WriteShortForm(
+                this,
+                emitter,
+                nestedValueSerializer,
+                new[] { this.LogicalId, this.AttributeName });
+        }
+
+        /// <inheritdoc />
+        protected override void SetValue(IEnumerable<object> values)
+        {
+            var list = (List<object>)values;
+
+            this.ValidateValues(this.MinValues, this.MaxValues, list);
+            this.LogicalId = (string)list[0];
+            this.AttributeName = this.UnpackIntrinsic(list[1]);
         }
     }
 }

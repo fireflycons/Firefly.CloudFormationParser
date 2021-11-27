@@ -13,6 +13,32 @@
     public abstract class AbstractArrayIntrinsic : AbstractIntrinsic
     {
         /// <summary>
+        /// Initializes a new instance of the <see cref="AbstractArrayIntrinsic"/> class.
+        /// </summary>
+        protected AbstractArrayIntrinsic()
+        {
+        }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="AbstractArrayIntrinsic"/> class.
+        /// </summary>
+        /// <param name="value">The value.</param>
+        protected AbstractArrayIntrinsic(object value)
+        : base(value)
+        {
+        }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="AbstractArrayIntrinsic"/> class.
+        /// </summary>
+        /// <param name="value">The value.</param>
+        /// <param name="useLongForm">If set to <c>true</c>, emit long form of intrinsic when serializing.</param>
+        protected AbstractArrayIntrinsic(object value, bool useLongForm)
+        : base(value, useLongForm)
+        {
+        }
+
+        /// <summary>
         /// Gets or sets the item list for the intrinsic
         /// </summary>
         /// <value>

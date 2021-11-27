@@ -16,6 +16,32 @@
         public const string Tag = "!ImportValue";
 
         /// <summary>
+        /// Initializes a new instance of the <see cref="ImportValueIntrinsic"/> class.
+        /// </summary>
+        public ImportValueIntrinsic()
+        {
+        }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="ImportValueIntrinsic"/> class.
+        /// </summary>
+        /// <param name="value">The value.</param>
+        public ImportValueIntrinsic(object value)
+            : base(value)
+        {
+        }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="ImportValueIntrinsic"/> class.
+        /// </summary>
+        /// <param name="value">The value.</param>
+        /// <param name="useLongForm">If set to <c>true</c>, emit long form of intrinsic when serializing.</param>
+        public ImportValueIntrinsic(object value, bool useLongForm)
+            : base(value, useLongForm)
+        {
+        }
+
+        /// <summary>
         /// Gets or sets the name of the export.
         /// </summary>
         /// <value>
@@ -38,7 +64,9 @@
         /// <inheritdoc />
         public override IEnumerable<string> GetReferencedObjects(ITemplate template)
         {
-            return this.ExportName is IIntrinsic intrinsic ? intrinsic.GetReferencedObjects(template) : new List<string>();
+            return this.ExportName is IIntrinsic intrinsic
+                       ? intrinsic.GetReferencedObjects(template)
+                       : new List<string>();
         }
     }
 }

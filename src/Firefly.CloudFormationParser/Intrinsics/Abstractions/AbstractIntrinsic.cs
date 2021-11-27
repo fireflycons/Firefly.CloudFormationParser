@@ -18,6 +18,33 @@
     /// <seealso cref="CloudFormationParser.Intrinsics.IIntrinsic" />
     public abstract class AbstractIntrinsic : IIntrinsic
     {
+        /// <summary>
+        /// Initializes a new instance of the <see cref="AbstractIntrinsic"/> class.
+        /// </summary>
+        protected AbstractIntrinsic()
+        {
+        }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="AbstractIntrinsic"/> class.
+        /// </summary>
+        /// <param name="value">The value.</param>
+        protected AbstractIntrinsic(object value)
+        : this(value, false)
+        {
+        }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="AbstractIntrinsic"/> class.
+        /// </summary>
+        /// <param name="value">The value.</param>
+        /// <param name="useLongForm">If set to <c>true</c>, emit long form of intrinsic when serializing.</param>
+        protected AbstractIntrinsic(object value, bool useLongForm)
+        {
+            this.SetValue(value);
+            this.UseLongForm = useLongForm;
+        }
+
         /// <inheritdoc />
         public abstract string LongName { get; }
 
@@ -25,12 +52,12 @@
         public abstract string TagName { get; }
 
         /// <summary>
-        /// Gets or sets a value indicating whether to use the long form when serializing.
+        /// Gets a value indicating whether to use the long form when serializing.
         /// </summary>
         /// <value>
         ///   <c>true</c> if long form should be used; otherwise, <c>false</c>.
         /// </value>
-        public bool UseLongForm { get; set; } = false;
+        public bool UseLongForm { get; }
 
         /// <summary>
         /// Gets the emitter trait for this intrinsic.
@@ -63,11 +90,28 @@
         /// <inheritdoc />
         public abstract IEnumerable<string> GetReferencedObjects(ITemplate template);
 
-        /// <inheritdoc />
-        public abstract void SetValue(IEnumerable<object> values);
+        /// <summary>
+        /// <para>
+        /// Sets the values for the intrinsic.
+        /// </para>
+        /// <para>
+        /// This is a list of objects, whose length depends on the number of properties (usually list elements) supported by the intrinsic.
+        /// Each element depending on the intrinsic, may be a scalar value, another intrinsic or another list of items e.g. for <c>!Join</c> or <c>!Select</c> 
+        /// </para>
+        /// </summary>
+        /// <param name="values">Values to assign to the intrinsic</param>
+        protected abstract void SetValue(IEnumerable<object> values);
 
-        /// <inheritdoc />
-        public void SetValue(object value)
+        /// <summary>
+        /// <para>
+        /// Sets the values for the intrinsic.
+        /// </para>
+        /// <para>
+        /// This is a single scalar or intrinsic object or a list of objects. This is a convenience method which wraps a scalar and then calls <see cref="SetValue(System.Collections.Generic.IEnumerable{object})"/>
+        /// </para>
+        /// </summary>
+        /// <param name="value">Value to assign to the intrinsic</param>
+        protected void SetValue(object value)
         {
             if (value is IEnumerable<object> enumerable)
             {
@@ -159,12 +203,12 @@
                 if (minValues == maxValues)
                 {
                     throw new ArgumentException(
-                        $"{this.LongName}: Expected {minValues} values. Got {values.Count}.",
+                        $"{this.TagName}: Expected {minValues} values. Got {values.Count}.",
                         nameof(values));
                 }
 
                 throw new ArgumentException(
-                    $"{this.LongName}: Expected between {minValues} and {maxValues} values. Got {values.Count}.",
+                    $"{this.TagName}: Expected between {minValues} and {maxValues} values. Got {values.Count}.",
                     nameof(values));
             }
         }

@@ -5,6 +5,7 @@
     using System.Linq;
 
     using Firefly.CloudFormationParser.Intrinsics;
+    using Firefly.CloudFormationParser.Intrinsics.Abstractions;
     using Firefly.CloudFormationParser.TemplateObjects;
 
     using YamlDotNet.Core;
@@ -59,6 +60,53 @@
         }
 
         /// <summary>
+        /// Performs some validation on the number of values being set on this intrinsic.
+        /// </summary>
+        /// <param name="parser">The parser.</param>
+        /// <param name="intrinsicName">Name of intrinsic being deserialized.</param>
+        /// <param name="minValues">The minimum values.</param>
+        /// <param name="maxValues">The maximum values.</param>
+        /// <param name="values">The values.</param>
+        /// <exception cref="System.ArgumentException">
+        /// Number of values being assigned is outside the min and max constraints,
+        /// </exception>
+        protected void ValidateValues(IParser parser, string intrinsicName, int minValues, int maxValues, IList<object> values)
+        {
+            var @event = parser.Current;
+
+            if (values.Count < minValues || values.Count > maxValues)
+            {
+                if (minValues == maxValues)
+                {
+                    throw new YamlException(
+                        @event!.Start,
+                        @event.End,
+                        $"{intrinsicName}: Expected {minValues} values. Got {values.Count}.");
+                }
+
+                throw new YamlException(
+                    @event!.Start,
+                    @event.End,
+                    $"{intrinsicName}: Expected between {minValues} and {maxValues} values. Got {values.Count}.");
+            }
+        }
+
+        /// <summary>
+        /// Unpack an intrinsic from a long form dictionary entry e.g. <c>{ "Fn::Sub", SubIntrinsic }</c>
+        /// </summary>
+        /// <param name="value">The value to unpack.</param>
+        /// <returns>If <paramref name="value"/> is a long form intrinsic, then the intrinsic else the original object.</returns>
+        protected object UnpackIntrinsic(object value)
+        {
+            if (value is Dictionary<object, object> dict && dict.Any() && dict.First().Value is IIntrinsic intrinsic && dict.First().Key.ToString() == intrinsic.LongName)
+            {
+                return intrinsic;
+            }
+
+            return value;
+        }
+
+        /// <summary>
         /// <para>
         /// Check if the parsed object is a dictionary with one entry, and that entry is e.g. <c>{ "Fn::GetAtt", GetAttIntrinsic }</c>.
         /// If so, return the intrinsic; else the original object.
@@ -83,6 +131,17 @@
             }
 
             return parsedObject;
+        }
+
+        /// <summary>
+        /// Creates an intrinsic instance given the type and value to set.
+        /// </summary>
+        /// <param name="type">The type.</param>
+        /// <param name="value">The value.</param>
+        /// <returns></returns>
+        protected static IIntrinsic CreateIntrinsic(Type type, object value)
+        {
+            return (IIntrinsic)Activator.CreateInstance(type, value);
         }
     }
 }

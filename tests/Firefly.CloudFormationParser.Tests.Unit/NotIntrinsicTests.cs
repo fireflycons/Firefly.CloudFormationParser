@@ -4,6 +4,7 @@
     using System.Collections.Generic;
     using System.Linq;
 
+    using Firefly.CloudFormationParser.Intrinsics;
     using Firefly.CloudFormationParser.Intrinsics.Functions;
 
     using FluentAssertions;
@@ -20,8 +21,7 @@
         public void ShouldReturnCorrectEvaluationForBooleanLiterals(bool operand, bool expectedResult)
         {
             var template = new Mock<ITemplate>();
-            var intrinsic = new NotIntrinsic();
-            intrinsic.SetValue(new object[] { operand });
+            var intrinsic = new NotIntrinsic(operand);
 
             ((bool)intrinsic.Evaluate(template.Object)).Should().Be(expectedResult);
         }
@@ -34,8 +34,7 @@
         public void ShouldReturnCorrectEvaluationForNumericLiterals(int operand, bool expectedResult)
         {
             var template = new Mock<ITemplate>();
-            var intrinsic = new NotIntrinsic();
-            intrinsic.SetValue(new object[] { operand });
+            var intrinsic = new NotIntrinsic(operand);
 
             ((bool)intrinsic.Evaluate(template.Object)).Should().Be(expectedResult);
         }
@@ -48,12 +47,11 @@
             var bools = operands == string.Empty
                             ? new List<object>()
                             : operands.Split(',').Select(bool.Parse).Cast<object>().ToList();
-            var intrinsic = new NotIntrinsic();
 
-            var action = new Action(() => intrinsic.SetValue(bools));
+            var action = new Func<IIntrinsic>(() => new NotIntrinsic(bools));
 
             action.Should().Throw<ArgumentException>().WithMessage(
-                $"{intrinsic.LongName}: Expected 1 values. Got {bools.Count}. (Parameter 'values')");
+                $"{NotIntrinsic.Tag}: Expected 1 values. Got {bools.Count}. (Parameter 'values')");
         }
     }
 }

@@ -4,6 +4,7 @@
     using System.Collections.Generic;
 
     using Firefly.CloudFormationParser.Intrinsics.Abstractions;
+    using Firefly.CloudFormationParser.Intrinsics.Utils;
 
     using YamlDotNet.Core;
     using YamlDotNet.Core.Events;
@@ -40,13 +41,12 @@
                 return false;
             }
 
-            var tag = new T();
-
             if (!parser.Accept<SequenceStart>(out _))
             {
                 return false;
             }
 
+            var tag = (T)TagRepository.GetIntrinsicByType(expectedType);
             var values = new List<object>();
             var @event = parser.Current;
 
@@ -73,8 +73,7 @@
                     $"{tag.LongName}: Incorrect number of values {values.Count}. Expected between {tag.MinValues} and {tag.MaxValues}.");
             }
 
-            tag.SetValue(values);
-            value = tag;
+            value = CreateIntrinsic(typeof(T), values);
             return true;
         }
     }

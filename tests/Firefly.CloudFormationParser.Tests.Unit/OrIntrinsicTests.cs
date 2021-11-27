@@ -3,6 +3,7 @@
     using System;
     using System.Linq;
 
+    using Firefly.CloudFormationParser.Intrinsics;
     using Firefly.CloudFormationParser.Intrinsics.Functions;
 
     using FluentAssertions;
@@ -29,8 +30,7 @@
         {
             var template = new Mock<ITemplate>();
             var bools = operands.Split(',').Select(bool.Parse).Cast<object>().ToList();
-            var or = new OrIntrinsic();
-            or.SetValue(bools);
+            var or = new OrIntrinsic(bools);
 
             ((bool)or.Evaluate(template.Object)).Should().Be(expectedResult);
         }
@@ -51,8 +51,7 @@
         {
             var template = new Mock<ITemplate>();
             var ints = operands.Split(',').Select(int.Parse).Cast<object>().ToList();
-            var or = new OrIntrinsic();
-            or.SetValue(ints);
+            var or = new OrIntrinsic(ints);
 
             ((bool)or.Evaluate(template.Object)).Should().Be(expectedResult);
         }
@@ -63,12 +62,11 @@
         public void ShouldThrowForIncorrectNumberOfOperands(string operands)
         {
             var bools = operands.Split(',').Select(bool.Parse).Cast<object>().ToList();
-            var intrinsic = new OrIntrinsic();
 
-            var action = new Action(() => intrinsic.SetValue(bools));
+            var action = new Func<IIntrinsic>(() => new OrIntrinsic(bools));
 
             action.Should().Throw<ArgumentException>().WithMessage(
-                $"{intrinsic.LongName}: Expected between 2 and 10 values. Got {bools.Count}. (Parameter 'values')");
+                $"{OrIntrinsic.Tag}: Expected between 2 and 10 values. Got {bools.Count}. (Parameter 'values')");
         }
     }
 }

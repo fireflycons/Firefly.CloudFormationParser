@@ -24,6 +24,32 @@
         /// </summary>
         public const string Tag = "!GetAZs";
 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="GetAZsIntrinsic"/> class.
+        /// </summary>
+        public GetAZsIntrinsic()
+        {
+        }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="GetAZsIntrinsic"/> class.
+        /// </summary>
+        /// <param name="value">The value.</param>
+        public GetAZsIntrinsic(object value)
+            : base(value)
+        {
+        }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="GetAZsIntrinsic"/> class.
+        /// </summary>
+        /// <param name="value">The value.</param>
+        /// <param name="useLongForm">If set to <c>true</c>, emit long form of intrinsic when serializing.</param>
+        public GetAZsIntrinsic(object value, bool useLongForm)
+            : base(value, useLongForm)
+        {
+        }
+
         /// <inheritdoc />
         public override string LongName => "Fn::GetAZs";
 
@@ -55,7 +81,8 @@
 
                 case string _:
 
-                    var pp = template.Parameters.Concat(template.PseudoParameters).FirstOrDefault(p => p.Name == "AWS::Region");
+                    var pp = template.Parameters.Concat(template.PseudoParameters)
+                        .FirstOrDefault(p => p.Name == "AWS::Region");
 
                     if (pp == null)
                     {

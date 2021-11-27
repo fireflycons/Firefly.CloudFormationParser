@@ -1,8 +1,10 @@
 ﻿namespace Firefly.CloudFormationParser.Serialization.Deserializers
 {
     using System;
+    using System.Net;
 
     using Firefly.CloudFormationParser.Intrinsics;
+    using Firefly.CloudFormationParser.Intrinsics.Abstractions;
     using Firefly.CloudFormationParser.Intrinsics.Utils;
 
     using YamlDotNet.Core;
@@ -14,7 +16,7 @@
     /// <typeparam name="T">Tag type to deserialize</typeparam>
     /// <seealso cref="YamlDotNet.Serialization.INodeDeserializer" />
     internal class ScalarTagDeserializer<T> : AbstractTagDeserializer
-        where T : IIntrinsic, new()
+        where T : AbstractScalarIntrinsic, new()
     {
         /// <summary>
         /// Deserializes the tag identified by the type parameter.
@@ -40,8 +42,6 @@
                 return false;
             }
 
-            var tag = new T();
-
             if (expectedType != typeof(T))
             {
                 return false;
@@ -49,11 +49,10 @@
 
             if (scalar is { Tag: { IsEmpty: false } })
             {
-                if (scalar.Tag.Value == tag.TagName)
+                if (scalar.Tag.Value == TagRepository.GetIntrinsicByType(expectedType).TagName)
                 {
                     // Short form
-                    tag.SetValue(new[] { scalar.Value });
-                    value = tag;
+                    value = CreateIntrinsic(typeof(T), scalar.Value);
 
                     // Move off the tag we just read
                     parser.MoveNext();
@@ -61,15 +60,13 @@
                 }
 
                 // Long form, but with a short form intrinsic as the value.
-                var nestedTag = TagRepository.GetTagByName(scalar.Tag.Value);
-                tag.SetValue(this.SafeNestedObjectDeserializer(parser, nestedObjectDeserializer, nestedTag.GetType()));
-                value = tag;
+                var nestedTag = TagRepository.GetIntrinsicByTagName(scalar.Tag.Value);
+                value = CreateIntrinsic(typeof(T), this.SafeNestedObjectDeserializer(parser, nestedObjectDeserializer, nestedTag.GetType()));
                 return true;
             }
 
             // Long form, with a literal as the value.
-            tag.SetValue(this.SafeNestedObjectDeserializer(parser, nestedObjectDeserializer, typeof(object)));
-            value = tag;
+            value = CreateIntrinsic(typeof(T), this.SafeNestedObjectDeserializer(parser, nestedObjectDeserializer, typeof(object)));
             return true;
         }
     }

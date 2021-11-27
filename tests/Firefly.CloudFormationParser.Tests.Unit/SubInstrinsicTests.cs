@@ -22,13 +22,11 @@
         {
             var references = new List<string> { TemplateParameterName, ResourceName };
             var template = new Mock<ITemplate>();
-            var sub = new SubIntrinsic();
+            var @ref = new RefIntrinsic(ResourceName);
 
-            var @ref = new RefIntrinsic();
-            @ref.SetValue(ResourceName);
-
-            sub.SetValue(
-                new List<object> { $"blah-${{{TemplateParameterName}}}-${{{SubstitutionParameterName}}}", new Dictionary<object, object> { { SubstitutionParameterName, @ref } } });
+            var sub = new SubIntrinsic(
+                $"blah-${{{TemplateParameterName}}}-${{{SubstitutionParameterName}}}",
+                new Dictionary<string, object> { { SubstitutionParameterName, @ref } });
 
             sub.GetReferencedObjects(template.Object).Should().BeEquivalentTo(references);
         }
@@ -39,9 +37,7 @@
 
             var references = new List<string> { TemplateParameterName, ResourceName };
             var template = new Mock<ITemplate>();
-            var sub = new SubIntrinsic();
-
-            sub.SetValue($"blah=${{{TemplateParameterName}}}-${{{ResourceName}}}");
+            var sub = new SubIntrinsic($"blah=${{{TemplateParameterName}}}-${{{ResourceName}}}");
 
             sub.GetReferencedObjects(template.Object).Should().BeEquivalentTo(references);
         }
@@ -72,12 +68,11 @@
             template.Setup(t => t.PseudoParameters).Returns(new List<IParameter> { pseudoParameter.Object });
             template.Setup(t => t.Resources).Returns(new List<IResource> { resource.Object });
 
-            var @ref = new RefIntrinsic();
-            @ref.SetValue(ResourceName);
+            var @ref = new RefIntrinsic(ResourceName);
 
-            var sub = new SubIntrinsic();
-            sub.SetValue(
-                new List<object> { expression, new Dictionary<object, object> { { SubstitutionParameterName, @ref } } });
+            var sub = new SubIntrinsic(
+                expression,
+                new Dictionary<string, object> { { SubstitutionParameterName, @ref } });
 
             sub.Evaluate(template.Object).Should().Be(expected);
         }

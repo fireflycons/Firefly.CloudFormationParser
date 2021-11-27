@@ -15,6 +15,32 @@
         /// </summary>
         public const string Tag = "!Equals";
 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="EqualsIntrinsic"/> class.
+        /// </summary>
+        public EqualsIntrinsic()
+        {
+        }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="EqualsIntrinsic"/> class.
+        /// </summary>
+        /// <param name="value">The value.</param>
+        public EqualsIntrinsic(object value)
+            : base(value)
+        {
+        }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="EqualsIntrinsic"/> class.
+        /// </summary>
+        /// <param name="value">The value.</param>
+        /// <param name="useLongForm">If set to <c>true</c>, emit long form of intrinsic when serializing.</param>
+        public EqualsIntrinsic(object value, bool useLongForm)
+            : base(value, useLongForm)
+        {
+        }
+
         /// <inheritdoc />
         public override string LongName => "Fn::Equals";
 

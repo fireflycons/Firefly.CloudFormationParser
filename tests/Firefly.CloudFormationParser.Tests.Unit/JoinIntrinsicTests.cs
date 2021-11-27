@@ -45,8 +45,7 @@
 
         private static ITemplate SetupJoin(out JoinIntrinsic joinIntrinsic)
         {
-            var @ref = new RefIntrinsic();
-            @ref.SetValue(RegionRef);
+            var @ref = new RefIntrinsic(RegionRef);
 
             var pp = PseudoParameter.Create(RegionRef);
             pp.SetCurrentValue(new Dictionary<string, object> { { RegionRef, Region } });
@@ -67,11 +66,9 @@
             template.Setup(t => t.PseudoParameters).Returns(new List<IParameter> { pp });
             template.Setup(t => t.UserParameterValues).Returns(new Dictionary<string, object> { { RegionRef, Region } });
 
-            var findInMapIntrinsic = new FindInMapIntrinsic();
-            findInMapIntrinsic.SetValue(new object[] { MapName, @ref, SecondLevelKey });
+            var findInMapIntrinsic = new FindInMapIntrinsic(MapName, @ref, SecondLevelKey);
 
-            joinIntrinsic = new JoinIntrinsic();
-            joinIntrinsic.SetValue(new object[] { ".", new object[] { "region", findInMapIntrinsic } });
+            joinIntrinsic = new JoinIntrinsic(new object[] { ".", new object[] { "region", findInMapIntrinsic } });
             return template.Object;
         }
     }

@@ -23,6 +23,32 @@
         private object? intrinsicValue;
 
         /// <summary>
+        /// Initializes a new instance of the <see cref="AbstractScalarIntrinsic"/> class.
+        /// </summary>
+        protected AbstractScalarIntrinsic()
+        {
+        }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="AbstractScalarIntrinsic"/> class.
+        /// </summary>
+        /// <param name="value">The value.</param>
+        protected AbstractScalarIntrinsic(object value)
+        {
+            this.SetValue(value);
+        }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="AbstractScalarIntrinsic"/> class.
+        /// </summary>
+        /// <param name="value">The value.</param>
+        /// <param name="useLongForm">If set to <c>true</c>, emit long form of intrinsic when serializing.</param>
+        protected AbstractScalarIntrinsic(object value, bool useLongForm)
+            : base(value, useLongForm)
+        {
+        }
+
+        /// <summary>
         /// Gets or sets the item list for the intrinsic
         /// </summary>
         /// <value>
@@ -55,7 +81,7 @@
         internal override IEmitterTrait EmitterTrait { get; } = new ScalarEmitterTrait();
 
         /// <inheritdoc />
-        public override void SetValue(IEnumerable<object> values)
+        protected override sealed void SetValue(IEnumerable<object> values)
         {
             var list = values.Select(this.UnpackIntrinsic).ToList();
 

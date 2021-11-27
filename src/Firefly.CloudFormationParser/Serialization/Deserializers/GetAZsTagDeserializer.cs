@@ -36,6 +36,7 @@
             out object? value)
         {
             value = null;
+            var useLongForm = false;
 
             if (expectedType != typeof(GetAZsIntrinsic))
             {
@@ -43,7 +44,7 @@
             }
 
             object nestedObject;
-            var tag = new GetAZsIntrinsic();
+            GetAZsIntrinsic tag;
 
             if (parser.Accept<Scalar>(out var scalar))
             {
@@ -55,21 +56,18 @@
                     if (scalar.Value == string.Empty)
                     {
                         // Empty or null value refers to current region
-                        var @ref = new RefIntrinsic();
-
-                        @ref.SetValue("AWS::Region");
-                        tag.SetValue(@ref);
+                        tag = new GetAZsIntrinsic(new RefIntrinsic("AWS::Region"));
                     }
                     else
                     {
-                        tag.SetValue(scalar.Value);
+                        tag = new GetAZsIntrinsic(scalar.Value);
                     }
 
                     parser.MoveNext();
                 }
                 else
                 {
-                    if (scalar.Value == string.Empty || (!scalar.Tag.IsEmpty && scalar.Tag.Value == tag.TagName))
+                    if (scalar.Value == string.Empty || (!scalar.Tag.IsEmpty && scalar.Tag.Value == GetAZsIntrinsic.Tag))
                     {
                         nestedObject = this.SafeNestedObjectDeserializer(
                             ParsingEventBuffer.FromNestedScalar(parser),
@@ -80,19 +78,16 @@
                             || nestedObject is string s && s == string.Empty)
                         {
                             // Empty or null value refers to current region
-                            var @ref = new RefIntrinsic();
-
-                            @ref.SetValue("AWS::Region");
-                            tag.SetValue(@ref);
+                            tag = new GetAZsIntrinsic(new RefIntrinsic("AWS::Region"));
                         }
                         else
                         {
-                            tag.SetValue(nestedObject);
+                            tag = new GetAZsIntrinsic(nestedObject);
                         }
                     }
                     else
                     {
-                        tag.SetValue(
+                        tag = new GetAZsIntrinsic(
                             this.SafeNestedObjectDeserializer(parser, nestedObjectDeserializer, typeof(object)));
                     }
                 }
@@ -116,14 +111,14 @@
                         throw new YamlException(
                             parser.Current!.Start,
                             parser.Current.End,
-                            $"{intrinsic.LongName} is not a supported function of {tag.LongName}. Only !Ref is valid here.");
+                            $"{intrinsic.LongName} is not a supported function of {GetAZsIntrinsic.Tag}. Only !Ref is valid here.");
                     }
 
                     // Parent must be emitted long form
-                    tag.UseLongForm = true;
+                    useLongForm = true;
                 }
 
-                tag.SetValue(new[] { nestedObject });
+                tag = new GetAZsIntrinsic(nestedObject, useLongForm);
                 value = tag;
                 return true;
             }
@@ -136,10 +131,10 @@
                 if (nestedObject is AbstractIntrinsic && !seq.Tag.IsEmpty)
                 {
                     // Parent must be an intrinsic and must be emitted long form
-                    tag.UseLongForm = true;
+                    useLongForm = true;
                 }
 
-                tag.SetValue(new[] { nestedObject });
+                tag = new GetAZsIntrinsic(nestedObject, useLongForm);
                 value = tag;
                 return true;
             }
