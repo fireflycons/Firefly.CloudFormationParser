@@ -7,7 +7,9 @@
 
 **WORK IN PROGESS**
 
-There are so many questions on Stack Overflow and other sites related to the parsing of CloudFormation Templates in .NET. This is a problem I really wanted to solve once and for all, as I have several other repos here that have half-cocked CloudFormation support, and this package will be gradually integrated into them.
+This project is currently quite fluid and breaking changes may be introduced at any time - use with caution! I hope to stabilise it by early 2022.
+
+There are so many questions on Stack Overflow and other sites related to the parsing of CloudFormation Templates in .NET. This is a problem I really wanted to solve once and for all, as I have several other repos here that have half-cocked CloudFormation support, and this package will be gradually integrated into them. This integration work is the cause of the fluidity of this project as I keep running into new requirements that sometime involve fairly major refactorings.
 
 I set out to solve the [five main issues](https://fireflycons.github.io/Firefly.CloudFormationParser/documentation/gory-details.html) I see with parsing CloudFormation effectively, plus I wanted to be able to understand the dependency relationship between objects declared in a template. Should you for instance want to create a CloudFormation Linter, most of what you would need is here.
 
