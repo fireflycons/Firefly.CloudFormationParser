@@ -9,6 +9,8 @@
     using System.Linq;
     using System.Text.RegularExpressions;
 
+    using Amazon.Runtime.EventStreams;
+
     using Firefly.CloudFormationParser.Utils;
 
     using YamlDotNet.Core;
@@ -378,38 +380,49 @@
                         break;
                     }
 
-                    if (value is string s)
+                    if (this.Type.StartsWith("AWS::SSM::Parameter::Value<") && value is string s)
                     {
                         this.CurrentValue = s;
                         break;
                     }
 
                     var mc = Regex.Match(this.Type, @"List\<(?<type>[^\>]+)\>");
-                    
-                    if (mc.Success && value is IEnumerable enumerable)
+
+                    if (mc.Success)
                     {
-                        var listType = mc.Groups["type"].Value;
-
-                        if (!AwsParameterTypeRegexes.ContainsKey(listType))
+                        if (value is string)
                         {
-                            throw new ArgumentException($"Parameter {name} - Invalid type {this.Type}");
-                        }
-
-                        var listValues = new List<string>();
-
-                        foreach (var id in enumerable.ToList().Cast<string>())
+                            // Comma separated list
+                            this.CurrentValue = stringVal.Split(',').ToList();
+                            break;
+                        } 
+                        
+                        if (value is IEnumerable enumerable)
                         {
-                            if (!AwsParameterTypeRegexes[listType].IsMatch(id))
+                            var listType = mc.Groups["type"].Value;
+
+                            if (!AwsParameterTypeRegexes.ContainsKey(listType))
                             {
-                                throw new ArgumentException(
-                                    $"Parameter {name} - Value '{id}' does not match required pattern for {this.Type}");
+                                throw new ArgumentException($"Parameter {name} - Invalid type {this.Type}");
                             }
 
-                            listValues.Add(id);
-                        }
+                            var listValues = new List<string>();
 
-                        this.CurrentValue = listValues;
-                        break;
+                            foreach (var id in enumerable.ToList().Cast<string>())
+                            {
+                                if (!AwsParameterTypeRegexes[listType].IsMatch(id))
+                                {
+                                    throw new ArgumentException(
+                                        $"Parameter {name} - Value '{id}' does not match required pattern for {this.Type}");
+                                }
+
+                                listValues.Add(id);
+                            }
+
+                            this.CurrentValue = listValues;
+                            break;
+
+                        }
                     }
 
                     throw new ArgumentException($"Parameter {name} - Invalid type {this.Type}");
