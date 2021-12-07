@@ -97,37 +97,14 @@
             visitor.VisitedIntrinsics.Should().HaveCount(2);
         }
 
-        private class IntrinsicCountingTemplateObjectVisitor : ITemplateObjectVisitor
+        private class IntrinsicCountingTemplateObjectVisitor : TemplateObjectVisitor
         {
             public List<IIntrinsic> VisitedIntrinsics { get; } = new List<IIntrinsic>();
 
-            public void VisitIntrinsic(ITemplateObject templateObject, PropertyPath path, IIntrinsic intrinsic)
+            public override bool VisitIntrinsic(ITemplateObject templateObject, PropertyPath path, IIntrinsic intrinsic)
             {
                 this.VisitedIntrinsics.Add(intrinsic);
-            }
-
-            public void BeforeVisitObject<T>(ITemplateObject templateObject, PropertyPath path, IDictionary<T, object> item)
-            {
-            }
-
-            public void VisitProperty<T>(ITemplateObject templateObject, PropertyPath path, KeyValuePair<T, object> item)
-            {
-            }
-
-            public void AfterVisitObject<T>(ITemplateObject templateObject, PropertyPath path, IDictionary<T, object> item)
-            {
-            }
-
-            public void BeforeVisitList<T>(ITemplateObject templateObject, PropertyPath path, IList<T> item)
-            {
-            }
-
-            public void AfterVisitList<T>(ITemplateObject templateObject, PropertyPath path, IList<T> item)
-            {
-            }
-
-            public void VisitListItem(ITemplateObject templateObject, PropertyPath path, object item)
-            {
+                return true;
             }
         }
     }

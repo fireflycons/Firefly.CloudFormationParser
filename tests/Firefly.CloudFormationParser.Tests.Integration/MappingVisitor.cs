@@ -1,9 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
-namespace Firefly.CloudFormationParser.Tests.Integration
+﻿namespace Firefly.CloudFormationParser.Tests.Integration
 {
+    using System.Collections.Generic;
+
     using Firefly.CloudFormationParser.Intrinsics;
     using Firefly.CloudFormationParser.TemplateObjects;
     using Firefly.CloudFormationParser.Utils;
@@ -67,35 +65,8 @@ namespace Firefly.CloudFormationParser.Tests.Integration
             template.Object.Mappings.Accept(visitor);
         }
 
-        private class MappingTemplateObjectVisitor : ITemplateObjectVisitor
+        private class MappingTemplateObjectVisitor : TemplateObjectVisitor
         {
-            public void VisitIntrinsic(ITemplateObject templateObject, PropertyPath path, IIntrinsic intrinsic)
-            {
-            }
-
-            public void BeforeVisitObject<T>(ITemplateObject templateObject, PropertyPath path, IDictionary<T, object> item)
-            {
-            }
-
-            public void VisitProperty<T>(ITemplateObject templateObject, PropertyPath path, KeyValuePair<T, object> item)
-            {
-            }
-
-            public void AfterVisitObject<T>(ITemplateObject templateObject, PropertyPath path, IDictionary<T, object> item)
-            {
-            }
-
-            public void BeforeVisitList<T>(ITemplateObject templateObject, PropertyPath path, IList<T> item)
-            {
-            }
-
-            public void AfterVisitList<T>(ITemplateObject templateObject, PropertyPath path, IList<T> item)
-            {
-            }
-
-            public void VisitListItem(ITemplateObject templateObject, PropertyPath path, object item)
-            {
-            }
         }
     }
 }

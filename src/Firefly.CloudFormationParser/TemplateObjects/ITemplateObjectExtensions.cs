@@ -171,31 +171,33 @@
             void ProcessIntrinsic(IIntrinsic intrinsic)
             {
                 path.Push(intrinsic.TagName);
-                templateObjectVisitor.VisitIntrinsic(self, path, intrinsic);
 
-                switch (intrinsic)
+                if (templateObjectVisitor.VisitIntrinsic(self, path, intrinsic))
                 {
-                    case IBranchableIntrinsic branchableIntrinsic:
-                        {
-                            WalkObject(branchableIntrinsic.GetBranch(self.Template));
+                    switch (intrinsic)
+                    {
+                        case IBranchableIntrinsic branchableIntrinsic:
+                            {
+                                WalkObject(branchableIntrinsic.GetBranch(self.Template));
+                                break;
+                            }
+
+                        case GetAttIntrinsic { AttributeName: IIntrinsic _ } getAttIntrinsic:
+
+                            WalkObject(getAttIntrinsic.AttributeName);
                             break;
-                        }
 
-                    case GetAttIntrinsic { AttributeName: IIntrinsic _ } getAttIntrinsic:
+                        case SubIntrinsic subIntrinsic:
 
-                        WalkObject(getAttIntrinsic.AttributeName);
-                        break;
+                            WalkDict(subIntrinsic.Substitutions);
+                            WalkList(subIntrinsic.ImplicitReferences);
+                            break;
 
-                    case SubIntrinsic subIntrinsic:
+                        case AbstractArrayIntrinsic arrayIntrinsic:
 
-                        WalkDict(subIntrinsic.Substitutions);
-                        WalkList(subIntrinsic.ImplicitReferences);
-                        break;
-
-                    case AbstractArrayIntrinsic arrayIntrinsic:
-
-                        WalkList(arrayIntrinsic.Items);
-                        break;
+                            WalkList(arrayIntrinsic.Items);
+                            break;
+                    }
                 }
 
                 path.Pop();
