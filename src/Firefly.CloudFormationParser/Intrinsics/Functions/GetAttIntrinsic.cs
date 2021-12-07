@@ -117,6 +117,21 @@
         }
 
         /// <inheritdoc />
+        public string ReferencedObject(ITemplate template)
+        {
+            switch (this.AttributeName)
+            {
+                case IIntrinsic intrinsic:
+                    return $"{this.LogicalId}.{intrinsic.Evaluate(template)}";
+                case string s:
+                    return $"{this.LogicalId}.{s}";
+                default:
+                    throw new InvalidOperationException(
+                        $"Cannot evalutate property name reference with type {this.AttributeName.GetType().FullName}");
+            }
+        }
+
+        /// <inheritdoc />
         internal override IList<UnresolvedTagProperty> GetUnresolvedDictionaryProperties()
         {
             if (this.AttributeName is IDictionary)

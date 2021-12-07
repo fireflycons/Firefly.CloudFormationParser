@@ -1,5 +1,6 @@
 ﻿namespace Firefly.CloudFormationParser.Intrinsics.Functions
 {
+    using System;
     using System.Collections;
     using System.Collections.Generic;
     using System.Linq;
@@ -97,6 +98,25 @@
         /// </returns>
         public object GetBranch(ITemplate? template)
         {
+            if (template == null && this.Items.Any(i => i is IIntrinsic))
+            {
+                throw new ArgumentException($"{this.TagName}: Template cannot be null when selecting from intrinsics", nameof(template));
+            }
+
+            if (this.Items[0] is IIntrinsic intrinsic && this.Items.Count == 1)
+            {
+                // If there's only one item in the select list, and that item is an intrinsic,
+                // then we select from the list of values returned by the evaluation of this intrinsic.
+                var values = intrinsic.Evaluate(template!);
+
+                if (values is IList list)
+                {
+                    return list[this.Index];
+                }
+
+                throw new InvalidOperationException($"{this.TagName}: Cannot select from {intrinsic} as it does not return multiple values.");
+            }
+
             return this.Items[this.Index];
         }
 

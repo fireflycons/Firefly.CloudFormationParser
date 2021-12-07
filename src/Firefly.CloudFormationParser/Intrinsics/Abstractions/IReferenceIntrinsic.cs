@@ -3,7 +3,14 @@
     /// <summary>
     /// Marker interface for intrinsics that may reference other objects in the template
     /// </summary>
-    internal interface IReferenceIntrinsic : IIntrinsic
+    public interface IReferenceIntrinsic : IIntrinsic
     {
+        /// <summary>
+        /// Gets the name of the referenced object, e.g. parameter name or resource.property (GetAtt)
+        /// </summary>
+        /// <value>
+        /// The referenced object.
+        /// </value>
+        string ReferencedObject(ITemplate template);
     }
 }

@@ -87,5 +87,11 @@
         {
             return $"!Ref {this.Reference}";
         }
+
+        /// <inheritdoc />
+        public string ReferencedObject(ITemplate template)
+        {
+            return this.Value.ToString();
+        }
     }
 }
