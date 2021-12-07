@@ -20,7 +20,7 @@
     /// </summary>
     /// <seealso cref="IIntrinsic" />
     [DebuggerDisplay("{TagName} {Expression}")]
-    public class SubIntrinsic : AbstractIntrinsic, IReferenceIntrinsic
+    public class SubIntrinsic : AbstractIntrinsic
     {
         /// <summary>
         /// The tag
@@ -45,8 +45,8 @@
         /// </summary>
         /// <param name="expression">The expression.</param>
         public SubIntrinsic(string expression)
+            : this(expression, new Dictionary<string, object>())
         {
-            this.Expression = expression;
         }
 
         /// <summary>
@@ -55,8 +55,8 @@
         /// <param name="expression">The expression.</param>
         /// <param name="substitutions">The substitutions.</param>
         public SubIntrinsic(string expression, IDictionary<string, object> substitutions)
-            : this(expression)
         {
+            this.Expression = expression;
             this.Substitutions = substitutions.ToDictionary(kv => kv.Key, kv => kv.Value);
             this.ExtractImplicitReferences();
         }
@@ -85,7 +85,7 @@
         /// <value>
         /// The implicit references.
         /// </value>
-        public List<RefIntrinsic> ImplicitReferences { get; } = new List<RefIntrinsic>();
+        public List<IReferenceIntrinsic> ImplicitReferences { get; } = new List<IReferenceIntrinsic>();
 
         /// <summary>
         /// Gets or sets the item list for the intrinsic
@@ -144,6 +144,11 @@
                             break;
                     }
 
+                    continue;
+                }
+
+                if (replacements.ContainsKey(reference))
+                {
                     continue;
                 }
 
@@ -226,7 +231,7 @@
             emitter.Emit(new Scalar(this.LongName));
             emitter.Emit(
                 new SequenceStart(AnchorName.Empty, YamlDotNet.Core.TagName.Empty, false, SequenceStyle.Block));
-            this.EmitSubsitutions(emitter, nestedValueSerializer);
+            this.EmitSubstitutions(emitter, nestedValueSerializer);
             emitter.Emit(new MappingEnd());
         }
 
@@ -245,7 +250,7 @@
 
             emitter.Emit(new SequenceStart(AnchorName.Empty, new TagName(this.TagName), false, SequenceStyle.Block));
 
-            this.EmitSubsitutions(emitter, nestedValueSerializer);
+            this.EmitSubstitutions(emitter, nestedValueSerializer);
         }
 
         /// <inheritdoc />
@@ -272,13 +277,13 @@
         /// </summary>
         /// <param name="emitter">The emitter.</param>
         /// <param name="nestedValueSerializer">An <see cref="IValueSerializer"/> with which to write nested objects such as dictionaries.</param>
-        private void EmitSubsitutions(IEmitter emitter, IValueSerializer nestedValueSerializer)
+        private void EmitSubstitutions(IEmitter emitter, IValueSerializer nestedValueSerializer)
         {
             if (this.Substitutions == null)
             {
                 // null check is already done before this is called, by we still need to shut to compiler up.
                 throw new InvalidOperationException(
-                    "Fn::Sub: Cannot call EmitSubsitutions when there are no substitutions");
+                    "Fn::Sub: Cannot call EmitSubstitutions when there are no substitutions");
             }
 
             emitter.Emit(new Scalar(this.Expression));
@@ -323,6 +328,13 @@
 
                 if (!this.Substitutions.ContainsKey(token))
                 {
+                    if (token.Contains("."))
+                    {
+                        var parts = token.Split('.');
+                        this.ImplicitReferences.Add(new GetAttIntrinsic(parts[0], parts[1]));
+                        continue;
+                    }
+
                     this.ImplicitReferences.Add(new RefIntrinsic(token));
                 }
             }
