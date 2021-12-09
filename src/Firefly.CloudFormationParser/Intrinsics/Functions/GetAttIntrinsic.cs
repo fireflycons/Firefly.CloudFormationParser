@@ -51,6 +51,7 @@
         {
             this.LogicalId = logicalId;
             this.AttributeName = attributeName;
+            this.Items = new List<object> { this.AttributeName };
         }
 
         /// <summary>
@@ -177,6 +178,7 @@
             this.ValidateValues(this.MinValues, this.MaxValues, list);
             this.LogicalId = (string)list[0];
             this.AttributeName = this.UnpackIntrinsic(list[1]);
+            this.Items = new List<object> { this.AttributeName };
         }
     }
 }
