@@ -2,9 +2,9 @@
 {
     using System.Collections.Generic;
 
-    using Firefly.CloudFormationParser.Intrinsics;
     using Firefly.CloudFormationParser.TemplateObjects;
-    using Firefly.CloudFormationParser.Utils;
+    using Firefly.CloudFormationParser.TemplateObjects.Traversal;
+    using Firefly.CloudFormationParser.TemplateObjects.Traversal.AcceptExtensions;
 
     using Moq;
 
@@ -60,13 +60,17 @@
                         }
                     });
 
-            var visitor = new MappingTemplateObjectVisitor();
+            var visitor = new MappingTemplateObjectVisitor(template.Object);
 
             template.Object.Mappings.Accept(visitor);
         }
 
-        private class MappingTemplateObjectVisitor : TemplateObjectVisitor
+        private class MappingTemplateObjectVisitor : TemplateObjectVisitor<NullTemplateObjectVisitorContext>
         {
+            public MappingTemplateObjectVisitor(ITemplate template)
+                : base(template)
+            {
+            }
         }
     }
 }

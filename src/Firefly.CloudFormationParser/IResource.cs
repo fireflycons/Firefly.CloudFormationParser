@@ -8,7 +8,7 @@
     /// <summary>
     /// Interface describing a CloudFormation Resource.
     /// </summary>
-    public interface IResource : ITemplateObject, IVisitable
+    public interface IResource : ITemplateObject
     {
         /// <summary>
         /// <para>

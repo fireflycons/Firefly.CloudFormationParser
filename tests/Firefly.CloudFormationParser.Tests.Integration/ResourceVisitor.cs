@@ -7,6 +7,8 @@
     using Firefly.CloudFormationParser.Intrinsics.Functions;
     using Firefly.CloudFormationParser.Serialization.Settings;
     using Firefly.CloudFormationParser.TemplateObjects;
+    using Firefly.CloudFormationParser.TemplateObjects.Traversal;
+    using Firefly.CloudFormationParser.TemplateObjects.Traversal.AcceptExtensions;
     using Firefly.CloudFormationParser.Utils;
     using Firefly.EmbeddedResourceLoader;
 
@@ -26,7 +28,7 @@
         {
             var template = await Template.Deserialize(
                                new DeserializerSettingsBuilder().WithTemplateString(this.templateContent).Build());
-            var visitor = new IntrinsicCountingTemplateObjectVisitor();
+            var visitor = new ResourceProperyVisitor(template);
 
             template.Resources.First(r => r.Name == "SingleReferenceIsLocated").Accept(visitor);
 
@@ -38,7 +40,7 @@
         {
             var template = await Template.Deserialize(
                                new DeserializerSettingsBuilder().WithTemplateString(this.templateContent).Build());
-            var visitor = new IntrinsicCountingTemplateObjectVisitor();
+            var visitor = new ResourceProperyVisitor(template);
 
             template.Resources.First(r => r.Name == "IfConditionReturnsOneOfTwoPossibleRefs").Accept(visitor);
 
@@ -52,7 +54,7 @@
         {
             var template = await Template.Deserialize(
                                new DeserializerSettingsBuilder().WithTemplateString(this.templateContent).Build());
-            var visitor = new IntrinsicCountingTemplateObjectVisitor();
+            var visitor = new ResourceProperyVisitor(template);
 
             template.Resources.First(r => r.Name == "SelectReturnsOneOfTwoPossibleRefs").Accept(visitor);
 
@@ -66,7 +68,7 @@
         {
             var template = await Template.Deserialize(
                                new DeserializerSettingsBuilder().WithTemplateString(this.templateContent).Build());
-            var visitor = new IntrinsicCountingTemplateObjectVisitor();
+            var visitor = new ResourceProperyVisitor(template);
 
             template.Resources.First(r => r.Name == "SubWithTwoRefArgumentsAndOneImplicitRef").Accept(visitor);
 
@@ -78,7 +80,7 @@
         {
             var template = await Template.Deserialize(
                                new DeserializerSettingsBuilder().WithTemplateString(this.templateContent).Build());
-            var visitor = new IntrinsicCountingTemplateObjectVisitor();
+            var visitor = new ResourceProperyVisitor(template);
 
             template.Resources.First(r => r.Name == "GetAttIsLocated").Accept(visitor);
 
@@ -90,21 +92,25 @@
         {
             var template = await Template.Deserialize(
                                new DeserializerSettingsBuilder().WithTemplateString(this.templateContent).Build());
-            var visitor = new IntrinsicCountingTemplateObjectVisitor();
+            var visitor = new ResourceProperyVisitor(template);
 
             template.Resources.First(r => r.Name == "GetAttWithRef").Accept(visitor);
-
             visitor.VisitedIntrinsics.Should().HaveCount(2);
         }
 
-        private class IntrinsicCountingTemplateObjectVisitor : TemplateObjectVisitor
+        private class ResourceProperyVisitor : TemplateObjectVisitor<NullTemplateObjectVisitorContext>
         {
+            public ResourceProperyVisitor(ITemplate template)
+                : base(template)
+            {
+            }
+
             public List<IIntrinsic> VisitedIntrinsics { get; } = new List<IIntrinsic>();
 
-            public override bool VisitIntrinsic(ITemplateObject templateObject, PropertyPath path, IIntrinsic intrinsic)
+            protected override void Visit(IIntrinsic intrinsic, NullTemplateObjectVisitorContext context)
             {
                 this.VisitedIntrinsics.Add(intrinsic);
-                return true;
+                base.Visit(intrinsic, context);
             }
         }
     }
