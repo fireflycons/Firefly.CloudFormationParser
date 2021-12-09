@@ -1,0 +1,177 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<ClassDiagram MajorVersion="1" MinorVersion="1">
+  <Class Name="Firefly.CloudFormationParser.Intrinsics.Abstractions.AbstractArrayIntrinsic" Collapsed="true">
+    <Position X="4" Y="4.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAACAgAAAAAAAAAAEAAAAAAAAAgAAAAAAA=</HashCode>
+      <FileName>Intrinsics\Abstractions\AbstractArrayIntrinsic.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="Firefly.CloudFormationParser.Intrinsics.Abstractions.AbstractIntrinsic" Collapsed="true">
+    <Position X="11" Y="3.25" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AACQQAgAAAEAAlAAAAAAAgQAAEAAEAAEAgAAAAAAGAA=</HashCode>
+      <FileName>Intrinsics\Abstractions\AbstractIntrinsic.cs</FileName>
+    </TypeIdentifier>
+    <Lollipop Position="0.2" />
+  </Class>
+  <Class Name="Firefly.CloudFormationParser.Intrinsics.Abstractions.AbstractLogicalIntrinsic" Collapsed="true">
+    <Position X="4" Y="6.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAQAAAAAAAAkAEAAEAAAAAAEACUAAAAgAAAAAAAAQ=</HashCode>
+      <FileName>Intrinsics\Abstractions\AbstractLogicalIntrinsic.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="Firefly.CloudFormationParser.Intrinsics.Abstractions.AbstractScalarIntrinsic" Collapsed="true">
+    <Position X="19.75" Y="4.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAACkAEAAAAAAAAAEIAEAAAAgAgAAAAAAA=</HashCode>
+      <FileName>Intrinsics\Abstractions\AbstractScalarIntrinsic.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="Firefly.CloudFormationParser.Intrinsics.Functions.AndIntrinsic" Collapsed="true">
+    <Position X="4" Y="8" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAEgAAgAAAAAAgAAAAAAAAAAAAAgAAAACAA=</HashCode>
+      <FileName>Intrinsics\Functions\AndIntrinsic.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="Firefly.CloudFormationParser.Intrinsics.Functions.Base64Intrinsic" Collapsed="true">
+    <Position X="14.5" Y="8" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAQEAAAAEgAAAAAAAAAgAAAEAAAAAAAAAAAAAACAA=</HashCode>
+      <FileName>Intrinsics\Functions\Base64Intrinsic.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="Firefly.CloudFormationParser.Intrinsics.Functions.CidrIntrinsic" Collapsed="true">
+    <Position X="12.75" Y="6.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAQAAAAAEgAkgAAAAAAgQAEEAAEAIAAgAgAAAACAA=</HashCode>
+      <FileName>Intrinsics\Functions\CidrIntrinsic.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="Firefly.CloudFormationParser.Intrinsics.Functions.ConditionIntrinsic" Collapsed="true">
+    <Position X="16.25" Y="8" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAQAAAAAEgAEAAAAAAAgAAAAAAAAAAAgAAAAAAGAA=</HashCode>
+      <FileName>Intrinsics\Functions\ConditionIntrinsic.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="Firefly.CloudFormationParser.Intrinsics.Functions.EqualsIntrinsic" Collapsed="true">
+    <Position X="9.25" Y="8" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAEgAAgAAAAAAgAAAAAAAAAAAAAgAAAACAA=</HashCode>
+      <FileName>Intrinsics\Functions\EqualsIntrinsic.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="Firefly.CloudFormationParser.Intrinsics.Functions.FindInMapIntrinsic" Collapsed="true">
+    <Position X="5.75" Y="6.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAQAAAAAEgAkgEAgAAAgAAABAAGAAAAgAgIAAACAA=</HashCode>
+      <FileName>Intrinsics\Functions\FindInMapIntrinsic.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="Firefly.CloudFormationParser.Intrinsics.Functions.GetAttIntrinsic" Collapsed="true">
+    <Position X="11" Y="6.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAQAAAEAEgAsgAAAAAAgAgAEAAEAAAAgAgAAAACAA=</HashCode>
+      <FileName>Intrinsics\Functions\GetAttIntrinsic.cs</FileName>
+    </TypeIdentifier>
+    <Lollipop Position="0.2" />
+  </Class>
+  <Class Name="Firefly.CloudFormationParser.Intrinsics.Functions.GetAZsIntrinsic" Collapsed="true">
+    <Position X="12.75" Y="8" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAQAAAgAEgAEAAAAAAAgAAAEAAEAAAAgAAAAAACAA=</HashCode>
+      <FileName>Intrinsics\Functions\GetAZsIntrinsic.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="Firefly.CloudFormationParser.Intrinsics.Functions.IfIntrinsic" Collapsed="true">
+    <Position X="14.5" Y="6.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAQAAAAAGgAkkEAAAAAgAAAAAAEAAgAgAgAAAACAg=</HashCode>
+      <FileName>Intrinsics\Functions\IfIntrinsic.cs</FileName>
+    </TypeIdentifier>
+    <Lollipop Position="0.2" />
+  </Class>
+  <Class Name="Firefly.CloudFormationParser.Intrinsics.Functions.ImportValueIntrinsic" Collapsed="true">
+    <Position X="19.75" Y="8" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAQAAAAAEgAAAAAAAAAgAAAAAAAAAAAABAAAAACAA=</HashCode>
+      <FileName>Intrinsics\Functions\ImportValueIntrinsic.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="Firefly.CloudFormationParser.Intrinsics.Functions.JoinIntrinsic" Collapsed="true">
+    <Position X="7.5" Y="6.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAQAAAAAEgAkgEAAAAAgAAAAAAEBAAAgAgAAAACAA=</HashCode>
+      <FileName>Intrinsics\Functions\JoinIntrinsic.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="Firefly.CloudFormationParser.Intrinsics.Functions.NotIntrinsic" Collapsed="true">
+    <Position X="5.75" Y="8" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAEgAAgAAAAAAgAAAAAAAAAQAAAgAAAACAA=</HashCode>
+      <FileName>Intrinsics\Functions\NotIntrinsic.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="Firefly.CloudFormationParser.Intrinsics.Functions.OrIntrinsic" Collapsed="true">
+    <Position X="7.5" Y="8" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAEgAAgAAAAAAgAAAAAAAAAAAAAgAAAACAA=</HashCode>
+      <FileName>Intrinsics\Functions\OrIntrinsic.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="Firefly.CloudFormationParser.Intrinsics.Functions.RefIntrinsic" Collapsed="true">
+    <Position X="18" Y="8" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAQACAAAEgAAAEAAAAAgAgAAAAAAAAAAAAAAAACAA=</HashCode>
+      <FileName>Intrinsics\Functions\RefIntrinsic.cs</FileName>
+    </TypeIdentifier>
+    <Lollipop Position="0.2" />
+  </Class>
+  <Class Name="Firefly.CloudFormationParser.Intrinsics.Functions.SelectIntrinsic" Collapsed="true">
+    <Position X="16.25" Y="6.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAQAAAAAEgAkgAAAAAAgAAAAAAEAAgAgEgAAAACAA=</HashCode>
+      <FileName>Intrinsics\Functions\SelectIntrinsic.cs</FileName>
+    </TypeIdentifier>
+    <Lollipop Position="0.2" />
+  </Class>
+  <Class Name="Firefly.CloudFormationParser.Intrinsics.Functions.SplitIntrinsic" Collapsed="true">
+    <Position X="9.25" Y="6.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAUAAAAgEgAkgAAAAAAgAAAEAAEAAAAgAgAAAACAA=</HashCode>
+      <FileName>Intrinsics\Functions\SplitIntrinsic.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="Firefly.CloudFormationParser.Intrinsics.Functions.SubIntrinsic" Collapsed="true">
+    <Position X="17.5" Y="4.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>EAAAYAAAAAEgCkgAAAAAAwAAAEAAEAAQAgAAAAAACIA=</HashCode>
+      <FileName>Intrinsics\Functions\SubIntrinsic.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Interface Name="Firefly.CloudFormationParser.Intrinsics.IIntrinsic" Collapsed="true">
+    <Position X="6.5" Y="2" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAQAAAAAEAAAAAAAAAAgAAAAAAAAAAAAAAAAAACAA=</HashCode>
+      <FileName>Intrinsics\IIntrinsic.cs</FileName>
+    </TypeIdentifier>
+  </Interface>
+  <Interface Name="Firefly.CloudFormationParser.Intrinsics.Abstractions.IBranchableIntrinsic" Collapsed="true">
+    <Position X="8.5" Y="3.25" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAgAAAAAAAAAAA=</HashCode>
+      <FileName>Intrinsics\Abstractions\IBranchableIntrinsic.cs</FileName>
+    </TypeIdentifier>
+  </Interface>
+  <Interface Name="Firefly.CloudFormationParser.Intrinsics.Abstractions.IReferenceIntrinsic" Collapsed="true">
+    <Position X="6.5" Y="3.25" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAgAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>Intrinsics\Abstractions\IReferenceIntrinsic.cs</FileName>
+    </TypeIdentifier>
+  </Interface>
+  <Font Name="Segoe UI" Size="9" />
+</ClassDiagram>
