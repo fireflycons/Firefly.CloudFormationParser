@@ -49,6 +49,9 @@
         public override string TagName => Tag;
 
         /// <inheritdoc />
+        public override IntrinsicType Type => IntrinsicType.And;
+
+        /// <inheritdoc />
         internal override int MaxValues => 10;
 
         /// <inheritdoc />

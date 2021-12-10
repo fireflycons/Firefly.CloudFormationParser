@@ -24,6 +24,14 @@
         string TagName { get; }
 
         /// <summary>
+        /// Gets the intrinsic type for this intrinsic.
+        /// </summary>
+        /// <value>
+        /// The type.
+        /// </value>
+        IntrinsicType Type { get; }
+
+        /// <summary>
         /// Evaluates the result of the intrinsic function.
         /// </summary>
         /// <param name="template">Reference to the template being processed</param>

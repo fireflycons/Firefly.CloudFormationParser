@@ -51,6 +51,9 @@
         /// <inheritdoc />
         public abstract string TagName { get; }
 
+        /// <inheritdoc />
+        public abstract IntrinsicType Type { get; }
+
         /// <summary>
         /// Gets a value indicating whether to use the long form when serializing.
         /// </summary>

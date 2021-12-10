@@ -42,6 +42,9 @@
         }
 
         /// <inheritdoc />
+        public override IntrinsicType Type => IntrinsicType.Or;
+
+        /// <inheritdoc />
         public override string LongName => "Fn::Or";
 
         /// <inheritdoc />

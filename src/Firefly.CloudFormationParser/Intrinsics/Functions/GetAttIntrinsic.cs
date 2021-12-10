@@ -64,6 +64,9 @@
         {
         }
 
+        /// <inheritdoc />
+        public override IntrinsicType Type => IntrinsicType.GetAtt;
+
         /// <summary>
         /// Gets or sets the name of the attribute. This may be a <see cref="RefIntrinsic"/> or a string.
         /// </summary>

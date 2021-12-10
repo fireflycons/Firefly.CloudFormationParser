@@ -43,6 +43,9 @@
         {
         }
 
+        /// <inheritdoc />
+        public override IntrinsicType Type => IntrinsicType.ImportValue;
+
         /// <summary>
         /// Gets or sets the name of the export.
         /// </summary>

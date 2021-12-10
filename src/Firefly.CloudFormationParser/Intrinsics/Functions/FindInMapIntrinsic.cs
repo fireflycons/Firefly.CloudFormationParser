@@ -62,6 +62,9 @@
         }
 
         /// <inheritdoc />
+        public override IntrinsicType Type => IntrinsicType.FindInMap;
+
+        /// <inheritdoc />
         public override string LongName => "Fn::FindInMap";
 
         /// <summary>

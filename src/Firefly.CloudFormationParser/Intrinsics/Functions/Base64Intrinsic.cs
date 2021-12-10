@@ -48,6 +48,9 @@
         }
 
         /// <inheritdoc />
+        public override IntrinsicType Type => IntrinsicType.Base64;
+
+        /// <inheritdoc />
         public override string LongName => "Fn::Base64";
 
         /// <inheritdoc />

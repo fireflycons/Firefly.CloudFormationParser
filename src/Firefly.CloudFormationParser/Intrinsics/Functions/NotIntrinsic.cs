@@ -43,6 +43,9 @@
         }
 
         /// <inheritdoc />
+        public override IntrinsicType Type => IntrinsicType.Not;
+
+        /// <inheritdoc />
         public override string LongName => "Fn::Not";
 
         /// <inheritdoc />

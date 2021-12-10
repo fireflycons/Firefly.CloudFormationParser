@@ -50,6 +50,9 @@
         {
         }
 
+        /// <inheritdoc />
+        public override IntrinsicType Type => IntrinsicType.Select;
+
         /// <summary>
         /// Gets the index.
         /// </summary>

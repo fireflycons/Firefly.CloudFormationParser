@@ -49,6 +49,9 @@
         {
         }
 
+        /// <inheritdoc />
+        public override IntrinsicType Type => IntrinsicType.If;
+
         /// <summary>
         /// Gets or sets the condition.
         /// </summary>

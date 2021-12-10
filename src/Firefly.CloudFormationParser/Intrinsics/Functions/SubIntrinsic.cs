@@ -71,6 +71,9 @@
         {
         }
 
+        /// <inheritdoc />
+        public override IntrinsicType Type => IntrinsicType.Sub;
+
         /// <summary>
         /// Gets or sets the expression.
         /// </summary>

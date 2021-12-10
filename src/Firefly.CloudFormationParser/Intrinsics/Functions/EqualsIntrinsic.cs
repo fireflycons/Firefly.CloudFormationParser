@@ -43,6 +43,9 @@
         }
 
         /// <inheritdoc />
+        public override IntrinsicType Type => IntrinsicType.Equals;
+
+        /// <inheritdoc />
         public override string LongName => "Fn::Equals";
 
         /// <inheritdoc />

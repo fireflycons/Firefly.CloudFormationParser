@@ -50,6 +50,9 @@
         {
         }
 
+        /// <inheritdoc />
+        public override IntrinsicType Type => IntrinsicType.Split;
+
         /// <summary>
         /// Gets the delimiter on which to split.
         /// </summary>

@@ -52,6 +52,9 @@
         }
 
         /// <inheritdoc />
+        public override IntrinsicType Type => IntrinsicType.GetAZs;
+
+        /// <inheritdoc />
         public override string LongName => "Fn::GetAZs";
 
         /// <summary>

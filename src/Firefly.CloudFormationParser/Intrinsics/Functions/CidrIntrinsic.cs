@@ -56,6 +56,9 @@
         {
         }
 
+        /// <inheritdoc />
+        public override IntrinsicType Type => IntrinsicType.Cidr;
+
         /// <summary>
         /// Gets or sets the number of subnet bits for the CIDR. For example, specifying a value "8" for this parameter will create a CIDR with a mask of "/24"..
         /// </summary>

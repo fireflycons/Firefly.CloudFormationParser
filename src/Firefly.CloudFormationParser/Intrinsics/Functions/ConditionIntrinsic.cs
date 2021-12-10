@@ -53,6 +53,9 @@
         }
 
         /// <inheritdoc />
+        public override IntrinsicType Type => IntrinsicType.Condition;
+
+        /// <inheritdoc />
         public override string LongName => "Condition";
 
         /// <inheritdoc />

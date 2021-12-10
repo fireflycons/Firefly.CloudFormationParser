@@ -49,6 +49,9 @@
         }
 
         /// <inheritdoc />
+        public override IntrinsicType Type => IntrinsicType.Join;
+
+        /// <inheritdoc />
         public override string LongName => "Fn::Join";
 
         /// <summary>

@@ -45,6 +45,9 @@
         }
 
         /// <inheritdoc />
+        public override IntrinsicType Type => IntrinsicType.Ref;
+
+        /// <inheritdoc />
         public override string LongName => "Ref";
 
         /// <summary>
