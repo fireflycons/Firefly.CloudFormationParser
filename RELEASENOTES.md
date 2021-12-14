@@ -1,3 +1,7 @@
+# v0.3.0
+
+* Enhancement - Breaking Change. Complete rewrite of visitor implementation.
+
 # v0.2.0
 
 * Fix - Ensure cloudformation parameter cannot have value `null`.
