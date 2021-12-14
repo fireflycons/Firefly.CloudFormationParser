@@ -98,7 +98,7 @@
         public ITemplate Template { get; }
 
         /// <summary>
-        /// Gets the path.
+        /// Gets the current path within the object graph.
         /// </summary>
         /// <value>
         /// The path.

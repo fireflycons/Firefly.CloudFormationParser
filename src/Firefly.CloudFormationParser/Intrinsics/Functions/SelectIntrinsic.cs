@@ -136,6 +136,17 @@
             return refs;
         }
 
+        /// <summary>
+        /// Converts to string.
+        /// </summary>
+        /// <returns>
+        /// A <see cref="System.String" /> that represents this instance.
+        /// </returns>
+        public override string ToString()
+        {
+            return $"{this.TagName} [ '{this.Index}', [ {string.Join(", ", this.Items.Select(i => $"'{i}'"))} ]]";
+        }
+
         /// <inheritdoc />
         internal override void WriteLongForm(IEmitter emitter, IValueSerializer nestedValueSerializer)
         {
