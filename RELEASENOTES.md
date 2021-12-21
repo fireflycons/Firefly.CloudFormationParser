@@ -1,3 +1,7 @@
+# v0.3.1
+
+* Enhancement - Add an "ExtraData" property to intrinsics. This allows client applications to attach app specific payloads to intrinsics.
+
 # v0.3.0
 
 * Enhancement - Breaking Change. Complete rewrite of visitor implementation.

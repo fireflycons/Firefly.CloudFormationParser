@@ -8,6 +8,14 @@
     public interface IIntrinsic : IEnumerable<object>
     {
         /// <summary>
+        /// Gets or sets the extra data.
+        /// </summary>
+        /// <value>
+        /// The extra data that may be stored against an intrinsic instance by client applications.
+        /// </value>
+        object? ExtraData { get; set; }
+
+        /// <summary>
         /// Gets the long name of the intrinsic.
         /// </summary>
         /// <value>

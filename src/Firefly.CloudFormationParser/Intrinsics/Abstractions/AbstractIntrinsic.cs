@@ -30,7 +30,7 @@
         /// </summary>
         /// <param name="value">The value.</param>
         protected AbstractIntrinsic(object value)
-        : this(value, false)
+            : this(value, false)
         {
         }
 
@@ -44,6 +44,9 @@
             this.SetValue(value);
             this.UseLongForm = useLongForm;
         }
+
+        /// <inheritdoc />
+        public object? ExtraData { get; set; }
 
         /// <inheritdoc />
         public abstract string LongName { get; }
@@ -94,39 +97,6 @@
         public abstract IEnumerable<string> GetReferencedObjects(ITemplate template);
 
         /// <summary>
-        /// <para>
-        /// Sets the values for the intrinsic.
-        /// </para>
-        /// <para>
-        /// This is a list of objects, whose length depends on the number of properties (usually list elements) supported by the intrinsic.
-        /// Each element depending on the intrinsic, may be a scalar value, another intrinsic or another list of items e.g. for <c>!Join</c> or <c>!Select</c> 
-        /// </para>
-        /// </summary>
-        /// <param name="values">Values to assign to the intrinsic</param>
-        protected abstract void SetValue(IEnumerable<object> values);
-
-        /// <summary>
-        /// <para>
-        /// Sets the values for the intrinsic.
-        /// </para>
-        /// <para>
-        /// This is a single scalar or intrinsic object or a list of objects. This is a convenience method which wraps a scalar and then calls <see cref="SetValue(System.Collections.Generic.IEnumerable{object})"/>
-        /// </para>
-        /// </summary>
-        /// <param name="value">Value to assign to the intrinsic</param>
-        protected void SetValue(object value)
-        {
-            if (value is IEnumerable<object> enumerable)
-            {
-                this.SetValue(enumerable);
-            }
-            else
-            {
-                this.SetValue(new[] { value });
-            }
-        }
-
-        /// <summary>
         /// Writes this intrinsic to a YAML emitter.
         /// </summary>
         /// <param name="emitter">The emitter.</param>
@@ -161,6 +131,22 @@
         internal abstract IList<UnresolvedTagProperty> GetUnresolvedDictionaryProperties();
 
         /// <summary>
+        /// <para>
+        /// Indicates to <see cref="IntrinsicFunctionNodeTypeResolver"/> and to the post processing phase whether a key matching an intrinsic function name
+        /// should actually be deserialized as an intrinsic.
+        /// </para>
+        /// <para>
+        /// This is useful for e.g. policy documents where 'Condition' may occur as a key, but is a policy condition, not an intrinsic condition.
+        /// </para>
+        /// </summary>
+        /// <param name="context">The context.</param>
+        /// <returns><c>true</c> if the key value pair should be deserialized as an intrinsic; else <c>false</c>.</returns>
+        internal virtual bool ShouldDeserialize(DeserializationContext context)
+        {
+            return true;
+        }
+
+        /// <summary>
         /// Called to write the long form of this intrinsic to YAML
         /// </summary>
         /// <param name="emitter">The emitter.</param>
@@ -176,18 +162,51 @@
 
         /// <summary>
         /// <para>
-        /// Indicates to <see cref="IntrinsicFunctionNodeTypeResolver"/> and to the post processing phase whether a key matching an intrinsic function name
-        /// should actually be deserialized as an intrinsic.
+        /// Sets the values for the intrinsic.
         /// </para>
         /// <para>
-        /// This is useful for e.g. policy documents where 'Condition' may occur as a key, but is a policy condition, not an intrinsic condition.
+        /// This is a list of objects, whose length depends on the number of properties (usually list elements) supported by the intrinsic.
+        /// Each element depending on the intrinsic, may be a scalar value, another intrinsic or another list of items e.g. for <c>!Join</c> or <c>!Select</c> 
         /// </para>
         /// </summary>
-        /// <param name="context">The context.</param>
-        /// <returns><c>true</c> if the key value pair should be deserialized as an intrinsic; else <c>false</c>.</returns>
-        internal virtual bool ShouldDeserialize(DeserializationContext context)
+        /// <param name="values">Values to assign to the intrinsic</param>
+        protected abstract void SetValue(IEnumerable<object> values);
+
+        /// <summary>
+        /// <para>
+        /// Sets the values for the intrinsic.
+        /// </para>
+        /// <para>
+        /// This is a single scalar or intrinsic object or a list of objects. This is a convenience method which wraps a scalar and then calls <see cref="SetValue(System.Collections.Generic.IEnumerable{object})"/>
+        /// </para>
+        /// </summary>
+        /// <param name="value">Value to assign to the intrinsic</param>
+        protected void SetValue(object value)
         {
-            return true;
+            if (value is IEnumerable<object> enumerable)
+            {
+                this.SetValue(enumerable);
+            }
+            else
+            {
+                this.SetValue(new[] { value });
+            }
+        }
+
+        /// <summary>
+        /// Unpack an intrinsic from a long form dictionary entry e.g. <c>{ "Fn::Sub", SubIntrinsic }</c>
+        /// </summary>
+        /// <param name="value">The value to unpack.</param>
+        /// <returns>If <paramref name="value"/> is a long form intrinsic, then the intrinsic else the original object.</returns>
+        protected object UnpackIntrinsic(object value)
+        {
+            if (value is Dictionary<object, object> dict && dict.Any() && dict.First().Value is IIntrinsic intrinsic
+                && dict.First().Key.ToString() == intrinsic.LongName)
+            {
+                return intrinsic;
+            }
+
+            return value;
         }
 
         /// <summary>
@@ -214,21 +233,6 @@
                     $"{this.TagName}: Expected between {minValues} and {maxValues} values. Got {values.Count}.",
                     nameof(values));
             }
-        }
-
-        /// <summary>
-        /// Unpack an intrinsic from a long form dictionary entry e.g. <c>{ "Fn::Sub", SubIntrinsic }</c>
-        /// </summary>
-        /// <param name="value">The value to unpack.</param>
-        /// <returns>If <paramref name="value"/> is a long form intrinsic, then the intrinsic else the original object.</returns>
-        protected object UnpackIntrinsic(object value)
-        {
-            if (value is Dictionary<object, object> dict && dict.Any() && dict.First().Value is IIntrinsic intrinsic && dict.First().Key.ToString() == intrinsic.LongName)
-            {
-                return intrinsic;
-            }
-
-            return value;
         }
     }
 }
