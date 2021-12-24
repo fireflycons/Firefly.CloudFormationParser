@@ -28,7 +28,7 @@
         public string Name { get; set; } = string.Empty;
 
         /// <inheritdoc />
-        /// [YamlIgnore]
+        [YamlIgnore]
         public ITemplate? Template { get; set; }
 
         /// <inheritdoc cref="IOutput.Value"/>
