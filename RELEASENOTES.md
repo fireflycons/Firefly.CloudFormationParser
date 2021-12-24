@@ -1,3 +1,7 @@
+# v0.3.2
+
+* Fix - An accidental commenting out of a `[YamlIgnore]` attribute in the parameter class generated a back-reference to the entire template. YamlDotNet then renders this as an alias. [Issue link](https://github.com/fireflycons/Firefly.CloudFormationParser/issues/4)
+
 # v0.3.1
 
 * Enhancement - Add an "ExtraData" property to intrinsics. This allows client applications to attach app specific payloads to intrinsics.
