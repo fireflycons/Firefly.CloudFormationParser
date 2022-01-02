@@ -1,3 +1,7 @@
+# v0.3.4 (not released)
+
+* Fix - Issue with !Join evaluation when an argument is a ref to a list.
+
 # v0.3.3
 
 * Fix - Another accidental commenting out of a `[YamlIgnore]` attribute in the parameter class generated a back-reference to the entire template. YamlDotNet then renders this as an alias.

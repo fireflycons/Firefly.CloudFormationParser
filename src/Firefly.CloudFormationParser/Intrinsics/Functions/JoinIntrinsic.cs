@@ -1,5 +1,6 @@
 ﻿namespace Firefly.CloudFormationParser.Intrinsics.Functions
 {
+    using System.Collections;
     using System.Collections.Generic;
     using System.Linq;
 
@@ -83,7 +84,26 @@
             {
                 if (item is IIntrinsic intrinsic)
                 {
-                    evaluations.Add(intrinsic.Evaluate(template).ToString());
+                    var evaluation = intrinsic.Evaluate(template);
+
+                    switch (evaluation)
+                    {
+                        case string s:
+
+                            evaluations.Add(s);
+                            break;
+
+                        case IEnumerable enumerable:
+
+                            evaluations.AddRange(from object? listItem in enumerable select listItem.ToString());
+
+                            break;
+
+                        default:
+
+                            evaluations.Add(evaluation.ToString());
+                            break;
+                    }
                 }
                 else
                 {
