@@ -1,6 +1,6 @@
-# v0.3.4 (not released)
+# v0.3.4
 
-* Fix - Issue with !Join evaluation when an argument is a ref to a list.
+* Fix - Issue with !Join evaluation when an argument is a ref to a list. Result was rendered as a type name, not actual list contents.
 
 # v0.3.3
 
